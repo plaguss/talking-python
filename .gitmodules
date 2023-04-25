@@ -1,0 +1,3 @@
+[submodule "talk-python-transcripts"]
+	path = talk-python-transcripts
+	url = https://github.com/talkpython/talk-python-transcripts
