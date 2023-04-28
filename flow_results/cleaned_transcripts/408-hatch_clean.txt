@@ -1,0 +1,978 @@
+In recent years, there's been a lot of experimenting with how we work with dependencies and external libraries for our Python code.
+There's pip, piptools, poetry, pdm, pyenv, pipenv, hatch, and other workflows.
+We dove into this deeply back on episode 406, reimagining Python's packaging workflow with a panel.
+And this time, we're back with Ofek Lev to take a deeper look at hatch.
+This is Talk Python to Me, episode 408, recorded March 1st, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Microsoft for Startups Founders Hub.
+check them out at talkpython.fm/foundershub to get early support for your startup.
+And it's brought to you by Sentry.
+Don't let those errors go unnoticed.
+Use Sentry.
+Get started at talkpython.fm/sentry.
+Ovech, welcome to Talk Python to Me.
+- Thank you, good to be here.
+- It's been a long time, at least a week since you've been on the show.
+(Ovech laughs)
+- Yep, just about a week.
+- Welcome back.
+In that appearance, it was a big panel of many of us talking about Python packaging.
+And you're the author of Hatch and Hatchling and a really interesting take on that tooling story.
+So I thought it'd be fun to go ahead and just dive into that in particular for this episode and get your thoughts on it.
+So I'm looking forward to talking about Hatch.
+- Yeah, sounds fun.
+- Yeah, it will be fun.
+Before we get into it though, a lot of people maybe don't know you out there.
+What's your background?
+How did you get into programming in Python?
+Those sorts of things.
+Let us know.
+I guess originally, this was like maybe 15 years ago now, I was just automating stuff that I was doing every day.
+So for me personally, I have a condition that makes me kind of weak, so all I can use is like a mouse.
+Therefore, I type pretty slow.
+So I was auto-completing like sentences, templating for like sending emails, basically like the traditional developer mindset.
+If you're doing anything more tha n once or twice, just write a script for it.
+I had like dozens or maybe even a hundred scripts just to automate like boring stuff.
+Kind of like the book, which I've never read the book, I would make the boring stuff, but I imagine it's what I was doing.
+That's how I originally got into Python.
+Excellent.
+You were doing the traditional developer thing.
+Why spend 20 minutes doing something when you can spend two weeks automating it?
+Yeah.
+Just kidding.
+Like, I really think that that's a huge value.
+There's so many people out there, probably many people even listen to this podcast, where they don't consider themselves developers, but there's like little things that could be automated that are super annoying.
+You don't look forward to it.
+Just a little bit of programming skill will let you really blaze through those things.
+Plus it also gets you further into Python where, you know, maybe one day you're releasing tools to manage everyone else's Python projects.
+Yeah, for sure.
+You don't know where it's going to go, right?
+>> Yeah, now I work at Datadog, working on agent integrations.
+So it's like, the thing that you physically install on your server host, it ships out of the box with like, almost 200 integrations.
+Like connecting to databases like Postgres, or monitoring like, Windows APIs, or hypervisors like vSphere.
+Pretty much whatever our customers want to monitor, it's our job to like find a way to connect to it and provide useful data.
+So. - Yeah, excellent.
+- A lot of research into every product that we integrate with.
+Sometimes the documentation is kind of sparse.
+So it's lots of investigative work.
+- Yeah, I can imagine.
+That sounds really fun.
+And I can see that as a follow on from the way you got started as well, right?
+Automating a bunch of tasks is not that different from kind of automating integration with a hundred different apps and performance counters and logs and different things, right?
+- Definitely.
+- Cool.
+Is that part of the application performance monitoring type thing?
+Are there--
+- We do that as well.
+That's not my team, but yeah.
+- Okay.
+- That's probably what we do.
+- All right, well, let's go ahead and dive in.
+- Sure.
+- So as I said, if people want to check it out, you were on the Python packaging discussion and over there was a broad conversation with a bunch of core developers and other interested folks, building tools like Hatch and so on, about where are we with packaging?
+Because a little while ago, I remember packaging mostly felt like PIP, instead of tools, maybe just this detail, something like that.
+And then it kind of got unlocked, the separation of like the build backends and stuff.
+And then many people started creating things.
+We had pipenv, we have poetry, we have pdm.
+There's a bunch of different ones and Hatch is amongst them, right?
+- Yeah.
+- Let's set the stage by just talking about, first of all, what do we mean when we're talking about Python packaging?
+And I'll ask you for you, right?
+Like it might mean something different for me than it might mean for you and it might be different for someone else as well.
+But let's just start with, you know, when we talk packaging, is that getting libraries to devs?
+Is that developers deploying their apps to servers?
+Or is that me sending an executable end product to a desktop?
+Like, what does it mean?
+- Yeah, that's a good question.
+I would say all of those are packaging.
+Historically though, we've mostly put our efforts toward the first one, which is basically like a developer making a library and making that really simple for other developers to use that library.
+So in the form of wheels being hosted on PyPI in particular, that's what we put our efforts on, which I think either way you look at it was the right choice to focus on in the beginning.
+'Cause either way, from either first principles or even hindsight looking back, you can't build a community without packages and being able to get packages and distribute packages.
+So I think that was the right choice.
+And I think now we're trying to satisfy other use cases, notably applications, I guess.
+Yeah.
+I mean, we even have an XKCD for it, right?
+True.
+And I don't know how many people know this.
+If you were in the Python REPL, you can type import antigravity and actually it does something.
+So the old XKCD is there's a person flying and the person on the ground looks at us.
+How are you flying?
+Python.
+Just learned it last night.
+Everything's so simple.
+Hello world is just print.
+Hello world.
+The person on the ground says, I don't know, dynamics, hyping white space.
+Come on, join us.
+Programming's fun again.
+Okay.
+But how are you flying?
+I just typed import anti-gravity.
+Right.
+And it's a great joke, but honestly, that is one of those superpowers of Python.
+Is that how many things do we have right now?
+How many packages?
+436,000 packages.
+Like insane.
+It's just insane.
+Yeah, no, it's.
+Yeah, massive community and really all kinds of domains from doing, you know, as we talked about automating scripts, you know, different tasks to doing like computing for, whether, you know, biomedical stuff, you know, even, embedded devices now with like, MicroPython stuff like that.
+So it's yeah.
+Users of Python do everything pretty much.
+Yeah.
+- Yeah, I think in the near term, we're gonna be talking about front end web as well with PyScript.
+And PyScript showed the possibilities, but I recently had a show on PyScript intersection with MicroPython, and that starts to be like, well, here's a couple hundred K download, and now you got Python in the front end.
+What do you think about it now?
+But of course, that has its own packaging and distribution story that we're gonna have to think about as well.
+like, well, kind of like node modules.
+Now what do you do with packages that got to run on the front end?
+This is getting weird.
+- Yeah, that kind of goes to, you know, talking about like how hard it is to do packaging when you have, you know, dozens of use cases that we have to satisfy.
+And with us being mostly just volunteers in our free time trying to do everything.
+So yeah, it's fun and also challenging.
+Yeah.
+- Yeah, absolutely.
+Another area, another thing we could consider Could be Conda, right, actually, yeah, I got that pulled over here.
+Could be Conda, right?
+This is a completely different take on pip and wheels.
+- Yeah, Conda is pretty cool.
+I think Conda, if I have my history right, it came about because there really was no packaging story some time ago.
+So Conda, I think was made by Peter Yang, if I remember correctly.
+And he has a whole company now around it, supporting Conda.
+And yeah, it just makes it easy to install very complex stuff.
+So if your package depends on, yeah, you can put in Fortran and Rust and all kinds of stuff and it just magically builds it and you can install it pretty easily.
+Yeah, it's pretty impressive.
+- It is pretty impressive.
+And with wheels now, it's closer, what we do with pip.
+It used to be setup.py would run and whatever it needed to do, it would do.
+But often that would require, "Well, compile this," usually with C back then, but for the scientific libraries, it says, "Well, compile this thing with Fortran," and they compile this thing with Scala.
+You're like, "I have neither of those things "set up as dev tools on my environment.
+"I'm a science student.
+"What am I doing here?" Right, and so that was the angle they were solving, and I think pip and Conda are coming a little bit closer together.
+I think they're not necessarily converging, but they're more similar now than they used to be.
+- Yeah, definitely that is true.
+And yeah, there's talk, I don't know how many people are aware, but the Python forums has a subsection on discourse for packaging.
+So yeah, right now there's actually talks from people at Conda trying to decide how we can kind of provide a more, like a unified experience.
+- That's interesting.
+- 'Cause right now Conda has their own repo, like for all their packages, And PyPI is its own thing outside of Conda.
+So yeah, there's talk about possibly making that like interoperable.
+- Oh yeah, okay, that'd be really interesting.
+Let's see, there was a question out here from Copa.
+Since we're in this realm, like what do you think about Docker as a way of shipping things?
+You know, a lot of times we'll get checkout, get clone, some code on a server, maybe some production branch, and then go through these steps, right?
+pip install requirements or a hatch run type of initialization, or you just get that done in a Docker container and you just hand that out.
+What are your thoughts on Docker as part of this?
+- Yeah, Docker definitely has its use cases.
+Like I guess in lieu of the black file, you can kind of use Docker as a reproducible environment.
+But I still think there's a place for a way to actually build applications outside of Docker, outside of containers in a reproducible fashion.
+I think that's still necessary.
+- I do as well.
+So Docker really, it addresses some of the types of packaging that we discussed really, really well.
+For example, I need to get my running code onto a server, but Docker is less good.
+It's not completely irrelevant, but it's less good at giving a developer a library, right?
+If people that make HTTPX and the people that make fast API, they're not going to build a combo Docker, right?
+There's still a place where you've just got to get the things.
+And that's like a base level closer to where a hatch might be working.
+And also Docker is not fantastic at sending to an end user.
+If I want to build an app that a non-technical non-developer person can use, Docker is the opposite of what they want.
+Yeah, true.
+Yeah.
+I will say there's another use case, which is like, if your machine is like messed up somehow, and some library package isn't working, I've had this happen with my co-workers on their Macs.
+It is nice to be able to just go into a container and start fresh.
+So I've had that happen a few times.
+It is isolated in quite a good way. And that's pretty, pretty excellent.
+So on that packaging panel that we were on, There was a really interesting focus for a little bit talking about, well, what is responsible for what?
+So right now, for example, I might use pip as a way to add tools to Python to a Python project, but I'll have to already have Python there. And in other communities, and even a little bit like Conda, and in this as well, there's tools that will say, what you do is use a tool kind of like pip, But it gets you the runtime.
+It gets, it would get you a version of Python you asked for plus the libraries.
+You know, I think rustup was one of the, the things that was brought up there.
+Right.
+So for people who don't know rustup, it's an installer for system for basically setting up a rust environment for doing rust.
+So.
+pip up Python up.
+I don't know.
+I don't know what we would call it, but do you want to just, you know, maybe give of your thoughts on that? Cause I think you had some comments on that, like inside out, outside in where, if you could start fresh, where were the tools?
+How would that work?
+Yeah, I think if we were to start fresh, I think the way Rust does it is like now the, the gold standard, it's probably the best way to do it, which is how, as you mentioned, Conda, a similar thing where you have a tool that you download and that one tool is in charge of managing the various Python or programming language versions. So if I were to start fresh, you would have a tool like Catch that you would download as an MSI or EXE or some kind of installer similar to Rustup.
+And that tool would manage the various Python versions and environments and packaging. So for Rustup, when you download this, it gives you Rustup, which manages Rust, but then it gives you Cargo, which is a separate command, and that's their package manager.
+Right.
+But in both cases, they live outside of Python.
+Interesting.
+Yeah, Cargo is to Rust as pip is to Python, right?
+That kind of thing.
+Hey folks, let's pause for an ad.
+Remember last time I had this advertisement for Microsoft for Startups?
+Well, I asked the AI to have some fun with it just to show you how powerful what they have on offer really is.
+Here we go.
+Me.
+Can you rephrase that Microsoft Founders Hub ad as a hipster?
+AI, sure.
+Here's a rephrased version of the ad in hipster style.
+Yo, Talk Python fam, this segment is brought to you by the sickest program out there for startup founders, Microsoft for Startups Founders Hub.
+If you're a boss running a startup, you're gonna wanna listen up because this is the deal of a lifetime.
+Microsoft for Founders Hub is your ticket to scaling efficiently and preserving your runway all the while keeping your cool factor intact.
+With over six figures worth of benefits, this program is seriously next level.
+You'll get $150,000 in Azure credits, the richest cloud credit offering on the market, access to the OpenAI APIs in the new Azure OpenAI service, where you can infuse some serious generative AI into your apps, and a one-on-one technical advisory from the Microsoft squad, who will help you with your tech stack and architectural plans.
+This program is open all, whether you're just starting or you're already killing it.
+And the best part, there's no funding requirement.
+All it takes is five minutes to apply, and you'll be reaping the benefits in no time.
+Check it out and sign up for Microsoft for Startup Founders Hub at talkpython.fm/foundershub.
+Peace out and keep listening.
+Thank you, Hipster Michael.
+And thank you, Microsoft for Startups, Founders Hub for sponsoring the show.
+I think that's pretty helpful because one of the problems is, well, you need to pip and saw this thing.
+Oh, do you have the wrong version of Python?
+Well, you gotta, you know, there's a lot of steps back and there's no immediately obvious command other than completely from scratch, install a new Python.
+>> Yeah.
+>> There's a tools that manage that, right?
+Like PyENV can work, although I've had trouble with it.
+>> Yeah, I've had issues with that.
+Yeah, I think it would be less error-prone in this hypothetical way, where the tool doesn't mess with your shell in a global manner.
+It just has its own paths to Python and just does everything by itself.
+>> That's interesting. That starts to maybe make it easier to to solve the, I want to ship you an executable binary, is if the tool were in charge of, I create this working directory where part of the things I've installed is all of Python and all the packages you've asked me for, I can see how that pretty quickly becomes something I'll bundle that up and hand it to somebody and give them an entry point.
+- Definitely, I could help that situation.
+I think there's not really a standard way to build an EXE from like a Python package.
+There are a few tools, like PyOxidizer is one newer option.
+PyInstaller, CXFreeze, I think was the thing that I've used before.
+So, there's a few options.
+- Yeah, I've used Py2App, and that's actually worked really well.
+I've used PyInstaller, and it's worked mostly well, except for I've had weird situations where on Windows it's great, but on Mac it has a dangling terminal.
+In addition to the GUI, I'm like, what are we supposed to do with that?
+How do we make it go away?
+Like, you know, here's the command.
+Like, no, it's not going away.
+I don't know why.
+And if there was a more official sort of core dev organized way, that would make me super happy.
+I'm not so much for official or unofficial.
+My view is like, if it works, it works.
+So as long as it's satisfying, you know, all the use cases, that's what I would push for.
+So I think right now, based on what I've used personally, I think PyOxidizer would be the the best choice for distributing standalone apps.
+- Interesting, okay.
+All right, cool, well, let's move on and start talking about Hatch.
+So, first off, why'd you build it, right?
+We had Pip.
+(laughing)
+Why do we need Hatch?
+And I don't know exactly the timeframe of when it came out, so maybe we had other things like poetry, or why'd you go and create this?
+- So Hatch, I did, it was kind of an owner project back in the end of 2016 or early 2017.
+I wasn't pleased with the tooling in Python.
+I think very similar to the author of poetry.
+That's kind of why he made poetry.
+So I wanted something that kind of matched my mental model of how development would go with building packages and managing environments automatically, stuff like that.
+When I made it though, there weren't very many standards for packaging and everything was kind of in limbo at that point, which kind of discouraged me from continuing because I was like, okay, in a six months or a year or two, I'm going to have to rewrite to follow standards.
+So I kind of just stopped development for a few years until everything was standardized.
+And then I rewrote it about a year and a half ago with this new version and new docs.
+So that's kind of the history of it.
+Yeah.
+I saw that there's a.
+Hatch.yaml and a pyproject.yaml, and you can use either of them.
+Was your hatch.yaml the original and then Pyproject.yaml gain traction and you're like, all right, well, we'll, we'll integrate with that as well.
+No, I had to came, hatch.yaml came with the rewrite.
+It's mostly for environments.
+Sometimes when you define lots of environments, it's very verbose.
+Like at my workplace, I saw a hatch file that was like over a thousand lines.
+So bringing that in Py project wouldn't be very nice.
+So that's why I have a second file to isolate certain things.
+Yeah.
+That makes sense.
+Like, just like maybe you don't want to write your entire application in an app.py, but maybe have multiple files.
+Yeah.
+Something like that.
+All right.
+Well, out in the audience, we've got some kind words.
+Like I switched to hatch and pip tools from poetry and love it.
+That's pretty awesome.
+Yeah.
+And then probably before I forget, because it was right at the top of the conversation, Marwan asks, is there a time estimate for when a hatch might support things like lock files?
+That's a good question.
+so my goal is by PyCon to write the plugin interface for locking.
+So the first version we use pip tools, actually, that would be the first plugin for lock files.
+But I won't be writing like an actual lock file spec.
+I'll just be using an existing pool.
+The new hypothetical lock file is kind of blocked on Brett because he has most context and knowledge about that.
+So yeah, I'm waiting on Brett basically.
+Got it.
+Brett Cannon, that'd be Brett Cannon.
+Yes.
+Python developer extraordinaire.
+We all know.
+Okay.
+Very cool.
+Other thing before we dive into it here, I see that you have a, some rough action going there.
+I just had Charlie on the show not too long ago to talk about Ruff.
+It's pretty impressive.
+When did you adopt that?
+I was an early adopter.
+I guess a few months ago now.
+Yeah.
+What's your experience?
+>> It's fantastic.
+It's kind of like a meme to say it now, but it's true.
+Like it's so fast.
+It's almost like you wonder if it's doing anything.
+Like it's-
+>> That was my first thought.
+When I ran it, I'm like, wait a minute, maybe I didn't give it any files or something, because I ran it on Talk Python Training, which is like 20,000 lines of Python code and it just went bam like that.
+I'm like, maybe it didn't take that because that seems like that should take a moment at least somehow.
+Yeah.
+Okay.
+So you recommend it?
+Yeah.
+All in one location and it supports like so many options as well, which is nice.
+Yeah, indeed.
+Cool.
+Cool.
+All right.
+Well, let's start with a high level overview.
+And then what I want to do is I want to walk through creating a project with this And I've got questions and thoughts as I kind of experience Hatch, not for the first time, but for a somewhat of a newbie perspective.
+So I think we'll do that.
+But let's start with the high level features.
+So the Hatch project is, I guess, conceptually two different projects.
+Hatch itself is the command line.
+So doing publishing and environment management, versioning, stuff like that.
+Then Hatchling is the build system, similar to a split or set of tools.
+So that's where the build system is.
+from, you can use it independently, right?
+You don't have to be doing anything with Hatch to use Hatchling basically to replace setup.py, right?
+Yeah.
+You can replace the setup.py with the pyproject.toml.
+Yeah.
+And most people do use Hatchling and not use Hatch.
+So yeah, Hatchling is much more popular than Hatch itself.
+Okay.
+So for a config, it's a bit more simple than set of tools.
+The default logic makes more sense for, for new users, especially.
+It's hard to mess up packaging with Hatchling.
+Yeah.
+Excellent.
+So I could have just some random Python project that I've put together with a pyproject.toml I wrote by hand, and I could just put Hatchling in as the build subsystem to make the wheels and whatnot.
+One benefit of hatching a hatch too, basically everything is a plugin.
+So you can have a builder that does like the MyPyC, which we have, you can have a metadata hook where you insert project URLs from some arbitrary location.
+Pretty much everything you can plug into and modify.
+Yeah, excellent. All right.
+- And then a robust environment management.
+- Yeah, so for this, this you can think of as a, as Tox or Knox, similar in spirit to that.
+The difference is Knox and Tox kind of treat environments as applications where an environment is tied to a command and you run an environment.
+Whereas in Hatch, you have environments that you define and then within that, you have scripts that you can run.
+So you can have a style environment that might be able to rent with one script or run the formatter to change the code with another script and environment itself.
+Isn't actually like, like an app you can run arbitrary commands, right?
+Like I could run hatch test or something like that.
+Yeah.
+And passing flags.
+Yeah.
+Okay.
+And then often people who published packages to PyPI, they've done this with Twine or some tool like that.
+And Hatch has that capability as well.
+Right?
+Right.
+Yeah.
+To yeah.
+PyPI or some private, you know, corporate owned index.
+I think those are probably getting to be more popular than they used to be with all the supply chain silliness.
+Yeah, that's true.
+Yeah.
+Do you have any visibility into how people are using it, whether it's public or private or as far as hatch.
+Yeah.
+Well, how they're using the hatch to publish.
+Do you have any visibility, whether they're publishing the PyPI yet or to some kind of private index?
+Based on the issues I have.
+Open like future requests.
+Most are talking about private indices.
+Actually.
+Interesting.
+Yeah, it's probably, those are the ones where the edge cases live.
+You know, the standard one place is dialed in and well, what if mine's on using active directory for authentication as I publish it, like it's doing what Artifactory is quite popular as well.
+- Yeah, yeah, that absolutely is.
+Another thing that was interesting is you have the ability to do version management, as we'll see in just a minute.
+You can say like, what version is my package?
+Increment the build, do a major version increment, or put it into a release candidate mode.
+- Yeah, and this is Plugable as well.
+So there's one plugin that's popular that wraps setup tools SCM, which doesn't actually depend on setup tools anymore.
+It's just a name that's still called that.
+So that pulls your version from Git or Mercurial or Subversion.
+And you can source the versions that way as well.
+Interesting.
+Yeah, I really liked that.
+I think that's a neat aspect.
+And then configurable project generation, same defaults.
+Yeah, I don't have too many options with this yet, but you can make it a flat layout or like a source directory.
+There's an option to add tests, which puts more stuff in your pyproject.toml.
+You can add a CLI, which has a very simple template for GitHub actions.
+And then there's a flag for a CLI that would give you a click and set up a command line for your package.
+I don't know how directly related this is to anything that Hatch does, but the usage of the pyproject.toml and then building it as a package, something you could install gives you a really nice way to create a global CLI.
+Right.
+Which is the entry points in the pyproject.toml.
+Yeah.
+That's what that CLI flag does.
+Yeah.
+It's very nice.
+Okay.
+Yeah.
+Then also you say it's two to three times faster than equivalent tools.
+That's great.
+It really just one trick.
+It just, I make the code not as readable by using lazy imports everywhere.
+I've just put lazy imports and that's why it's faster.
+Yeah.
+Because there's a lot of execution paths that only use some of the imports in effect.
+Right.
+Yeah.
+Going back to the scripts, Jonathan points out, I love the custom scripts within Hatch.
+It makes creating build pipelines way easier and moves most of the logic within the Hatch configure rather than spreading them around multiple files, which is, that's pretty cool.
+Yeah.
+That's what I do as well.
+Cool.
+I even use Hatch for non-Python projects just for the scripting ability.
+Yeah.
+Cool.
+Well, I mean, Python traditionally had been used for a lot of that, you know, called it glue code, right?
+A lot of, well, I really want to do these other things with these other systems and scripts, but let me kind of orchestrate that in Python.
+And that's, it sounds a bit, a bit like that.
+Let's do a little walkthrough.
+I think, I think that'll be fun.
+But first of all, I think this is just MK docs, but thank you for pointing it out.
+That your documentation and your website here have hotkeys.
+Yeah.
+MKDocs with the material theme, which is very nice.
+>> Yeah. So it turns out if I just press a dot, it goes to the next page and if I comment, it goes to the previous page and it doesn't sound like much, but actually it's really nice.
+It is really nice.
+>> Before we read this front page, one other thing to note to go back to the top, just because I'm very happy with it.
+The logo was actually generated by Dolly, the AI.
+>> Okay.
+>> Yeah.
+>> Fantastic.
+>> Yeah. Generate the logo and then I had a brother of a friend from work, I like actually touch it up.
+So it's a really cool logo. I like it.
+I didn't catch on that it was made by Dolly, but now I see that.
+I've been doing a lot with mid journey and I think these AI tools are, I think they're a little bit fraught with maybe a few moral issues about like, well, did you really train it on stuff that you were allowed to train on?
+But putting that aside, if they exist, you know, assuming just they exist, they're really neat.
+And there's really amazing stuff you can do with them.
+Yeah. Yeah. Cool.
+I guess maybe a quick sidebar there is if you were a project maintainer out there and you don't really have an a logo Drop in on dolly or a mid journey and spend half an hour and you probably will but I I just think There are so many people that build web apps out there that don't put hotkeys into them And it's it is not that hard and it is such a nice experience And it brings you so much closer to a native app type of experience So, please put put some hotkeys out there for us All right.
+So pressing dot takes us to the first one.
+So installing hatch.
+Obviously you can pip install it.
+However, you offer some interesting other areas I want to talk about.
+First of all, my favorite pipX, I love pipX.
+If you've got a tool that you don't directly import into your code that does stuff against your Python apps, boy, pipX is almost always a good choice.
+What do you think?
+Oh yeah, pipX is awesome.
+Yeah.
+Yeah, it just allows you to provide isolated apps for command line apps.
+Yeah.
+It manages everything and you don't even have to think about it.
+So.
+Yep.
+It just creates its own little environment.
+You can say upgrade all my installed CLI tools.
+It's like package manager if the thing that it's managing is built with Python.
+It's great.
+I had chat on the creator of PIPX a while ago.
+So people, if they want to hear more about it, they can listen to that show.
+Homebrew, good.
+Conda brew.
+Mac ports is interesting.
+But the one that stood out to me was Mamba.
+I'm like, wait, what's Mamba?
+So it's interesting.
+I hadn't heard of that, but yeah.
+- Yeah, I don't use Conda that much, but as far as I know, there's a few different distributions of Conda.
+So there's Anaconda, which gives you like over a gigabyte installed, like massive scientific computing.
+There's Miniconda, and Miniconda gives you just the bare minimum Conda CLI with like package management and that's what most people use, I think.
+But now there's Mamba, which is like mini-conda, but it pulls from conda-forge by default and conda-forge is sort of like our PyPI where anybody can contribute their own packages.
+So I think that's the main difference.
+And yeah, it is faster and it was rewritten.
+And that's what Mamba is.
+It's a re-implementation of Conda, the Conda Package Manager and C++.
+Doing parallel downloading and other bits of that, which is interesting.
+Cool.
+Well, I don't use either all that much, but it's still kind of cool to see there.
+So you could Mamba install Hatch if that was your workflow as well, right?
+Okay.
+So installing it pretty easy.
+If you were to do it, if somebody gave you a blank machine and said, set this up to use Hatch, what would you do?
+- For now I would do PipX.
+- Okay.
+- In the future, like we talked about in the beginning, I plan to have like an actual executable that does the work, like Python does.
+But until then, then probably PipX.
+- Okay, so maybe then it would be Homebrew and Winget and apps, things like the higher level OS ones, okay.
+This portion of Talk Python to Me is brought to you by Sentry.
+Is your Python application fast Or does it sometimes suffer from slowdowns and unexpected latency?
+Does this usually only happen in production?
+It's really tough to track down the problems at that point, isn't it?
+If you've looked at APM, application performance monitoring products before, they may have felt out of place for software teams.
+Many of them are more focused on legacy problems made for ops and infrastructure teams to keep their infrastructure and services up and running.
+Sentry has just launched their new APM service.
+And Sentry's approach to application monitoring is focused on being actionable, affordable, and actually built for developers.
+Whether it's a slow running query or latent payment endpoint that's at risk of timing out and causing sales to tank, Sentry removes the complexity and does the analysis for you, surfacing the most critical performance issues so you can address them immediately.
+Most legacy APM tools focus on an ingest everything approach, resulting in high storage costs, noisy environments, and an enormous amount of telemetry data, most developers will never need to analyze.
+Sentry has taken a different approach, building the most affordable APM solution in the market.
+They've removed the noise and extract the maximum value out of your performance data while passing the savings directly onto you, especially for Talk Python listeners who use the code Talk Python.
+So get started at talkpython.fm/sentry and be sure to use their code, Talk Python, all lowercase, so you let them know that you heard about them from us.
+My thanks to Sentry for keeping this podcast going strong.
+All right, so the way we get started, if we just say Hatch New, and I thought one of the things I don't normally do here on the podcast, but I think it might be fun is just to kind of go through these steps here to see what it's like to get a sense, 'cause then I can ask questions.
+So I'll say Hatch New calcy, I'll call my little app Calcy, And tell us about what we get when we run that.
+- Sure, so it makes your package as you named it with about.py and init.py.
+The init.py obviously makes it, turns that directory into a Python package.
+The about.py stores the version by default.
+And that's where it reads it by default.
+It gives you, oh yeah, go ahead.
+- Well, I was just gonna say, one of the things I can type now is hatch version and it gives me, basically pulls out the version of about.py, right?
+- Yeah, you can, if you do the same command again, but pass in the arg like minor, then it can bump it as well.
+- Yeah, so the old version is what it says, is 001, new version is 010.
+Could I say build and get 11, something like that?
+No, what would I type to change the last one?
+- RC, you should do RC.
+- Okay.
+- It's documented to allow arguments as well.
+- Got it, yeah, sure.
+- So yeah, then it also gives you a test directory that doesn't have any predefined tests, but you can add tests to it.
+And then the most important part is the pyproject.toml, which has your metadata and your other config.
+- So it's got the build system set to be Hatchling, and then it's got all the project settings, like who is the author, what are the requirements, and all that stuff, right?
+- And from the author, it would have gotten that from Git.
+The default comes from Git, so that's why it has the right stuff for you.
+And then down here is testing.
+So some coverage stuff and environments.
+- When I typed Hatch new, could I have made it ask me those questions like, who are you and stuff?
+- There is an interactive mode, yeah.
+- Okay, yeah.
+Yeah, so you also, as part of this pyproject.toml, you create some of these commands.
+These are the scripts you were talking about a little bit, right?
+Like you've got the test and other options you can run.
+- This default example down there has environment, which is just default, which is a little bit special.
+It just means you have to add a prefix on the command line.
+And so there's two scripts by default, a cov, so you could do like a hatch run cov, and it will run pytest with coverage.
+And then another command is no cov.
+- Yeah, I can do hatch test, hatch run test.
+Is that a thing as well?
+- There is no test command.
+You could do pytest, so if you do hatch run pytest, you could, yeah.
+- Yeah, excellent, that's really cool.
+- Yeah, so it basically creates the structure for you and the workflow that we just discussed would be if I've got a folder and I wanna start from absolute scratch, I want to create the entire directory structure through Hatch, but there's also a way I can go to an existing one and kinda convert it to Hatch or upgrade it to Hatch, right?
+- Me and other contributors have done it so much that most of the edge cases are gone, So it can take pretty much any setup.py and turn it into a hatch pyproject.toml.
+And it's pretty good now.
+- Okay, and because it doesn't actually need hatch the CLI, the environment tool to do that, to run and build, you could just use that to get your pyproject.toml out and use hatch.ling as a build engine, right?
+But still just keep going.
+- Yeah, exactly.
+- Okay, so people are sitting out there like, I really should be using pyproject.toml, but you know, inertia, I don't really want to do it.
+Like, Hatch new init might do it, right?
+- Yeah, yeah, that's an option.
+Before you time out, if you do which Python, which maybe I can just illustrate, and if you do Hatch run, which Python 3, it will show you that it's actually in a managed virtual environment.
+- Okay.
+So it's created a virtual environment over in, at least for me, library application support, hatch and so on, based on the project name.
+And then it has some big long deal on the end.
+- It's just a, yeah, it's just a checksum.
+- Okay, what is that checksum based on?
+The reason I ask is what do I change to make this no longer work?
+(laughing)
+- So I do that because it's possible that somewhere else on your machine, you might have another project, maybe a fork of Calcy with the same name.
+So I have to add hash. - Likely, it's a very popular library, so it's likely.
+- That's likely.
+- That's why I do that, yeah.
+- I see, okay.
+That's like a hash of the path to where the project is or something.
+Okay. - Yep.
+- A lot of projects, a lot of management tools work this way, Conda works this way, for example, where there's some other place where the virtual environments live.
+Is there a way, another workflow that's pretty common is to have the virtual environment in a VENV folder at the root of the project.
+Is there a way when I create my project to say, I want a local ENV?
+not at project creation time, but there is a way in either HatchConfig or in pyproject.toml, they are able to change that.
+Yeah, which is documented on the site.
+- Yeah, the HatchConfig is one of the things I would do.
+There's a lot of cool CLI tools where you can ask it to show me the details of whatever it is.
+So what would I put, say, into the config to say create my VENV locally and call it what is it this dirs ENV?
+>> Yeah, dirs.env.
+>> Yeah, dirs.env. What would I put in there?
+>> You would have a subtable for virtual and then have the path be just dot venv basically.
+>> Right. Okay. So like a dot slash, whatever you want to call it locally.
+>> Yeah.
+>> Is this, I guess I could do hatch find config or config find, I guess.
+>> Config find.
+>> Config find. Right. So this is a global, Like how do my projects get started using hatch for my machine, not a per project deal, right?
+Yeah.
+That's cool. So kind of like get config. Once I set up my machine, if I say, well, I like my virtual environments like this, then I'll be okay. Right?
+Yeah, it makes it easier to distribute tooling. Like for if you're managing like some corporate environment where you're using hatch for everything, then it's nice to have a config that you can modify just as a machine level.
+then every project will do the same.
+Just as a team to say, look, we always want tests.
+We always want this other thing that we call it that we always want this default library.
+Sorry, we want this default license, right?
+We don't want MIT, we want, you know, corp.inc or whatever license that we use.
+So quick question from ZL out there, I think is relevant.
+Is this useful for application development, not libraries?
+Say if I'm building like a flask app or a fast API app, like would, would this be relevant?
+Yeah. So especially with the environment management, that's kind of what applications we use anyway. The missing feature of course, like the other person asked is the lock files.
+For any app you're going to want to be able to reproducibly build the app. So right now there's not a way built in other than using an environment with like pip tools or something.
+So I'm going to add that plugin interface soon.
+Interesting.
+Does pip-tools work with pyproject.toml?
+It does now.
+Yeah, it does.
+Yeah.
+I've only used it with requirements.in and then generate the requirements.txt.
+But yeah, they added that last summer.
+I think I'm so behind the times on this.
+You know, these workflows, I, I, I'm sort of joking, but also not.
+These workflows, you kind of get into like, well, here's how I build these apps.
+Here's how I manage my requirements.
+And then you just tunnel.
+I think a lot of people just go, okay, well, that's working for me.
+I'm doing that.
+You know, I, yeah.
+Yeah.
+Yeah.
+And then, so if I want to like, so for example, when I asked which Python.
+It said the one from homebrew you've installed silly.
+Of course, that's your global Python.
+I want to activate a virtual environment.
+If I can, when I get into like this application mode, I would do a hatch shell.
+Right.
+Yes.
+And because I have an awesome, Oh my posh.
+You can see my prompt here's now taking on the calcy 3.11.2 environment as part of my prompt.
+So, yeah, that's the one.
+So it's, it's working now.
+If I ask just straight up, which Python is that virtual environment one, right.
+And I can do pip list and so on, but there's also ways I think I recall in hatch to like show me my dependencies and get a list of, yeah, show.
+DEP show.
+Yeah.
+Is it showed up?
+Table, table.
+Okay.
+I only have right now two dependencies, pytest and pytest-cov.
+Yeah.
+Interesting.
+Or I could do requirements.
+Yep, and I would spit out the...
+The same but it's not at the table, right?
+Just plain text.
+Yeah, just like requirements.txt.
+Got it. Okay.
+Yeah, excellent.
+What do you recommend?
+So there's the hatch run commands, which will use the environment, or you could just go into the shell and run it.
+Or, if I'm sneaky and I put my virtual environment in there, I might have something that automatically detects that environment and picks it up.
+So for example, PyCharm might go, you know what, I see a VENV folder, we'll use that and, and just grab it and not care about hatch directly. Right. That's actually one of the reasons I was asking about putting it locally is it's kind of a hassle to find that thing and tell your editor, go find it over here. Whereas it automatically finds the top level of project variants, you know?
+Yeah. So you can do, as we talked about sitting in the current directory, like a dot venv and yeah, Python, VS code, they'll, they'll pick it up because it is just a virtual environment at the end of the day. Nothing too special. So yeah, it will work out of the box.
+Yeah. And klutz out there in the audience has got us covered. PIP tools command is pip compile, rebuild output file, such and such pyproject.txt from pyproject.toml. Yeah. Cool. Nice. Yeah. And and variations on that, I suspect.
+So one thing that I was thinking about this that I expected Hatch to do, and maybe it does, and maybe it doesn't, I just don't know, is suppose I want to use requests for calcy.
+Like, calcy can't run locally.
+It needs its calculator API service that it's going to connect to.
+So it needs a request or HTTPS or something.
+Yeah.
+Is there a way with Hatch to say, I have a new requirement, set that up, put it in the PyProject TOML, install it?
+That's going to come with the lock file plugin.
+I figured it wouldn't make sense to add those commands until I knew how locking would work.
+'Cause adding and removing always hits the locking logic.
+And since there wasn't locking, it didn't make sense to me to add those commands.
+So it's going to come soon.
+So right now you would just modify your pyproject.toml until those are added.
+- And then I think there's a way where Hatch looked at your PyProject Toml and said, okay, you're going to need.
+These dependencies, right?
+When you run it, I thought it installed the dependencies that were in the PyProject Toml, even if it won't edit it.
+Like if I put something in there and I try to run it, it'll say, oh, you need this.
+Yeah.
+It'll sync automatically.
+Oh, what command do I use to do that one?
+Either a run command or the shell command.
+I see.
+Oh, even the shell will do it, huh?
+You do hatch run pip list, for example.
+Yep.
+Okay.
+Now in pyproject.
+Toml and like requests maybe too.
+Yeah.
+Right now I have requests and like friends of requests.
+Yeah.
+Yep.
+Yeah.
+Okay.
+That's pretty cool.
+Nice.
+And then I'm looking forward to the lock stuff because I absolutely love pip tools.
+I think it is a glorious way.
+I used for a while, I used panda bot at get up and it drives me crazy.
+It's like so noisy.
+I've got like 30 PRS a week.
+I'm like, you know, could you just.
+package this up and so now I just start periodically, I just go, "Okay, I'm going to use pip tools and just ask, how has the world changed?" and then update my stuff in a more sane way.
+>> It was a bit noisy for us too.
+At work, we have a custom dependency update logic as well.
+I think there is an open feature request for a dependent bot to chunk the updates, but I don't know if it has happened yet.
+>> Yeah, I've seen one of those for a couple of years and there was like 100 plus one.
+Me too, me too, like I gotta review these things.
+(laughing)
+You know what I mean?
+And I don't know if it's there.
+It's not there on my projects, it's still.
+I'll get 20, I'll do a pip compile update and I'll push that and I'll get like 20 messages.
+These are no longer required.
+I'm like, okay, thanks.
+Could you just batch them?
+You know, anyway.
+Okay, so Calcy is coming along here.
+Let's just imagine that it does good stuff.
+I haven't even written any code for it, but it depends upon requests, so that's a start.
+So the next step going kind of forking on the various possible definitions of what packaging is a next step for this thing might be I want to put it on to PyPI or create a wheel I can share.
+So Hatch also supports that, right?
+Yeah.
+So first you have to create the artifacts.
+So you would do Hatch build and that would build Metafault, both the source distribution and the wheel.
+Okay.
+Just like the other tools, there's going to be a dist D I S T that now has those.
+And if you run a hatch publish, that would put it on PyPI by default.
+And it would prompt you for your username.
+I'm not entering that.
+Yeah.
+I don't want to own calc on PyPI.
+No, just kidding.
+But yeah, I don't think I have it configured, so it wouldn't really do anything, but it would, it would go and put it on PyPI, right?
+Yeah.
+Potentially.
+Yeah.
+That's pretty straightforward.
+forward. You also point out in the docs that CI, build wheel and some, and things like TOX, they, you know, you could be the build, just Hatchling could be the build system for that, right?
+Hatch does like a lot. So you can use, you know, parts. Say you wanted to only use environment management to replace like TOX or NOX, you could do that. If you wanted to only use Hatchling with like CI build wheel or other tools, you You could do that.
+If you wanted to only use the version management, you could do that.
+It's kind of choose whatever you want.
+Yeah, you're not locked in.
+- Yeah, so the last thing I could do is publish, but I'm not really gonna go.
+- Yeah, yeah.
+- There's also a way to set in the config file.
+You said that if I set into the config file under the publish index, disable true, well, you can make it confirm rather than just straight up publishing it, right?
+- Yeah, that was a feature request.
+Yep, so.
+- Yeah, cool.
+Another thing that I've always stumbled on when I do this, at least with Twine, is I'll have some project, I've done this, I've published a version, later I'll come back to it, I'll make some changes, I'll increment the version.
+I used to have to do that manually, but now I can just do a hatch version and then something like, I could build one again, minor.
+There we go.
+It'll automatically change it and that changes the code, which is great.
+So now if I do a hatch build, which is really nice, it'll create a new one.
+But if I look in my project, I've got the old one and the new one and you can't republish the old one, I don't think.
+So what happens if I just say publish now and I've already got 0.1.0 out there?
+Yeah, so you can do hatch build -c for clean, and it should clean it first.
+Okay, that's cool.
+Because then I can just say hatch publish and not worry about conflicts.
+that exists already on PyPI, it will ignore us.
+It'll put a warning, but it won't fail the command.
+I think Twine by default does fail.
+- I think it does as well.
+- And has a pass if blank.
+So I do the inverse because that was frustrating to me too.
+So I do the opposite, yeah.
+- Perfect, I love it.
+Okay, yeah, that's a really cool aspect.
+And so, yeah, that was, I guess, walking through that.
+I think it was neat to just kind of explore it together.
+So thanks for talking me through that.
+- Yeah, the past month I've been pretty busy at work, but I'm gonna pick up development again next week for Hatch.
+There's a bunch of open feature requests I have to crank out.
+- Yeah, that's a pretty popular project on GitHub with 3.7 thousand stars.
+So I suspect there's some user feedback.
+- Yep, and so I guess the main next features are the lock file plugin mechanism, And also people are asking about workspaces, which is basically like, kind of like editable installs, but more built in and fundamental.
+So I'm going to add that especially useful for monorepos.
+Oh, right.
+Okay.
+Cause you, you don't necessarily want to hatch build all of Google or, or whatever, right?
+Right.
+Right.
+So workspaces, like a view into the monorepo that I said, I know there's like 500 projects here and they all have their things, but I want the web app and the data layer.
+That's it.
+Something like that.
+Exactly.
+Yeah.
+Okay.
+That sounds useful.
+Yeah.
+And I'm modeling it after cargo workspaces and rust.
+I worked with that recently and I think they have pretty good config and like a model of how local development works.
+So, yeah, that sounds really great.
+I do my preview of what Hatch will look like.
+It's basically cargo workspaces.
+Nice.
+Jonathan out there says--
+that sounds like music to his ears-- definitely waiting on the workspaces feature for our mono repo work.
+Nice.
+And then also Ryan is asking you, any chance there could be a package build target?
+I'm using PEX via TOX currently.
+Yes, that's possible.
+One thing that's great about plugins is I don't have to do every feature.
+anybody can do that.
+So we do have a few to the docs and go to the top, plugins.
+Plugins.
+Where are you?
+Yeah.
+Home.
+Yeah.
+Again, builder builder.
+Yeah.
+And then reference.
+Yep.
+And then, yeah, so known third party.
+So here's some examples of third party builder plugins.
+So the build command that you ran, it has a option to output a target.
+if they named target other than we will and sdist.
+So you can write an arbitrary builder and build those targets.
+So yeah.
+- Okay, it's probably not super hard to do, I'm guessing, to just like basically bundle up the commands to build the pex.
+- Yep, and just implement the interface and that's all you gotta do.
+- Yeah, excellent.
+Good to hear.
+I vote for the lock file management, the dependency management.
+I'm excited to hear that that's coming.
+- Yep, that's coming next.
+Are you thinking of building on something like pip-tools or doing your own?
+I wouldn't feel confident doing my own without feedback from like other folks that have been in this for longer.
+Like Brett Cannon, I think he wrote the first black file pip attempt last year.
+For various reasons it got rejected, but I think his next attempt will happen.
+I just don't know when.
+Excellent.
+a suggestion, a Cython builder would be cool.
+Maybe a MyPYC.
+I don't know, there's a lot of--
+- That one exists actually.
+- Oh, the mypyC one does?
+Okay, I do remember seeing.
+- Yeah, if you go back to the plugins, I know the docs are a lot, sorry.
+Back one, build hook.
+- Okay.
+- And then reference, and it's listed under third-party, hatch mypyC.
+I maintain that one actually.
+- Okay, nice.
+- Actually, I have black builds with that now.
+- Nice.
+What about the Jupyter builder?
+What does that do?
+- So recently, Jupyter switched their entire extension ecosystem to Hatchling, actually.
+So now the standard way to do Jupyter stuff is with Hatchling, and that's the plugin that everything happens with.
+- Nice, okay, cool.
+Probably makes you feel good to see major projects like that using your tools.
+- I'm happy that people are finding value in it, and every time someone says, "Oh, it's so easy to use," Yeah, it makes me happy.
+- Yeah, indeed.
+- I like stuff that can do a lot, but is very simple.
+That's my purpose.
+- Yeah, I think I might play with the config, the global config to see how close I can make it match my current workflow and make it kind of coexist what I'm doing.
+So that'd be fun.
+Awesome.
+All right, well, I think we're about out of time.
+Anything else you want to throw out there while we're talking about your project?
+- If anybody wants to contribute, there's lots of open issues.
+I have had lots of really nice contributors.
+They almost finished adding type hinting everywhere.
+Like in the beginning I had zero type hinting, and then a bunch of contributors helped out with that, and that was almost fully my part.
+So.
+- Cool, yeah, I saw you had 40 contributors, so that's really cool.
+- Yeah.
+- Maybe one other quick comment that I'd like to ask you about here is, I see the domain this is on is hatch.pypa, as in Python Packaging Authority, .io.
+how'd it end up on pypa.io versus yeah, hatch.dev or whatever.
+This is just the standard domain for all the packages.
+So if you type in pip rather than hatch and get rid of the latest part, it'll go right to the pip docs.
+Right, right, right.
+Well, I was thinking more about like, how did it become sort of official?
+I announced hatch 1.0, like the rewrite that happened last year sometime.
+And then the same day, maybe the next day, I forget who, put somebody in the discord was asking if I wanted to join the Pypa and I was like, well, sure.
+That makes sense.
+So then there was a vote on a mailing list and it was unanimous that they agreed and then after I think seven or 10 days, then we transferred the repo and it was hosted on the new domain.
+Oh yeah.
+And it's also under the GitHub organization of Pypa.
+That's right.
+Excellent.
+All right.
+Well, really nice project.
+Congrats on all the uptake and.
+Thanks.
+Yeah.
+It looks like people are enjoying it.
+So two quick questions before you get out of here.
+I didn't get to ask you this on the panel one, because one we're over time and two, there was a bunch of people in order just another 10 minute debate.
+First of all, notable PyPI package, something that you've come across.
+Like, Oh, this is super cool.
+People should know about package X.
+Anything come to mind?
+I guess it's a bit cliche because right now it's actually pretty popular, but I would still evangelize Textool.
+Textool is like a new application for building T-UIs, which is like textual, not user interfaces.
+I've actually been doing a project at work that uses this, and it's very nice.
+It's pretty awesome.
+- It's kind of nuts what this thing does.
+- Yeah.
+- This is like the higher order UI framework built on Rich by Will McGugan and team, and you get like fly out docking panels. It's crazy.
+>> Yeah. It's like if the web could be in a terminal.
+>> True.
+>> Something like that.
+>> It's true. I plan to actually use this for a hatch when I have time.
+On the creation, the interactive creation of a new project, on the left-hand side, you would have the inputs and then it would render the pyproject.toml on the right-hand side and markdown.
+>> Oh, that's super cool.
+>> In a few months.
+Yeah.
+Fun.
+And then if you're going to work on hatch, what editor are you using these days?
+I have PyCharm for large projects when I'm doing like one-off scripts, then VS code.
+Okay, cool.
+All right.
+So this may be a question I got to start asking people.
+I don't know.
+PyCharm is, and all the JetBrains IDs I believe are starting to promote a, what they call the new UI, which I think is more, much more like VS code.
+Are you the old school style or are you the new UI style?
+I've not seen that yet.
+Actually.
+There's a gear in the upper right.
+If you click on it, it'll say new UI.
+To me, I'm still I'm old school.
+I love the old one.
+I mean, I'm using PyCharm, not VS code for a reason.
+So I don't want it to look more like VS code for my style.
+Right.
+But I know other people prefer the opposite.
+I wouldn't mind using VS code.
+There's one missing feature that is like a blocker where I just want to use VS code full time, which is it can't yet do vertical tabs.
+There's an open feature for years.
+And I guess technically there's some kind of challenge to implementing that.
+So right now, if you have like a hundred times, it doesn't look very nice.
+It's all horizontal.
+It's just a bunch of X's.
+Yeah.
+I can't select them.
+I just closed them.
+Yeah.
+Yeah.
+I got it.
+Okay.
+Very cool.
+All right.
+Well, congrats with Hatch and thanks for coming on the show.
+- Yeah, thank you very much.
+Nice talking to you.
+- Yeah, you too, bye bye.
+- All right, bye bye.
+- This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Don't miss out on the opportunity to level up your startup game with Microsoft for Startups Founders Hub.
+Get over six figures in benefits, including Azure credits and access to open AIs, APIs.
+Apply now at talkpython.fm/foundershub.
+Take some stress out of your life.
+get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm/sentry and get started for free.
+And be sure to use the promo code, talkpython, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)

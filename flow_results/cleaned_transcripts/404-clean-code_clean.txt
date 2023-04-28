@@ -1,0 +1,966 @@
+Clean code is one of those aspects of your programming career that's easy to put on the back burner, sometimes more by management than yourself.
+But it's important in the short term for writing more debuggable and readable code.
+And it's important in the long run for avoiding having your program take on the dreaded legacy code moniker.
+We're fortunate to have Bob Bilderbos back on the show.
+He's been thinking and writing about clean code and Python a lot lately.
+And we'll dive into a bunch of tips that you can use right away to make your code cleaner, more fun to work with easier to read and more maintainable.
+This is talk Python to me Episode 404, recorded February 12 2023.
+Welcome to TalkPython to Me, a weekly podcast on Python.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode of Talk Python to Me is brought to you by Taipy.
+They're here to take on the challenge of rapidly transforming a bare algorithm in Python into a full-fledged decision support system.
+Check them out at talkbython.fm/taipy.
+And it's also brought to you by my friends over at Brilliant.
+Stay on top of technology and raise your value to employers or just learn something fun in STEM at brilliant.org.
+Visit talkpython.fm/brilliant to get 20% off an annual premium subscription.
+Bob, welcome back to Talkpython to me.
+- Thanks for having me back.
+I'm excited to be here.
+- Yeah, it's really great to have you back.
+You've been on a couple of times.
+We started, I believe our first discussion on the show way back when was around a hundred days of code.
+We went on quite the a hundred days of code journey, writing a couple of really, really long courses that were well-received, but it took a long, you know, like nine months for us to write, which was amazing.
+And we're back together.
+It's great to catch up.
+Yeah, indeed.
+Yeah.
+That goes way back to a hundred days of Python and two courses that came from it.
+And later, I think we also did a Django episode.
+Yeah.
+That's right.
+We did do a Django episode as well.
+Good stuff.
+So this time we're back to talk about code quality, writing clean code.
+What are some of the tools and also what are some of the techniques, maybe even mindset people are using to help them write clean code, better code, both for yourself to make yourself happy and as well to be a better teammate.
+If you're working in a team, right?
+Yeah.
+So this topic really excites me.
+It's in my everyday work and I think there's a lot to gain from it.
+So, uh, yeah.
+Excited to share today.
+I am too.
+but it's something I really, really care a lot about.
+It's one of those topics that I think is long-lived, which is rare in software development.
+It's not the latest JavaScript framework or something that's gonna last for a year or two.
+These ideas are the kind of ideas that just no matter what you're doing, even if you don't do Python, if you do something else, it's very likely that these are solid foundations.
+Some of the ideas will be specifically for Python, but many of them not.
+- Yeah, timeless stuff.
+- Yeah, those are the good ones that are worth putting your time into learning.
+Now, before we jump into that topic, which is gonna be good, maybe just tell people what tripped you.
+- These days, so I left Oracle a while back.
+I think we spoke about that in 2020.
+So I've been working on PyBytes full-time for almost three years.
+- Congratulations.
+I know you and I spoke about this beforehand and it was a really a big step for you.
+- It was.
+- And something you were absolutely looking forward to, but just walking away from a good paying job, that's scary.
+- Stuff, yeah. - So congratulations.
+- Yeah, thanks.
+This is also around the time that as PyBytes, we pivoted to doing coaching.
+So people helping people one-on-one, we created our PyBytes developer mindset program, a 12-week coaching program.
+And then that really took off and we have work now with a hundred plus people.
+And what I'm super excited about every day when I wake up, because helping people overcoming the tutorial paralysis, embracing imposter syndrome, helping them shipping two projects end to end is just the best thing ever.
+Yeah.
+to see people grow and become more confident and get better.
+And yeah, it's really, it's excellent work, isn't it?
+- Yeah, it's really fulfilling.
+- Yeah.
+So congratulations.
+It's awesome to hear that you're doing that now and you can put all of your energy, not just your side hustle energy into these types of things, which I can tell you, it feels real good.
+- You know how it is, right?
+- I do, I do.
+I've been in it for a while.
+Very fortunate.
+Okay, so let's start this off with looking at your article.
+But before we do, Toon Army Captain has a really great way to sort of kick off this topic, I believe.
+Clean Code has less or fewer WTFs per line.
+How about that?
+- Nice.
+- So yeah, I think that's gonna be a theme here.
+Let's go ahead and jump into it.
+I reached out to you and said, hey, let's get together and talk about this because I knew that you were passionate about these things, but then you also put together a blog post here called Tips for Clean Code in Python.
+I thought, okay, that's interesting.
+Let me start flipping through here And there's just a bunch of nice ideas that resonate with me.
+So what I thought we could do is maybe you could set the stage, like what the heck is clean code?
+Toon Army did do a pretty good job of kind of giving us the colloquial term, but you know, maybe something a little more safe, forward, conformal.
+We could go with, set the stage for, for what is clean code?
+Why does it matter?
+And then we could dive into some of the stuff you put into your article.
+And then also you and I both threw some ideas in after like to kind of expand it as well.
+So let's, let's start with what is this clean code thing?
+Yeah.
+So set off the stage.
+So clean code is really when you write code, that's easier to maintain, easier to test, easier to update.
+Because as we all know, a project usually starts simple, but over time it grows, new requirements comes in.
+You constantly have to change things.
+And yeah, the cleanness of your code will definitely determine how easy you can move a project forward, how you can make changes, and of course it's also contribution to our team to make it a more pleasant experience and decrease the amount of WTFs.
+Yeah.
+You don't want to have fewer the better, although maybe you'll even want to, and just for a good war story at a conference five years from now, but you don't want too many of those.
+I think it's appreciating the fact that if you do a good job, what you're building will live a long time, right?
+It will possibly be still the main focus in five years from now.
+And you don't always know what that's going to be, right?
+It could be, oh, here's a little side project.
+It's just going to pull in some data and like, you know, you show it to somebody at work and like, you know what, that's great.
+Ship it.
+Like, whoa, whoa, whoa, whoa, ship it.
+No, no.
+I just threw it together.
+It's, it's good.
+Let's go.
+Like we're in a hurry, you know?
+And then that just starts to build and layer on like a sediment that just makes it harder and less fun to work with.
+And so as you just think about this thing is small now, but as it grows, what are the, both the practices and maybe technological or programming things to bring and put in place so that as it grows, you don't start to just really come to a screeching halt to make changes.
+Uh, it's test start to fail randomly as you just touch it in various places, things like that, right?
+Yeah.
+It was also kind of my, introduction to Python in 2012.
+So almost 11 years ago when I made this automation framework at work and,  I was a big fan of Perl back then.
+I guess that goes back to my Unix shell scripting, initial programming exploration, and it was not maintainable at all, right.
+There were no classes in Perl and it was just a mess.
+Also, of course, because I didn't know Perl maybe very well, but then I discovered Python and I could refactor it, make it more modular and that project was then just a joy to work with.
+And maybe that says a lot about Python as well, that it does inherently things well, because if you type import this in the REPL and you get the scent of Python, a lot of these statements sound so simple, but they're actually so profound and they actually tell you a lot about writing clean code in a sense.
+So anyway, but I digress.
+They do.
+They also talk a lot about the community that cares enough that, you know, you have these sorts of commands in the language itself that remind you to think about writing clean code and going way back to the late eighties, you know, when he came up with it, really broke with tradition to use white space for the code structure. And I think it's a little bit less so now, but back then that was very much to encourage people to write code in a way that was very readable. Whereas, you know, I say less so than now, because you've got a lot of IDEs and stuff where you can push a button and it'll auto format it. And you've got things like black and, you know, if you had curly braces, like it could still be quickly put into a pretty shape now. But in the early days, that was a really important concept of it.
+days we were spoiled, right? Having black out of formatting and all that. When we started, that was not the case. How did you react to the white space thing when you first had to use it?
+At first I hated it. I just really didn't like it. I thought this is just weird. Like, okay, everything else about this language seems pretty nice, but this is weird stuff.
+Then I started using editors that understood it. It's like, okay, well I just hit, you know, colon and enter and it, it kind of does it for me automatically. And sure there's three spaces, four spaces, but if I backspace, then it goes back four.
+And it, it kind of treats it, the structure, the tools know the structure and it makes it really nice.
+And at the time, this is long ago, I was doing C#, which is an okay language, it's pretty good, but it has all the symbols and formulas and all the angle brackets and all the stuff that you would do, right?
+It's not quite C++, but it's pretty close.
+And when I came to Python, I'm like, gosh, it's just weird that like a lot of that stuff's not here and it seemed to kind of out of place.
+But then when I went back, I realized, wait, these languages are lying to me.
+They're saying I need all these symbols to make it hold together.
+And you just don't.
+And it's so much nicer to look at code that is not laden with these support structures.
+So a bit of a diversion, but yeah, that's, I reacted weirdly to it, but after about a week, I'm like, but it's better.
+It really is.
+Even though I'm so weirded out by it, it's better.
+And then, you know, pretty quickly I'm like, yeah, this is sweet.
+I'm going with this.
+Yeah.
+Same here.
+Indeed.
+All right.
+Well, let's start, I guess, start at the top with your article.
+What inspired you, by the way, to write it right now?
+Cause it's pretty recent, isn't it?
+Yeah, that's a good question.
+It's not the first time I've been writing content about clean code and stuff.
+In 2016, I actually did a formal certification building maintainable software from the SIG group, software improvements group.
+They have formal certifications.
+Yeah.
+So it's a passion of mine.
+A clean code.
+Um, it's also coming back a lot in, in the coaching I do day to day helping people.
+So it's not the first content piece, but I think this one kind of summarizes in a bit more of a concise way.
+And of course there's way much more to it, but I think the 10 points here get you pretty far.
+So those are pretty important.
+They sure are.
+So let's start with one that you already kind of laid this out.
+Like so many of these techniques, they are like, they sound so simple and like, Yeah, sure. Obviously, Michael, I wouldn't write a 1000 line function.
+And you're like, but it's, it's already 700. What is how, how did this happen?
+Right? How do we get here? And the first one solidly falls into that realm, which is smaller units, smaller functions, smaller classes, smaller modules, single responsibility principle, all that, right? Tell us about this.
+Yeah. So indeed, a function or a unit of code should ideally do one thing. And And just, just a side note, right.
+That usually not how we start.
+Sometimes I do want to make this side note that when we are figuring out a design, it can definitely happen that you have very large units because you're basically trying to figure out what you're building.
+Right.
+And that's where refactoring comes in.
+But we'll, we'll talk about that a bit later.
+But yeah, I give a very simple example in this article, right.
+Where a function parses a CSV file, builds up a result list and also prints it out.
+Right now
+function is doing three things and it probably works and it's fine, but you cannot really easily reuse something that's doing three things, right? So if you want to plug in this function now into something else, there's a lot of things happening that probably doesn't make it a candidate to reuse in its current shape or form. It's also harder to test because now you have to test parsing and printing and this is kind of a silly example, but just think about another thing you have in in your code that's doing multiple things that will just be harder to test because there's a lot more going on.
+And yeah, as you said, right, these things sounds very intuitive and easy to grasp.
+Yet, when we look at code bases, right, this happens all the time.
+And, um, yeah, so if something's harder to test, it's, it's harder to guarantee that it works.
+If it's hard to extend and when requirements change, it will be harder to update.
+Yeah.
+Yeah.
+It's harder to maintain.
+It's harder to reason about the more things that it's doing, the more state that it might be changing, it's harder to onboard new people, it's just a whole spectrum.
+This portion of Talk Python to Me is brought to you by Taipy. Taipy is the next generation open source Python application builder. With Taipy, you can turn data and AI algorithms into full web apps in no time. Here's how it works. You start with a bare algorithm written in Python.
+You then use Taipy's innovative toolset that enables Python developers to build interactive end-user applications quickly. There's a visual designer to develop highly interactive GUIs ready for production, and for inbound data streams, you can program against the Taipy core layer as well. Taipy core provides intelligent pipeline management, data caching, and scenario and cycle management facilities. That's it! You'll have transformed a bare algorithm into a full-fledged decision support system for end-users. Taipy is pure Python and and open source and you install with a simple pip install taipy.
+For large organizations that need fine grained control and authorization around their data, there is a paid taipy enterprise edition, but the taipy core and GUI described above is completely free to use, learn more and get started by visiting talkpython.FM/taipy.
+That's T A I P Y the links in your show notes.
+Thank you to Taipy for sponsoring the show.
+and it's write functions that are 10 lines long, not 100 lines long.
+Now, I'd like to hear your thoughts on this, but my feeling about all of this stuff is, as a general rule, this is what you should do.
+There will be situations where you might, you know, this is just, I can't think of something better, or it's way over the top to try to adhere to all of these rules within this small context.
+I could tell you, on the TalkPython training website, There's a couple of places where it's like 75, 80, 90 lines of code for a single function.
+I was like, this is just so bad.
+I just, I wish it wasn't like this, but it's just weirdly unique.
+And, but there's, you know, 19,000 other lines of code that are all three lines, five lines type of thing.
+Right.
+So it's, for me, at least this isn't a 100% or you're doing it wrong.
+It's a 98% or 95% of the time you should be doing this.
+And it may be some weird case and I don't know, what do you, how do you feel about that in general on these topics?
+Yeah.
+As I said before, sometimes you just don't get the reside and design right from the start, so inevitably you're going to write some longer classes or functions.
+But then when you break them out in smaller units, the other thing I have to say about that is it gives you an opportunity to better documents, because in this example, if you break this long function, that's doing three things out into three separate functions, parse CSV, build a list, bad name, but you get the point and print results, then all of a sudden we have three units now and every unit has a name.
+Hence, when you go back after a year and look at that code, which always happens and you always wonder what the heck was I thinking?
+Now you add a glance just by looking at the function numbers, you have just already a better idea.
+Uh, this function, she can give doc strings as well.
+So at a glance, you have just a much easier time figuring out what this was about.
+Yeah.
+I appreciate you actually gave a shout out to me in this first piece here, which I didn't expect, but what are my rules?
+You know, and I see in this article, you referenced Martin Fowler's refactoring book, and one of the most important things that came out of that is not all the refactorings, but this idea of code smells, right.
+And maybe tell people real quick about code smells.
+Yeah.
+That's a funny name, right?
+Code smell.
+Code that is smelling and it's an analogy I came up with.
+But yeah, basically it's code that's not following these best practices, and it's just not maintainable, not easy to extend, going back to these principles we mentioned.
+So yeah, not following these guidelines that code can be smelly, it can be as code smell.
+Yeah, well, the idea is like, it's not actually not working.
+It's just not nice.
+You know, you kind of turn your nose up at it when you see it, but you can't say it's broken, because it is working.
+That's a good point.
+It smells a little bit off, right?
+It's not quite broken code, but it's sour.
+I don't know.
+And so the reason I bring this up is one of my rules of thumb here that I love, and I think you're kind of hinting that with this little shout out that you gave me in this article is when we come across these code smells, often, especially when you're earlier in your career, often the reaction or the first thought is, you know, this part is not nice.
+This part is complicated.
+This part is hard to maintain or hard to understand.
+So I need to put a nice comment.
+I've been told comment your code, don't be a jerk, comment it.
+So I'm going to put a big comment that describes why it's really bad and all that.
+And in the code smells sort of world, these code comments can be seen as deodorant for the smell.
+Like it doesn't remove the smell, but it kind of obscures, like it's not as bad if you saw the comment saying why the code that follows is bad.
+But maybe you could just make it not need a comment.
+And a lot of times, like you just said, that's, well, these five lines of code need an explanation because they're mixed in with all this.
+But if they had a function that had a name, whose name was basically the comment, well, then you don't need a comment because the name is the comment and it's now small and understandable, right?
+Like there's a lot of these little iterative things that go on.
+Exactly.
+Yeah, that's a great point.
+And it's very easy to make that refactoring, just turn the comment into a function.
+And we have created another unit we can extend, we can test, etc.
+So yeah, it's interesting because there are kind of mixed feelings about commands.
+Some people, they voracious command your code, but mostly in their literature, literature I'm reading that commands are actually not that good.
+And sometimes even labeled as a code smell in the sense that your code should be kind intuitive.
+I think it's going back to that, like half of the time when people are actually putting those comments, it's because there's something kind of messy and they're trying to help you get over that mess or deal with that mess rather than just fixing the mess, you know?
+Yeah.
+It might be an indication of a bad design.
+Right.
+Yes, exactly.
+You might even have to go back to the drawing board.
+Yeah.
+But that said, I definitely see a place for comments where sometimes you just want to remind yourself and of course your team members, not what the code is.
+They can read the code obviously, but why you took that decision.
+What the, and there might just be some extra context that you need to give.
+Yeah.
+And it's also different than doc strings potentially.
+Right.
+Which is kind of a form of a comment, but it's, it's meant to talk about the API and not cover up some weird thing you had to do in the middle.
+Exactly. Yeah. Doc strings are basically your API documentation.
+Yeah, exactly.
+All right. Well, good stuff.
+I mean, even GitHub Copilot and those things are starting to use these comments as a way to say, "Well, I'll just make a function that kind of is named what the comment is." You know, so it's...
+Even our robot overlords are going to help us by taking these comments and removing them, putting the functions there.
+- Help us in a number of places, right? - Another thing...
+Yeah, hopefully, fingers crossed.
+We'll see.
+Another thing related to this, strongly related to this, because the more things you have that are smaller units, you're probably still going to have about the same amount of codes.
+You have more functions, more classes, more modules, files, and so on.
+What gets tricky can be naming them, right?
+So choosing good names also, I think probably is a message in here that people need to think about.
+What are your thoughts on that?
+Yeah, it's funny.
+Again, another thing that sounds very intuitive, but it wasn't, wasn't there a saying like there are two or three.
+complex problems in science.
+One other one I cannot remember and naming things.
+Yeah, it's, uh, there's two problems that are hard in computer science, naming things, cache invalidation and off by one errors.
+Thank you.
+Yeah.
+Yeah.
+So naming is up there, right?
+And it is, that's right.
+I think it goes back again to knowing your design and what you're building.
+And sometimes you don't really have that figured out.
+Hence naming becomes more difficult.
+But I think that's an experience thing.
+You get better at it, the more code you write.
+Maybe we can touch on the magic numbers there.
+- Yeah, absolutely.
+That's the next one is magic numbers.
+And magic, the number part, I think, is could be expanded a little bit broader, even.
+You know, magic static values, right?
+But if you see 360, you know, think just in the code, like, well, is that like a degrees?
+- Right. - What is that?
+Like, probably degrees, but it might not be, I don't know.
+So yeah, magic numbers, that's your next recommendation.
+I'm presuming to avoid them.
+- Yes.
+So when you see some sort of random integer in the code, which might be an intuitive one, like 365 number of days in a year, which we might kind of guess, but yeah, any guessing in code is not good.
+So it's very easy to then replace that 365 integer with a number on the score of days in a year or something like that.
+Something that expresses meaning.
+Yeah.
+And again, this is kind of an obvious example, but if you have some magic five or six or 87 in there, the reader of this code probably doesn't know what that means.
+Right?
+So if you have a constant uppercase with underscores as per PEP eight, defined at the top of your module, I usually put them in the top of the module and then in the code, or you see like max underscore, blah, blah, blah, a real name.
+And then immediately make sense.
+Right.
+And it's also a nice way of grouping those variables in one place.
+I said top of the module, but if you have many, you could also have a const NumPy can also use enums to group various constants together if they logically pertain to the same group.
+And again, all more readable.
+Yeah.
+Enums are a great recommendation because instead of saying, well, the default Sunday, so we're just going to put Sunday here, like, Oh, I said, Hey, this is weird.
+Or you say the function can take a string when really it can only take seven strings, seven particular values of string, right.
+You could really clearly communicate that with enums, which is, you know, communicate that with enums, which is quite nice.
+- Yeah, and the use of constants, that's really a win.
+- I'm 100% on board with you on constants.
+All caps, maybe snake case, otherwise, you know, underscores, separate them.
+But I have tooling that I work with all the time that'll say, oh no, you misnamed this variable.
+Python, you know, they want you to use lowercase variables, not uppercase variables.
+I'm like, but for constants, they say to use uppercase.
+Why don't you know this?
+It drives me crazy.
+So I was thinking about sort of expanding on this a little bit.
+Are you familiar with this, the typing.final, when this was added in 3.8?
+- Recently discovered this, yes, super nice.
+- So it's also, the idea is that it comes along and is meant to be used in this scenario in addition to what we've already discussed.
+So the example in the Python docs says there's a max size, capital max, capital size.
+Instead of just saying it's 9,000, you say it's colon final 9,000.
+Now that means nothing to Python.
+It means nothing, but it means something to type checkers, right?
+So if you have like MyPY or something, and somebody tries to change the value of it later, it's going to come at least as a linting type of error, if not a full on runtime error.
+So this is something people could leverage to go a little bit further.
+That's super nice.
+Type hinting.
+As you will paraphrase it's, it's meaningless to Python, but if you now run your checker and at C somewhere in your code that you try to overwrite that variable, which is perfectly fine, right?
+Because Python doesn't enforce, doesn't say anything if you now would assign a new value to max size, but, uh, there is no constant Python.
+Yeah.
+My PyPI picks up on that final, Hey, it was final.
+Shouldn't overwrite that.
+So super powerful.
+I should use this more.
+Yeah.
+Yeah.
+And so you can say final, or I would think preferably final of int, so you say what type it actually is in addition to that.
+Now related to this, related to this is, it's not exactly a magic number, but I often find magic numbers appearing in this situation.
+And that has to do with, I want this thing to have maybe a default value or a value that says clearly communicates.
+I haven't set a value for it, but I want it to be like in this case, a number.
+It still needs to be an int.
+Well, what integer are you going to put there?
+Zero, zero valid value.
+Do you want it to be falsy?
+Like there's all, could it be negative?
+Which negative values?
+Then you see weird tests.
+Like if it's less than zero, like why is it testing that?
+Well, that means it's not set.
+Like, okay, that's weird.
+So another idea that I think comes in that's pretty interesting is the sentinel pattern where you come up with a particular number and sort of store that and say this number or value something.
+You say, if it is this, that means it's unset or it's just a weird case or it's, It's kind of like setting it to none, but if that's not going to be a case you can use, sometimes none is, is that thing.
+Right.
+But not always.
+Are you familiar with this?
+Do you do anything like this?
+I have not really used it.
+So I had to read a read up on it.
+I think I use non quite a bit, but I think the, I mean, that's at least better maybe done minus one is defined example at the top.
+Yeah.
+Yeah.
+I think this even wins by being more explicit even right.
+By having an object then to test against.
+Yeah. So one example of a standard library is the config parser has an underscore unset as a global variable and that's its sentinel value.
+BZ2 has the underscore sentinel to just call out the pattern directly there.
+And so on.
+My favorite one out of this actually is a variation is this null object pattern.
+So, null because it comes, you know, sort of earlier in the life cycle of languages where null not none, but where a lot of times if you see if this value is none, then we can do a thing other than otherwise we can do actually work with it.
+Right.
+And you'll see these, these tests all over.
+And so this pattern is come up with a Sentinel value that is not none, but kind of behaves in a no op way.
+Right.
+So you could give it a value of a person who is a Sentinel and it just, if you try to get his name, it's just going to return, I don't know, nothing or something like that.
+Right.
+So you can, if it makes sense in that situation, you can remove a lot of these, if thing is none, do something else, do something else just globally, which is really nice.
+So you don't have to do this non-check here.
+So are you saving an if else?
+Yeah, you're saving, you're saving the cyclomatic complexity.
+You're saving like branching at the cost of maybe allocating more stuff or, or having it possibly have this value that doesn't really mean it has a value, you know?
+So you got to trade it off and figure out what it makes.
+That's interesting because I think I do the is not quite a bit.
+So yeah, I do too, because sometimes it's kind of hard to deal with that or you don't control it.
+A lot of times, kind of going back to when I was talking before about the 95% case, and I told you about this really gnarly bit of code, that's because I'm consuming two other APIs that I have no control over.
+And they're junky. They're real junkies.
+So, you know, I've kind of got to like fit it together.
+And you don't get a pick whether they use the null object pattern or not.
+You just got to make it work, right?
+Yeah, that's a good point.
+So yeah, indeed.
+All right.
+So those are all kind of under the magic number category, I would say, even though technically some of them are not, like I said, not numbers.
+This one, honestly, I'll tell you, you asked me about kind of my first experiences with Python long ago, and this one weirded me out a little bit.
+Cause it's something I had spent a long time in C, C++, C#, trying to just remove and weed out and that's global scope.
+Tell us about this and maybe why to watch out for it.
+If we leave something in global scope, for example, we have a global variable and we're pulling that into a function with a global keyword.
+And we're making changes to it.
+Now this function has side effects, right?
+So you have to stop that's going in the function, but it's also mutating some external objects.
+Right.
+And when you write it, you probably are very aware of it because you're doing it, but you're going back and all of a sudden this might bite you.
+It will surprise you.
+Side effects overall are bad, right?
+And the global scope has that potential because it's global scope.
+It's not local scope to some class or function.
+Yeah, basically that, that, uh, it can lead to surprises and we don't want surprises in code.
+Yeah.
+And it's not an argument you pass to a function.
+It's not a return value from a function.
+You might not even know that that is in play as you interact with part of your code, but somewhere out there, it's something deep down is reaching up and seeing that value.
+This portion of talk Python to me is brought to you by brilliant.org.
+You are a curious person who loves to learn about technology.
+I know because you're listening to my show.
+That's why you would also be interested in this episode's sponsor, Brilliant.org.
+Brilliant.org is entertaining, engaging, and effective.
+If you're like me and feel that binging yet another sitcom series is kind of missing out on life, then how about spending 30 minutes a day getting better at programming or deepening your knowledge and foundations of topics you've always wanted to learn better, like chemistry or biology over on Brilliant.
+Brilliant has thousands of lessons from foundational and advanced math to data science, algorithms, neural networks, and more, with new lessons added monthly.
+When you sign up for a free trial, they ask a couple of questions about what you're interested in, as well as your background knowledge.
+Then you're presented with a cool learning path to get you started right where you should be.
+Personally, I'm going back to some science foundations.
+I love chemistry and physics, but haven't touched them for 20 years.
+So I'm looking forward to playing with PV equals NRT, you know, the ideal gas law, and all the other foundations of our world.
+With Brilliant, you'll get hands-on on a whole universe of concepts in math, science, computer science, and solve fun problems while growing your critical thinking skills.
+Of course, you could just visit brilliant.org directly.
+Its URL is right there in the name, isn't it?
+But please use our link because you'll get something extra, 20% off an annual premium subscription.
+So sign up today at talkbython.fm/brilliant and start a seven-day free trial.
+That's talkpython.fm/brilliant.
+The link is in your podcast player show notes.
+Thank you to brilliant.org for supporting the show.
+You know, one of the areas where this comes back, where I think maybe things might've been different if the people were able to see the future 30 years in advance, which I'm not expecting, they should be able to would be the global interpreter lock itself with its global global description right there.
+It's first G, you know, you know, Eric Snow did a lot of work to try to create a per sub interpreter lock.
+So it's still a global lock, but global for that sub interpreter and try to share those within processes.
+And I recall, I talked about just reworking hundreds or thousands of global variables so that they were no longer globally shared, but were more local.
+And it's this kind of, this is the kind of stuff that can grow and really makes it hard to go forward and make changes.
+Yeah.
+Interesting.
+I think you have had an episode on, on the gil and then the refactoring, right?
+Yes.
+A couple, I have not had Sam Gross on for his true Gil-less Python work, but he's welcome anytime he wants to come, of course.
+Cool.
+All right, let me see. I want to make sure I don't skip anything on my list. So let me just throw this out here for you.
+So Global Scope says, look, you should avoid having global variables. Sometimes you'll need global variables, but they shouldn't be the default.
+Is there a way you can pass this down to the thing that needs it and not just make it global and share it?
+So minimize what is global, I guess, is one of the things.
+When I first started that, well, Python is full of just a bunch of modules and functions, and the shared state is going to end up in these global variables.
+And that seems really, oh my gosh.
+But if you look at languages like Java, C#, C++, you end up with a lot of static classes.
+And just because there's a class namespace between your global variable and not, they're the same thing.
+Right. And so modules and module level variables are very, there's something that you don't want to have too many of, but they're not as out of whack with the rest of programming, as I think maybe people might initially see them are, right?
+There's no real difference between a static class and a function and a global variable and a module.
+Because they are scoped to that module, right? So unless you bring in that module, you don't have access to it, you mean?
+You mean?
+Yeah, exactly. And if you have a class and it has one value and you have a module has one value, it's really semantics on whether they're different.
+So I don't feel like putting them in, you know, some languages, maybe things like, "Oh, well, we don't have that because we have classes and we put stuff in classes." I get if they're static classes, so the same thing.
+Yeah, sometimes what confuses people though is having a static method or just a plain function outside of the class.
+And I've been a longtime proponent of just a function, But I did see a Raymond Hettinger talk where he showed that if you do now, if you have the static method, so you bring basically the function in the class without it handling the instance, it does show it as part of your API. So if you now do a DIR on an instance of that class, that static method shows up, which I found kind of interesting.
+- That is interesting. Yeah. I think there's a lot of places where people think, I need a static class or something where it could just be a module with functions and maybe be a global variable or two, but if you do have classes and I guess, and you're trying to look, what's part of this class, then making that go ahead and bringing that into the class.
+That totally makes sense to me.
+I can see that.
+I didn't see that presentation, but that makes sense.
+Yeah.
+As a form of grouping, but I'm with you with, uh, modules and functions, you can get very far.
+I would say more people error on trying to build up stuff into a bunch of classes because they've seen that in other languages that are coming from, then they don't quite group it right.
+You know, like it's, it's more of not idiomatic code, which I guess we're going to get to as well as some of that stuff.
+So one of the things that we kicked off this conversation with is worse.
+Well, you, you said we were spoiled.
+I take offense to that defense.
+Now I, I think it's absolutely fair.
+We are so spoiled with the tools we have these days.
+And I remember pre-internet it was hard programming.
+So pre-web anyway.
+So lenders tools that automatically fix things.
+That's what's next.
+Tell us about that.
+This is really a no brainer in the times we live.
+And actually, yeah, we're spoiled because there was a time I was just manually fixing stuff like eight was giving back till the black out of four murder.
+Him along.
+Bob, it was worse.
+There was a time where we had argue about how it should be fixed.
+And we, this would be like a conversation and it would be like, no, no, no.
+We put the commas here and we spaced it like this.
+It's like, is this really how we should spend our day?
+And it was time for somebody to step in and give them defaults because I asked the questions.
+And enter Lukas.
+Yeah.
+I asked the question on Twitter the other day, like single or double quotes.
+And there were like 50 commands and there's really, yeah, people are really torn about the default style should be.
+But yeah, Flake 8 to be compliant with PEP 8, which every Python developer should be, Black for auto-formatting, MyPy to the type checks, right?
+As we said before, Python doesn't enforce it.
+So you need a tool for that.
+MyPy hence.
+Yeah.
+And then there's also Flake 8, for example, has a lot of plugins.
+we might go into next, but I, first I want to highlight, like you want to automate as much as possible and a pre-commit tool is just, just awesome.
+It's, it's called pre-commit, right?
+And so it's a tool that runs before you try to make a commit.
+So it's a great enforcer locally to not commit any code that's not formatted or that has a style violations in it.
+Very easy to use, very easy to set up.
+It might take a little bit of work fixing.
+I mean, black auto-formatting is automatic, but maybe you need to fix some flake errors.
+But I see that as a little bit of work or a little price to pay with every commit to avoid a lot of technical debt.
+Over time.
+One of the challenges I see for a lot of these things and linters and testing, they're both in this category is different people on the team who all work in the same code base, have very different levels of commitment to say, writing or running unit tests or formatting your code so that it all looks nice and clean before they check it in.
+Right.
+I mean, I've had experiences where like, oh, the build is broken again.
+It's like, well, why is the build broken again?
+Well, someone checked it in.
+Why didn't they notice?
+Well, cause they don't run any of the tools.
+Why do they run the tools?
+Cause they don't really want to run the tools.
+Like, okay, but we're all in this together.
+Let's let's see what, and tools like the pre-commit stuff just mean is just automatic.
+Right.
+There's not a person to be blamed for saying, well, why didn't you run it?
+Or that person makes me run this tool or, you know, like there's none of that, that, that weird friction.
+And it's just like the software said, this is what we agreed on.
+And it's not ready.
+You've got to go, you know, format this line or, or it'll often, it'll just do that itself.
+Right.
+Yep.
+What's the saying?
+If it's not automated, it is broken.
+And this is as simple as putting the, the YAML in place.
+I mean, that's a one-time thing.
+Then that's committed to a version control.
+So your collaborator teammate pulls that in, you do a pre pre-commit install.
+It installs the hook locally in your dot git folder and you get to go.
+No, all this stuff is enforced.
+You can also do that with github actions, but I think the more you do locally at the individual developer level, the better.
+>> You do both.
+>> Oh, yeah.
+>> Ideally, now the malformed code gets checked in and then fixed, and then it shows up as a git diff and things like that.
+So you could have it on the server just as a safety net.
+Who knows how that got checked in, but also have it as a pre-commit hook for most cases.
+>> Yeah, exactly.
+>> All right. Let's see next up.
+narrow exception blocks.
+Yeah, this is something I see quite a lot when I'm reviewing code.
+It's these long blocks between the try and accept.
+So 20, 30 lines, and my code review command is always the same.
+Are all these lines of code susceptible to this exception?
+And of course, often they're not, right?
+So narrow your exception blocks, meaning put only code in the try except that can actually raise that exception.
+I think it's good advice.
+I think it doesn't have to be just one try-except block either for one huge function.
+You know, you could have try-except do some stuff, try something else if you really need to.
+You can't disambiguate them by exception type.
+But also worth pointing out, I suppose, is the except star stuff, which is that going to be maybe Python.
+Oh, that's new, yeah.
+Yeah, that's new, and I don't know how to search for it because it seems like the star...
+Well, whatever, I could just describe.
+But it's really interesting because you can catch multiple exceptions.
+And maybe this actually changes the advice a tiny bit.
+You can catch multiple exceptions for something going wrong.
+So, if you were doing, primarily it's run async but not just.
+So, you could say, I'm going to try to talk to the database and this API, and if they both break, the accept star will let you catch both at two separate executions, the database exception and the API exception, potentially.
+Right. Interesting. Yeah, I think that's new, brand new in 3.11.
+Yeah, that's a 3.11 thing. So it'll be a while till we see that really coming along.
+But one of the places that might be relevant is there's cool libraries like Tenacity, which say, I want to call this function, and if it fails, just wait and call it again.
+And then try again, and maybe back off until too much time has passed, or give it a certain number of attempts. But if it failed, but it failed differently three times, you might want to know, well, what are all the ways in which it failed, not just the last or the first.
+Right.
+And with the star, you could actually catch all of those errors, say from like a retry block or something.
+So, yeah, interesting.
+I don't know.
+It doesn't make this cleaner or simpler to go with it.
+It only complicates it, but still the idea of like smaller code blocks.
+I think good advice there.
+Yeah.
+And always name your exceptions.
+Right.
+So sometimes I see try except colon, and then we're like, what's exception?
+We got that.
+We'll just catch anything.
+Right.
+So always be explicit in the exception.
+I don't think you understand how this works.
+When you put that in there, there's no more errors in the code.
+It just keeps running. It used to crash.
+And if I put except colon and just keep going, way more reliable.
+Yeah.
+Well, it's a saying in the Zen of Python, errors should not pass silently.
+Yes, exactly. I remember.
+Yeah, I've seen some of this code.
+It's not always bad, but it's usually not good.
+So, yeah.
+Couch the exceptions by specific type, handle different ones potentially differently and so on.
+And maybe that kind of leads us into number six here more broadly.
+That's one of the Pythonic or idiomatic things of Python, right?
+But there's a whole bunch more.
+And that's your next tip.
+Yeah, this can of course be a whole series of articles because there's so much what can be considered idiomatic or not.
+But yeah, there's sometimes you see people reinventing the wheel and they can perfectly well use the standard library.
+There's also a very rich set of built-ins, right?
+like all any those built-ins, but then also style wise, there's this concept of leaping, checking before you leap versus just do something and ask, ask for forgiveness rather than a permission. So for example, code that overly checks if a file exists or can be opened.
+So all these, these conditionals, what's often considered more Pythonic is to just try open a file, try to do something and then catch the exception. Right. So that's why it's called, it's easier to ask for forgiveness than permission.
+Yeah.
+Yes, exactly.
+As opposed to like a C language or something where you do six or seven checks to make sure everything is set up just right.
+And then, you know, I'm going to check that the file is not just, that it's not null and that it has a null terminating character.
+Now I'm going to check that I have access to the files.
+You know, you're like, there's, if you write, if you go and read a lot of C code, there's like check, check, check, check, check, check, do the thing.
+And usually that's because there's a page fault and the program just goes hoof and just goes away if you touch it wrong, whereas Python almost always, not always, but almost always the result is here's an exception you can catch and handle, and it tells you what went wrong instead of trying to think of all the checks, because there's probably a check you forgot, just give it a shot.
+Right.
+Right.
+And it's also, it's kind of the positive mindset.
+Like usually it works.
+And if it doesn't work, we deal with the consequences.
+Whereas if you do all these, if checks that's code that always runs and might not be necessary. So it might even be faster.
+Right, for sure. So more of the ideas that came to mind when I was reading your idiomatic code section was just one use that you did mention this a little bit, but I'll reinforce it is you said use a standard library. And one of the things I learned from working with you is there, you know, sort of, I would try to pull another other library, other things from PyPI or something, you're like, look, this is built in, right? Just, you know what, you're right. That seems pretty handy, right? Like, for example, counter is definitely one that I use all the time because of you.
+- And a collection.
+- So embrace, yeah, exactly.
+So embracing what's there, instead of maybe getting another library or just trying to write that algorithm yourself, 'cause who knew it existed?
+Didn't study the standard library enough.
+I just came from C and this is how we do it in C, so I'm gonna try to do that here, right?
+Like the enigmatic steps that you can take are really good there.
+But also lambdas versus regular functions for like little inline things.
+You mentioned some of the ones that take generators for like all and any and these other tests.
+And there's just a lot of cool little language features.
+Decorators.
+Yeah.
+Decorate.
+Yeah.
+Yeah.
+Decorators.
+Definitely.
+I would put it in that, that space as well.
+And the wit statement, context managers to automatically clean up resources, pretty important feature.
+Another one that is near and dear to my heart, your number seven on this list.
+And near to dear, because I have suffered badly.
+The consequences of choosing wrongly is choose the right data structures.
+Tell us about that.
+Yeah, this is very important for performance, right?
+So where you kind of need to understand just the fundamentals here, right?
+Like list versus sets and dictionaries and how to perform, for example, if you're very big collection of a million items and you would leave that as a list yet you want to do searches or lookups, then how this works is they traverse them item by item.
+Right.
+Where if you'd make that a set, it's now in big O notation, O one, because there's hashing going on.
+So it can immediately find the value because they're hashed.
+Right.
+So that that's an ex, a small, well, a pretty fundamental example, because we work with lists and sets and dictionaries all the time, but those are very important to know.
+They are.
+I, the dictionary and the set one can't emphasize that enough.
+I mean, obviously we use dictionaries so much, but if you've got a list, but you think you might need to look up stuff in that list based on, say, if it's a list of objects, some field of that object, if you would make that a dictionary and make the key of the field, then it's not a little bit faster.
+it's unbelievably faster.
+My mind just never ceases to be amazed.
+Like, you know what?
+It really, it went through a million items that fast?
+Like, instantly.
+Right?
+So different.
+Or if you see people writing code, here's some more of the idiomatic stuff is, I'm looping over a thing, I want to build up this list of them, but I want duplicates.
+You might see, if this thing is not, you know, look in the list for it, then you can add it.
+Like, just don't do that.
+Just make a set and just jam it in there and it'll reject the duplicates, right?
+Like there's a lot of things where this ties back to your automatic one as well.
+Yeah.
+And another one I highlight there are decks, right?
+So when you do inserts and leads on both ends of a sequence, that's also generally slow with a list for the same reason, because as the search example is that it's, it needs to remap her values, right?
+Massively.
+And a deck is designed to do that fast on both ends.
+So anytime I need to, if it's a, it's a big collection and I need to insert stuff on at the start and the collection, a deck from the collections module is a better choice.
+Yeah, absolutely.
+Another thing, I guess, given a little quick shout out here is the default dict is really nice too.
+Oh yeah.
+For removing tests and checks and initialize.
+Because you don't have to check if a key is in the dictionary.
+You can just assume it's there and then that, yeah, that leads, you can ditch a whole bunch of if statements.
+Yep, exactly.
+It's the job of the dictionary, not your job now.
+Yeah.
+Nice.
+All right.
+Let me see.
+So here's one that I wanted to sneak in before we get further beyond this, is to use guarding clauses.
+And so often what I'll see, especially when people are new, is writing code that looks like this.
+It's like, it looks to me like a saw, that a lumberjack would use or something, and it's just like, zip, zip, zip, out, and then back, and then out, and then back.
+And you're like, whoa.
+You know, it's usually like, it starts in the middle of the editor window and it goes to the right.
+What is this?
+And it's usually if some case, and then if some other case, maybe do a little step, then if another case.
+And it's like assuming that it's got to build up a bunch of these steps before it can sort of go down the happy path.
+So it's gonna check everything that could possibly go wrong before it tries to do that.
+And I don't know how you feel about guarding clauses.
+I love guarding clauses.
+Yeah, you do?
+So tell people about this sort of alternative.
+It's so simple, but it makes such a difference.
+Yeah, it goes back to the Zen of Python again, flat is better than nested.
+So nested, deeply nested code is just inherently it's more complex, painful and it's harder to maintain.
+Yeah.
+So it's called the arrow arrow shape.
+I learned from this article that it's also called the staircase, which is nice, but yeah, you can, if you look up our arrow shape, that explains more about it.
+But yeah, it's, it's just more complex because yeah, it's, it's again, that cyclomatic complexity, right.
+done, the amount of paths you have through your code.
+And if you, in this case, reverse all these statements and early return, uh, the code is now way flatter.
+It's easier to read and less complex.
+Right.
+So this, um, this code looks really reasonable and, uh, yeah, the other is, is just very hard to follow.
+You don't even know.
+And there's all these weird interplays of like, well, what if this is true, but that's false and could you actually get into that if case, whereas these guarding clauses just say, if this is wrong, bail out of this function.
+If this other case is wrong, bail out.
+We're just like return false or don't do the thing or whatever.
+And then eventually once you've hit all those with very little indentation, then you have the thing you wanted to get to.
+And that also kind of makes them a little bit unrelated to each other.
+Unlike the, the super nested style.
+Yeah, I guess.
+Yeah.
+The, the psychromatic complexity, right.
+The amount of combinations you can have with this is less hands.
+It's less complex hands.
+It's, it's easier to maintain.
+- And readability here is way better.
+- Yeah, I totally agree.
+So when you see things like flat is better than nested in the Zen of Python, you're like, cool, but I got to test some stuff, so it's getting nested.
+Right, I guess, I just, there's nothing in that statement that it tells you, what are the mechanics that you consider to avoid that?
+Right, it's just, well, it's complicated.
+I'm sorry, it's going to be nested, right?
+It would be better if it weren't, but it is.
+Well, not actually, like guarding clauses almost always will lessen it, if not really, really decrease it.
+Yeah, that's a good point.
+Like this N tells you the what, but not necessarily the how and the guard clauses that this is a particular technique.
+Another one in refactoring is the extract method refactoring.
+And that's where we pull out a bunch of code into a new function, which also also often leads to less nested code.
+Indeed.
+Is that your next one?
+Refactoring?
+Could be.
+I think that was a bonus.
+It was a, that's right.
+It was a bonus here at the end.
+Absolutely.
+So that's where you gave a shout out to the refactoring book, which also had those could, could smells in them.
+Totally.
+Yeah.
+Do you still recommend people read that?
+I mean, I, I read it with bated breath in 1999 or whenever that thing came out.
+It was really an important book and I'm like, this has changed everything, but you know, that's 20, 25 years ago, something like that when it actually came out.
+Yeah, that's a good point.
+I think the tooling has improved, but still, I think conceptually, this is still an important book.
+I was reading parts of it again.
+Honestly, I do like the, the first edition a bit better sometimes because it uses Java where this uses JavaScript and I don't know the paper quality.
+I'm not a fan of Java, but I think I would, I might actually prefer the Java or the JavaScript to be honest.
+Yeah, but it's, it's very fundamental stuff.
+And um, yeah, it still has, it's also nice.
+That's a catalog, so you don't have to read it end to end.
+You can just zoom into parts that are relevant for you at that moment.
+So yeah, the collection of things.
+Okay.
+Very interesting.
+Another one, I don't remember if it was directly in your article.
+I don't think so.
+It was just sort of implied throughout was, you know, embrace refactoring.
+You opened the, with alluding to this at the beginning of this conversation is I see a lot of people who get stuck thinking about, I've got to get this right.
+I know if I start wrong, I'm going to hate it.
+It's going to be hard to work on.
+It's going to be so bad.
+So I got to sit here and think for like two weeks to get started on this project.
+So I get it right.
+You know what you could also do?
+just pick one way that seems right at the time, spend a week on it, if it's not working, it'll refactor to the other, or even throw it away and go the other option.
+Right, like there's a lot of people kind of stuck, and I think embracing the idea of refactoring, maybe not in the traditional by-hand effect of Martin Fowler's original book, but we have tools that do a lot of this automatically, or almost automatically, you know, right-click and ask it to.
+So, what are your thoughts?
+I definitely think people should at least catch the zen of it, if not go through the book, Cause the tools will take care of it.
+Yeah.
+You still want to know the concepts here.
+The different techniques as I already highlighted the extract method, for example, grouping constants into enums we've mentioned before.
+So a lot of actually what we've spoken about so far can be found in this book as well.
+Right.
+And I think overall the, the goal of refactoring is to keep that technical depth in check.
+Right.
+So avoid suffer rot.
+They also say, and, um, yeah, as you start to add more code and.
+cover more scenarios and the always changing requirements, inevitably what happens, you kind of need to learn.
+You thought it was one thing, but as you got further into it, you're like, you know, that part is actually the, that's where the problem is.
+I didn't think so, but now I know because that's where it's hard, right?
+You wait, you only learn as you go, right?
+Yeah, that's a good point.
+Right.
+But the people who are stuck, I don't think they internalize that.
+Like the only way to know where you're going to get stuck further down the road is to go down the road.
+You can't think about it very well.
+There are a couple of interesting comments here.
+With respect to guarding clauses, Alvaro says, you could go and put assert statements at the beginning of functions to indicate some of the assumptions that could be disabled in production and give nice errors on PyTest.
+Yeah, possible. What do you think, Bob?
+Yeah, asserts are great, but yeah, I'm happy that you highlight the caveat that they can be disabled, so you cannot always rely on them.
+I definitely see a place for asserts.
+And of course, you use them in PyTest all the time to assert different ways your function performs.
+Yeah, I use most my asserts in PyTest.
+Yeah, but I can definitely see a place for the scenario that Alvaro highlights.
+Yeah, and then Brendan at Lottie has a very realistic problem that people run into is, I worked a lot of places where they don't give you the time to do the refactoring and make things better. And so it just builds up until it becomes not ideal, as his second comment here implies.
+- That's a good point.
+- That is a real problem.
+And I'll tell you how I solved it.
+Bob, maybe we're getting short on time, but you can tell me real quick how you solved it.
+For me, when my managers and folks would say, "Michael, what is your estimate for how long this is gonna take?" If I thought it was gonna take five hours, but maybe I would need to do an hour or two of refactoring, this feature took seven hours.
+Like, you want it done, it's gonna take seven hours.
+Because if I'm gonna do it, I'm gonna do it right, 'cause I'm gonna have to work on it afterwards.
+And I know it's just gonna get worse if I...
+So I wouldn't exactly lie to them, but I would, I would include the time to make it right.
+Not just make it work as part of my estimate.
+Yeah.
+Maybe even double it.
+Right.
+Because there's the initial version and there's the testing, there's the documentation, there are bug fixes, there are inevitably are requirement changes in the sprint meetings.
+So it might five hours might just be that initial draft almost, but maybe it should then be 10 hours.
+Yeah.
+But whatever it is, clean code should be part of the deliverable, in my opinion.
+And it should be part of the estimate.
+I love what you're saying.
+Estimate times three plus two weeks.
+That's a nice one.
+Exactly.
+That is a good one.
+Very good.
+All right.
+Well, we're getting short on time here.
+I, let me do some, I want to do something that's kind of different, Bob, because I think this is actually, let me, let me share a different thing.
+I think that this is something people are going to have to start thinking about as well as maybe an option here.
+So what about asking AI assistants, things like Google copilot or chat GP?
+There might be some cases where people say, here's my code.
+Hey thing, could you make it better?
+So for example, let's, let's do this to close out the show.
+Okay, Bob.
+Sure.
+How can we write clean code in Python?
+I'm going to ask chat GP.
+We have already, I've already covered this.
+Are you sharing?
+All right.
+Oh, hold on.
+I thought so.
+I did.
+I forgot to add a stream.
+So I'm going to ask chat GPT here.
+And what else does it say?
+So I gave it all of your tips and I said, we already discussed that.
+What else can we do?
+Does it fit based in the article as well?
+No, I didn't give it the article, just, just the type, just the headings.
+So it says you can document your code, keep it simple, which it didn't understand follow pep eight.
+This is an interesting one.
+Exceptions are for error handling.
+So anyway, I just thought it might be kind of fun to think about, you know, can we ask these things to help us and improve our code?
+Well, I don't know if you played with any of this, but it could be fun.
+I have not yet.
+That's Julian's department.
+He's, he's a geek geeking out over the tool, but I'm, having on my high on my list to try it out because it's, it's, it's a really mind blowing what, what this tool is doing.
+Yeah.
+I had a program that I wrote and, let's just see if I can go to, I'll just go up some, grab some random just here on GitHub, let's see.
+So you can take these things, this random code and say, you know, things like, here's a Python program.
+How can I make it more readable?
+You can give it this long thing, and it'll say, look, there are no doc strings.
+There's some places where you had meaningful variables are missing, could have grouped the imports better, could add more type hints, and then it rewrites it.
+So for example, this is my code to integrate with turnstile, and so you see it putting type hints and stuff as it goes. - So I think there, yeah.
+- Yeah, yeah, yeah.
+So anyway, I don't know.
+I feel like this is as much as looking back 25 years and seeing refactoring go, that's seminal, you know, maybe, this kind of stuff is going to have to be something that we take into consideration going forward.
+So, yeah.
+Wow.
+Pretty impressive.
+Yeah.
+We will see.
+We'll see.
+So anyway, that was fun, but let's, let's close it out.
+Yeah.
+Excellent work.
+I mean, I feel like we only just touched the surface, right?
+This could go on and on.
+JF out in the audience asked about unit testing and we barely touched on that.
+There's a bunch of, a bunch more areas, but I think, I think we're out of time.
+Yeah.
+The sun is coming up in your world.
+I can see.
+Thousand page or books have been written about this.
+It's a whole field.
+So, uh, yeah, yeah.
+We, uh, we mentioned a couple of important things, I think.
+Yeah, we sure did.
+Well, it's certainly a lot of things that people can take and they do sound simple.
+Like, well, write smaller programs and give them good names or write smaller parts of your program and give it good names.
+But that it's like a never ending journey to do that right.
+And to keep on it.
+Right.
+So there's a lot to nuance as well.
+Right.
+There is absolutely.
+All right.
+Well, quick, two final questions before you get out of here.
+If you're going to write some clean Python code editor, would you use these days?
+Well, the coaches, the team almost had me on VS code, which is an amazing ID, but it was not as that super fast, of course, but it was for me or my workflow.
+It was not as fast as VIM.
+So I stuck with vim and I do everything.
+It's just the setup, right.
+With all the plugins and shortcuts and it makes me fast.
+And then muscle memory.
+Yeah.
+It's one of those things where, you know, you could change to something potentially, but how long are you going to be in a degraded state of working before you gain enough experience and will it actually be that much better?
+You know, it's, there's a lot to it.
+Right.
+And once a tool introduces a mouse and I have the other option of only using a keyboard, then it's still the key word.
+Yeah.
+Yeah.
+Yeah, for sure.
+Okay.
+And then notable PyPI package come across lately.
+Yeah, this is such a hard question.
+I think I've mentioned requests in the past, uh, these days there's HTTPX because we're using a lot of code to consume APIs and now you can do that to synchronously, but now maybe the shout is, is really for, um, Sebastian Ramirez, SQL model, fast API typer.
+Apart from amazing tools, the documentation, it's so pleasant.
+I keep going back and because I teach those tools as well, right.
+To other developers, I can just teach them from the documentation.
+That's it's really good with a solid code samples.
+So fast API, I guess it is then.
+Right on.
+And all those things you named there, an important piece in the mix are Python types and Pydantic.
+So yeah, exactly.
+Exactly.
+That, that, that really took the type hints to the next level.
+It did.
+Yeah.
+Yeah, it definitely did.
+All right.
+Well, final call to action.
+People are interested in this.
+Maybe they're interested in getting to know some of your coaching stuff better as well.
+What do you tell them?
+Yeah.
+Go to pybit.es our website, check out our PDM program and yeah, for anything, you can also join the pybyte slack hit me up there with any questions or commands on py Bob at py Bob there.
+And, uh, I think that's it.
+Py Bob.
+Yeah, that's good.
+That's a good name.
+I like it.
+So my handle.
+So yeah, perfect.
+So people can, go check it out there and you've got the, you've got the cool aspect of the Spanish domain suffix. So, pybit.es. You can actually have just the word. That's very cool. Excellent. All right. Well, thank you for being on the show. Thanks for writing the article and good to catch up with you.
+Yeah. Thanks for having me. This was so much fun. I'm happy to share.
+You bet. Bye. Bye, everyone.
+This has been another episode of Talk Python to Me. Thank you to our sponsors. Be sure to check out what they're offering. It really helps support the show. Taipy is here to to take on the challenge of rapidly transforming a bare algorithm in Python into a full-fledged decision support system for end users.
+Get started with Taipy Core and GUI for free at talkpython.fm/taipy, T-A-I-P-Y.
+Stay on top of technology and raise your value to employers or just learn something fun in STEM at brilliant.org.
+Visit talkpython.fm/brilliant to get 20% off an annual premium subscription.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at TalkPython.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct rssfeed@/rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
+[BLANK_AUDIO]

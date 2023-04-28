@@ -1,0 +1,1275 @@
+At some point, you've probably migrated an app from one framework or major runtime version
+to another.
+For example, Django to Flask, Python 2 to 3, or even Angular to Vue.js.
+This can be a big challenge.
+If you had hundreds of active devs and millions of lines of code, it's a huge challenge.
+We have Ben Bariteau from Yelp here to recount their story of moving 3.8 million lines of
+code from Python 2 to 3.
+But this is not just a two to three story.
+It has many lessons on how to migrate code
+in many situations.
+There are plenty of gems to take from his experience.
+This is Talk Python to Me,
+episode 401, recorded January 18th, 2023.
+(upbeat music)
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and
+be part of that episode.
+This episode is brought to you by Cox Automotive.
+Join their team and use your technical skills to transform
+the way the world buys, sells, and owns cars.
+Find an exciting position that's right for you at
+talkpython.fm/cox
+and it's also brought to you by User Interviews.
+Earn extra income for sharing your software development
+opinion at User Interviews.
+Head over to talkpython.fm/userinterviews
+to participate today.
+Ben, welcome to Talk Python to Me.
+Thank you. Thank you so much for having me, Michael.
+We're going to talk a little bit of legacy code,
+a little bit of very, very large code bases,
+and how you might not have to permanently live in the past,
+which I think would be really welcome to a lot of people.
+I just talked a little bit about this before I hit record, but I,
+even though your topic is specifically
+how the story of move from Python 2 to 3,
+and this, like, making your whole code base modern,
+I do think that this idea of how do I move from one code base to another code base
+is super relevant to lots of folks who might not be going from Python 2 to 3,
+but maybe from Flask to FastAPI or vice versa,
+or those types of things. I think the techniques that you're going to talk about here are
+more broadly applicable than just a 2 to 3 migration.
+And it's really cool how you all migrated
+3.8 million lines of code without interrupting development. That's kind of nuts.
+Yeah, I did it and it still seems ridiculous.
+You lived it, and it seems like a dream. Amazing.
+Before we get to all that, though, let's start with your story.
+How did you get into programming and Python?
+Took a job at Yelp. Yelp was a Python shop.
+Before that, I had a couple internships,
+and I went to Georgia Tech, and I mostly did Java.
+So it was sort of a new experience for me.
+You know, Python is one of those beginner languages
+that everyone loves to throw around.
+So I had done, you know, I dabbled in a little bit,
+but I first started really getting deep into the language
+when I started it at Yelp.
+And I've definitely made it,
+it's sort of become like,
+I've become sort of a local expert on it.
+So I've been able to build up a lot of knowledge about like,
+you know, a lot of weird edge cases and, you know, stuff like that.
+You may be familiar with it.
+There's a t-shirt that's kind of a joke,
+a meme that says, "I learned Python. It was a great weekend."
+Yeah.
+And yet, I've been doing Python for many years,
+and I'm still learning new stuff.
+Even today, I learned some interesting new Python things.
+So which is it?
+Do you learn in a day or is it like this deep journey?
+I think most programming languages have some amount of, you know,
+width and depth. I think, you know, Python definitely has the advantage of being
+a relatively straightforward language.
+One of the nice things, obviously, is that like,
+instead of using a lot of weird keywords, it has, like, you know,
+words, like, you know, instead of being like,
+– Oh, like, "or double pipe." – Yeah, or instead of double pipe and stuff like that.
+Those are the things that I think definitely help people.
+Personally, you know, me coming into it,
+that wasn't as big of a deal for me because I was already familiar with all that stuff.
+You're coming from a very symbol-heavy world of
+Java, which is not as symbol-heavy as C++,
+but it's got a lot of abstractions in what it builds, for sure.
+Yeah, I will say, I think there are certain things that Python does.
+I will say Python is not a perfect language by any stretch of the imagination.
+But I will say one thing about Python that I think is really cool is
+did sort of, before many other languages,
+managed to integrate a lot of functional paradigms.
+Like, list comprehensions or comprehensions in general
+are, I think, one of those features where it's just like,
+this doesn't exist in a lot of other, sort of, more popular languages,
+and they're really, really fluent and powerful in a way that
+you kind of miss when you don't have it, right?
+And so, I think that's something that's really cool about Python.
+But Python itself, being a language with the legacy that it has,
+I mean, we're going to be talking about the two to three differences which have their own nuances to them,
+but it's always going to have some weirdnesses to it.
+And some of those things are just like, "Oh, someone made a decision 30 years ago that still reverberates today."
+And so that means that it has this depth to it.
+You have to really learn the depth in order to fully understand all of the problems that exist.
+Not necessarily problems with the language, but when you're building software, you run into problems that you have to solve.
+And so that's like the main, I think that's
+true of all languages to an extent, especially popular ones and older ones.
+But yeah, I do think that
+Python more than a lot of languages really is able to straddle the line of
+being like, oh, it's approachable, but also you can do a lot of
+really interesting and powerful stuff with it.
+Yeah, you compare that with like Java.
+Java, you've got to understand functions,
+you've got to understand classes,
+possibly namespaces, like
+just to write the first line of code,
+Whereas Python, you can work with it for,
+like, you know what, this is really clumsy to repeat this.
+Maybe I'll learn what a function is
+and then I can start using that,
+but you don't know what a class is,
+you don't care about it.
+You kind of like slowly layer on the stuff as you need it
+rather than you've got to jump in
+and go with it all at once.
+- Yeah, for sure. - Yeah, interesting.
+So you're still at Yelp?
+- Yes. - I presume, yeah.
+- I'm in a conference room
+in our San Francisco office right now.
+- Excellent, and what are you doing there?
+- So I work on a team that's called Core Services.
+Our team is responsible for a lot of infrastructure,
+mostly Python focused, though not exclusively.
+We do a lot of our sort of like internal
+Python infrastructure, so we'll be responsible
+for making sure that we can upgrade to new Python versions.
+We've got, on our internal PyPI,
+we recently, this is a cool thing
+that has happened since my talk,
+so I didn't mention it, is we recently built a system
+to automatically import certain packages from a public PyPI.
+And that has saved us some headaches.
+And then we own some other stuff, like,
+you know, we've dealt a lot with sort of the general service contract at Yelp.
+So like, being like, okay, what does it mean to be a service?
+How do you be a good citizen there?
+And a lot of other things like testing tools,
+a lot of like, sort of like, oh, I need to test against multiple services.
+We have a testing tool that like,
+automates a lot of the steps to like, sort of get those all connected together
+you can test against them.
+- Yeah, it sounds like a really fun
+sort of task you're doing there.
+So you said you have an internal,
+we're going to dive into the code and stuff,
+all this whole migration, but, you know,
+kind of sidebar, like you said,
+you have this internal private PyPI server.
+What's the details around that?
+Like how, obviously, you're whitelisting
+things that can be brought inside,
+saying we're going to put those onto our server
+and you can request and you can choose
+when to let the new one in and so on.
+But what's the software
+How do you put that together?
+A number of years ago now, we
+switched to a piece of software
+that I don't think is used pretty much
+anywhere else, which was built by
+one of my teammates who
+named Chris Keel. So Chris Keel
+built essentially a
+PyPI implementation called
+dumbPyPI.
+It's called dumbPyPI because
+unlike some other PyPI servers,
+the way that it works is you
+just sort of give it a list of distributions
+and then it just generates all of the HTML pages.
+So instead of being like, "Oh, I'm a server,
+and I'm going to handle this request and blah, blah, blah,
+and run some code," it's literally like, "Okay, here are the HTML pages."
+I see. It's like a static site generator
+for a PyPI backend.
+Yeah, yeah. And we've been using that for a really long time,
+and maybe four or five years now.
+And it's serviced pretty well.
+It's really nice in my opinion, because it's the only service that my team actually owns.
+So it, and it never pages us.
+So that's great.
+I love that it never pages us.
+It can't go down.
+Yeah.
+Not really.
+Well, it can't, it wouldn't be good that if it goes down, but also it doesn't.
+That's the great part is it just, it just doesn't.
+So Chris's, uh, Chris's software works great.
+Yeah.
+Uh, that's a really cool idea.
+And so you tell it certain versions or, or do you just limit it to the libraries and let it pick the latest versions of whatever's on real PyPI?
+So the way that we do it is we have a whole system which imports packages.
+We actually rebuild all of our wheels.
+It's kind of for hard to explain reasons.
+So what we'll do is we'll like, someone will say, "Hey, I want this version of this package."
+Or maybe they'll just say, "Hey, I want this package," and then we'll just pull down the newest one at the time.
+And we'll do some security vetting on it.
+So we have some automated security stuff.
+And basically just make sure that it's not malicious.
+And then we build the wheels and then we upload those
+to the S3 bucket that backs our PyPI.
+So we just do that. In terms of how we decide, it's basically just sort of like,
+we make sure, we do the security check, we do like,
+there's a few other things, like we make sure we have all the dependencies, we make sure we have
+that it has a license that we're okay with using internally.
+And so all of those things are checked.
+And then we have, as I mentioned, we have this sort of like automated import system.
+So like certain packages, we'll just we'll try to download them.
+They might fail, you know, one of those checks, and then we won't upload it.
+But like, you know, so we'll just like import it, we'll try to import it.
+And and so certain packages, we'll try to get the newest one.
+Some packages, you know, how we haven't set that up for one reason or another,
+some packages, there's certain packages that are just like difficult to build.
+And so we avoid importing them.
+Right. You just we got this one working. It's fine.
+Yes, yes. And so like some are difficult to build, some are just like,
+oh, this is a package we've never used before.
+So we just like don't use it.
+So, or we don't have it.
+You talked about how many dependencies your projects
+have and stuff, and that'll be fun.
+But let's maybe take a step back and just talk about
+you know, Python at Yelp,
+you've, this main project that you have,
+it was running on Python 2.
+It's kind of obvious, but
+some of the reasons are obvious, some are not.
+Like, why did you care what version of Python it's on?
+That's a good question. I mean, I think the main reason was just sort of like we saw the writing on the wall. The writing on the wall was the end of life for Python 2, right?
+And I think everyone else, we knew that other people were going to follow that, right? There was, I remember in 2019 when I was looking into this, there was a thing I think was called like the Python pledge or something like that, where basically like packages would, like open source packages would say like, hey, we're going to drop Python 3, you know, after end of life at some like, you know, either the day of or,
+of or a few months later or something like that.
+And so we were sort of looking at that and being like, well, we use some of those packages,
+you know, and eventually we might want to upgrade them.
+Yeah, you're about to get frozen in time around mid 2020.
+So you're, you maybe don't want that.
+By the time that I did my talk, I remember, I think it was early 2021 or something,
+you know, pip had dropped support for Python 2.
+So that was like one of those things where it was just sort of like,
+Yeah, there's not a realistic ecosystem in which you are able to use open source and upgrade your stuff
+for security patches or whatever.
+I want this new feature. Oh, sorry, that's Python 3 only, you know, kind of thing.
+So that was the main motivation.
+And then I think some secondary stuff was just sort of like,
+as you build, as time marches on and people start
+being familiar with Python 2 and it has some quirks compared to Python 3,
+you definitely have the problem of like, okay, now you have to like,
+if you're hiring people and they're working on Python 2, you have to train them up on those quirks
+in a way that like, you wouldn't necessarily have to do if you're using a modern language that other places are using.
+Those are the, I think, the main motivations.
+Personally, I think I had like a small motivation myself, which was just sort of like,
+I hate seeing things like be left behind like this, you know.
+Yeah, sure.
+Very emotional thing, but yeah, that's part of the reason I pushed for it.
+Well, there's the train thing.
+I mean, there's obviously just the infrastructure stopping,
+stopping the updates, but there's the training side of helping people who are
+new come, but there's also the, how do you hire the very best engineers?
+It's really hard to get an amazing Python engineer to come and say, you're
+going to do amazing work from 2008.
+You're going to love it.
+You know what I mean?
+Right?
+Like if they're working on some new package that they're inspired about,
+Instead of trying to bring that in and like,
+help make that better and also boost what you're doing.
+It's like, well, we can't use that because that,
+you only do it in Python 3.
+Well, of course I created it this, you know, two years ago.
+Why wouldn't it be Python 3 only?
+There's a lot of knock on effects like that, right?
+Yeah.
+Did you see the performance stuff from 2.11 or even from 2, sorry, 2.11,
+3.11 or even 3.10,
+where you're like, you know, there might actually be
+fewer servers as well if we do this?
+That's definitely something that we are,
+you know, we want to do. That specific issue is something that we're
+sort of, we're trying to move towards being able to use those versions of Python right now.
+It's always a process just because of various, you know, internal things. But it's definitely
+something that has been talked about. We're like, yeah, if we could use new versions of Python,
+maybe things will be faster, things will be more efficient. Trying not to spend too much money
+is definitely a thing that we think about. So that's definitely exciting.
+- Yeah, when I did the episode on 3.11,
+we talked a lot about the performance there.
+And it's impressive.
+It's, you know, 40, 50, 60%.
+And I won't steal your thunder.
+I know at the end, you've got some nice performance boosts
+that you got even from the changes that you made.
+But there was somebody in the audience that pointed out,
+like, not only is this faster, which is nice for us,
+right, it's nice that we have to pay less for servers,
+or it's nice that our code runs a little bit faster,
+but it's also good for the planet, right?
+If we just all start using newer, faster foundations, then necessarily we just
+use less energy to do the same thing that we're already doing.
+Right.
+Yeah, that's definitely a, I like that.
+This portion of talk Python to me is brought to you by Cox automotive with
+brands like Kelly blue book, auto trader, dealer.com and more Cox automotive
+flips the script on how we buy, sell, own, and use our cars.
+And now the team at Cox Automotive is looking for software engineers, data
+scientists, scrum masters, and other tech experts to help create meaningful
+change in the industry.
+Do you want to be part of a collaborative workplace that values
+your time and work-life balance?
+Consider joining Cox Automotive.
+Visit talkpython.fm/cox today.
+Thank you to Cox Automotive for sponsoring the show.
+Let's talk about Python at Yelp.
+So you've, you've got this repo, this, this big project called Yelp main.
+Let's start there.
+Sure.
+Yelp main is what it sounds like.
+It is sort of the original repo Yelp.
+That's when you're a startup in 2004, you're, you kind of just make a repo, right?
+And it's your web app.
+And that's how we made a subversion repo.
+Cause it wasn't none of that CVS stuff we're doing subversion.
+I don't remember when we switched from subversion, but we, it was subversion.
+I don't know if it was before...
+I don't know if we actually started out in Subversion.
+But I didn't start until 2014.
+But yeah, it's definitely Subversion was...
+I know there was some old Subversion stuff.
+So you have this one sort of web app,
+and the web app is a server that serves...
+that originally served everything.
+So there's a bunch of stuff,
+like you can sort of think of as like Yelp.com, right?
+Like if you go to www.yelp.com,
+then you're looking at what you think of as Yelp, right?
+It's like, "Oh, I can search for businesses, I can look at their reviews,
+I can write my own reviews," that kind of stuff.
+So it's that, but it's also other stuff.
+It's also our business owner site, so biz.yelp.com,
+which is where business owners look at their own businesses
+and are able to see the metrics and buy ads and stuff like that.
+There's our admin site, which is where a lot of anybody,
+we have our user operations people
+whose job is at least partially to do some moderation and stuff like that.
+So like, we need to be able to have those tools.
+And then there's also what we call internal API.
+And internal API is a way for internal stuff to get the data that's in Yelp name.
+So that's what that is.
+And that's like its own separate sort of site.
+But these are all in the same repo.
+They all run in the same process.
+That's... Sorry.
+No, I was just going to ask, is this kind of the, the mono repo style, or it's,
+it's truly a monolith in the sense that it's kind of all the same app.
+It's truly a monolith.
+There is some amount of stuff where it's like, Oh, we have like different
+containers running like different entry points, but like the code is all
+kind of tangled up together.
+So there's not really a meaningful delineation between different components.
+In a way that you could really separate them out in any meaningful way.
+So like my understanding of like what I would define as a monorepo, I
+I wouldn't really call it that.
+I would just call it, I would call it--
+- Just a large app.
+- Yeah, it's a huge, huge, huge app, huge repo.
+- Yeah, yeah, okay.
+So in your talk, you said that you have six different sites
+with 2000 different endpoints, which it's a lot.
+I don't think it's completely excessive or anything
+like 2000 URL endpoints for all those different services
+and like all those different admin apps.
+It seems it's a lot, but it's not insane.
+And then you have these background batch services.
+What's the story of those?
+It's just sort of anything that you need done.
+As I said, this was just sort of like, this is the one repo, right?
+And so there's a lot of things that you want done
+that aren't necessarily done in the context of a web request
+or don't make sense to do synchronously.
+So a lot of that is just sort of like, okay,
+I need to do this really complex report or something, right?
+I want to get some metrics that involve collating a bunch of data,
+doing a bunch of joins against a bunch of tables.
+"Okay, well, I'm not gonna have just like a web request do that, I'm gonna put that in like a separate process."
+And we originally, as you can imagine, for that type of application,
+we just called those batches.
+Yeah.
+Like a batch job, right?
+That name is stuck, despite the fact that now batches don't necessarily do that type of work.
+They're just sort of anything you want to do in the background.
+Right.
+And that could be something like, "Oh, the first of the month we do our like add billing."
+or we might have some process where it's just sort of like, oh, we want to like update this cache
+based on like data like stuff, but we don't want to do it inline in a web request.
+We can do it asynchronously.
+So it's really anything that is not in the context of a web request.
+I suspect most major apps, most companies have that kind of stuff too, right? They've got to.
+I mean, everyone has some version of it.
+whether or not they do it exactly the way that we do it is
+a separate question that I'm not really sure.
+Yeah, I think part of the story is, do you deploy them all out of the same codebase?
+Or are they a bunch of different jobs
+and repos, or how does that fit together? That's probably where it varies.
+Yeah, I mean, for us, we have,
+I mean, I said 800 batches, and I was referring specifically to the batches that are still in the Yelp main repo.
+And like I said, all these things are kind of tangled together.
+So it's not like, oh, you can just pull a batch out.
+That's like talking about, well, how do you get the data that it needs?
+What does that look like?
+How does it get the data access layer?
+How does it get a hold of the logging thing that's over here?
+And all that kind of stuff, right?
+Exactly. So those 800 batches, but we also have tons and tons of batches
+that are in services.
+So they live in service repos,
+and they run, and they're in totally separate code base.
+I don't know what that number is.
+I'd have to figure it out. It's definitely a lot.
+It's almost certainly more than we have in Yelp main at this point.
+But that paradigm exists all over Yelp and not just in this repo.
+Yeah, well, I think these are a lot of value to having that code together, right?
+If you break this out into a whole bunch of different repos,
+you've got dependency management, versioning, deployment,
+there is some value to just saying, just let it live together.
+We'll upgrade it together.
+But it does make for some striking headlines when you talk about how many lines of code got upgraded at once, right?
+Yeah, I mean, I think that when you're talking about, like,
+why do we stall them all? The answer is mostly just because
+it's really hard to not have one once you have one.
+You have to do all the work to move it out.
+And there are disadvantages. Like you said, it's sort of like,
+okay, now as soon as you have a new repo,
+it has its own set of dependencies that you have to keep up to date,
+and you have to do other sort of maintenance on it.
+Generally speaking, we consider that better though still,
+because it's sort of like, it's always better.
+Like imagine if I'm in this giant monolith,
+and I'm like, "Oh, I need to upgrade this package."
+And it's like, "Okay, well, you want to do a major upgrade,
+and this package is imported in a thousand places.
+Now you need to deal with that migration."
+Whereas if it's like, "Oh, I'm in my service,
+and I need to do this package upgrade,
+and it's imported in ten places."
+That's like an afternoon instead of like,
+you know, a quarter of a year or something, right?
+So there's definitely advantages to that.
+It does add, it's sort of like more work overall,
+but you can do it in a more granular way,
+so it allows you to unblock people faster, essentially.
+So we definitely want to move away from monolith,
+and we have been doing that.
+Like, compared to when I started at Yelp,
+we have way, way less code that is important running in Yelp main.
+There is still a ton that's important in there,
+like I mentioned in my talk,
+almost inevitably someone has to call into an internal API
+to get data out of it.
+So that's something that we definitely want to fix at some point,
+but it is a process, and that process is, generally speaking,
+we're getting to a point where some people who work at Yelp
+don't really work in Yelp main anymore.
+They just don't have to deal with it, especially not on a day-to-day basis.
+Right, sure.
+And you mentioned your talk, I don't know if I said this at the beginning,
+but you gave a talk at PyCon 2022, which definitely was a very popular one
+and highlights some of these things there as well.
+So I'll be sure to link to that so people can check it out.
+And you talk about people developing in Yelp main,
+some of them not, but there's still a lot happening there.
+You said 20 pushes a day, 800 simultaneous developers.
+And yeah, that's no joke.
+That's a lot of traffic on a repo.
+- Yeah, I think since I did that talk
+where we've been trending down
+in terms of number of changes per day,
+but it's still probably like somewhere in the eight,
+like 15 to 25 a day.
+So it's less.
+Like that's an appreciable percentage less, but it's still a lot of changes per day.
+Yeah.
+And you also said you have 700 Python package dependencies.
+We talked about the private PyPI.
+So when you say you have 700 dependencies, that's if I go into the virtual environment and type,
+you know, pip list, I see 700 things.
+Okay.
+It's a lot.
+It's a lot.
+It was an ordeal dealing with that.
+Especially coming from a long time ago until present, right?
+In terms of code, code compatibility, right?
+Some of those things you depended on,
+maybe their new versions have moved to Python 3,
+but maybe with breaking changes.
+Others, they might just not have a Python 3 version.
+And how'd you deal with that?
+- There were basically, in terms of like open source stuff,
+there were basically like three ways that we dealt with that.
+So one is just like upgrade
+and like deal with whatever the upgrade entails.
+I don't think we really ran into any issues
+where we were like, oh no,
+we have to do this massive breaking change migration.
+That wasn't really a problem that we ran into, thankfully.
+So a lot of those were just sort of like
+figuring out what packages need to be upgraded,
+and just sort of doing the upgrade, making sure that they test pass and that kind of stuff.
+So that wasn't too bad.
+The other one, which was a little bit more annoying, was
+like you said, some packages just stopped updating before
+they got Python 3 support.
+And we were relying on them, so we had to be like,
+"Okay, well, can we replace these with something that, you know, fix that?"
+And there were a few examples of packages
+where it sort of stopped getting development and then someone was like,
+"Oh, I see where the problem lies.
+That's a problem for me, so I'm going to fix that."
+And so luckily, a lot of people had already done that work and they,
+there were like forks or sort of drop-in replacements.
+Sometimes not exactly drop-in replacements, but like, you know, close enough that we could like do
+do the small amount of work that was needed.
+It's one of the advantages of being a little bit later to the party is
+it lets other people bump into those problems and maybe they fixed them for you, right?
+That probably happened most of the time, honestly.
+That was definitely a good chunk of the time.
+I couldn't tell you, I'd have to go back and run the numbers on what percentage of the time that was.
+But we definitely, yeah, there was definitely a good chunk of things where we were just sort of like,
+"Oh, someone already made a fork or whatever, and we can just use that."
+And that was nice. It was, "Okay, that one checked off."
+And then the final sort of grouping was stuff where that wasn't available.
+So it was like, oh, this package is Python 2 only,
+and no one ever made a replacement.
+So we need to deal with that.
+Luckily, none of those were in a position where we were completely
+unable to deal with it.
+Like, we didn't run into anything where we were like, oh, this is just like,
+this is like a blocker.
+But there were things where we were like, oh, this thing needs to be replaced
+with something else that does something similar.
+or maybe right away.
+Very often we ran into code where it was like,
+"Oh, this is using this thing."
+And then you start looking into it and you're like,
+"Oh, actually this code is like,
+this branch or whatever that uses this package
+isn't actually used anymore.
+So we can just delete all that code
+and not have to think about it."
+So that's how we dealt with it.
+Yeah, that's a nice way to upgrade it,
+just get rid of it.
+Were there any packages that you're out there
+that didn't have Python 3 support?
+like, "We really depend on this one,"
+that you upgraded and contributed back?
+Or were you able to just move on?
+There was nothing that we ran into that was like
+an absolute walker like that.
+So we didn't end up contributing anything
+in terms of open source, other than
+there were some packages that are on our GitHub,
+like the Yelp GitHub, that we did do upgrades for.
+So that was the only sort of open source work
+that I think we really ended up doing.
+So luckily, I mean, I don't know if this is lucky or not,
+but it's definitely, it happened
+so that we didn't have to do that.
+- Yeah, that's good.
+I mean, it would be a nice if you ran across that
+and helped solve it for someone,
+but you don't have to even better.
+Testing, one of the challenges of,
+well, first it's good to have tests,
+but one of the challenges of these upgrades
+is you wanted to do this without disrupting development.
+You wanted to keep adding new features.
+You didn't want to say, hey, everyone,
+stop making any progress or bug fixes for six months
+and we're all just gonna do this until we're done.
+All right, you wanted to keep it moving.
+But in order to do so, you gotta run the test
+'cause you're making wholesale changes
+to millions of lines of code.
+So that's pretty nerve wracking, right?
+And you're swapping out its dependencies in big ways.
+And yet running tests, you all have a lot of tests
+and they take a while to run, right?
+- Yeah, we have about 100,000 tests in Yelp main,
+little under.
+And yeah, if you were to run them serially,
+at least when I wrote my talk, it was about 35 hours total.
+But we have a test runner framework called Jolt
+that we run internally.
+And what it does is it basically like
+puts those tests up into bundles
+and then runs those across a bunch of machines.
+And so you're basically able to get
+all of the tests run for Yelp main
+in about give or take an hour and a half.
+- Okay, that's pretty good for running 100,000 tests.
+That's still a long time to have a test run though, right?
+So you probably need it.
+You can't just get immediate feedback.
+Minor change, how'd that go?
+Minor change, how'd that go?
+You gotta be a little more thoughtful than that, right?
+- Yeah, I mean, I think that in terms of,
+and this sort of gets into testing theory,
+is that you start to get an idea of what changes
+are like, affect what other things.
+Sometimes you're not gonna have a perfect idea,
+but if you're like, oh, this is a thing
+that just affects everything,
+then you're gonna run all the tests.
+But we did have the ability to run tests
+if we were like, okay, we want to just run tests under Python 3,
+we could do like, oh, I'm just going to run this test module
+under Python 3. I can do that.
+And so if you were literally just like,
+oh, I'm checking, I'm fixing this test under Python 3,
+then you could just do that.
+You could just be like, oh, I'm iterating very quickly
+by changing the code and then running the test under Python 3.
+And then, oh, it passes.
+Okay, let me double check it passes under Python 2 as well.
+And then you can commit that and then
+put that into PR and then we do require,
+so one of the things is we do require running all,
+doing a full jolt run for every pull request to Yelp.
+So in order to do, so you have to run that anyway,
+but like, while you're waiting for that to run,
+you can work on something else.
+- Sure. - And you're really high confidence.
+You run a couple, okay, that makes sense.
+So run a couple local tests,
+10 hundred, five hundred, whatever.
+Once you're happy with that, then you put it as a PR and
+CI figures out what happens.
+- Yeah, and I think that ultimately,
+when we were really early on,
+and we were working on the really foundational stuff,
+that that was causing the most issues,
+that was the time when we were like,
+oh, we really gotta run all the tests.
+But once you get down to the nitty gritty,
+pretty early on, actually,
+you really don't need to think about
+how it affects other things.
+It's mostly just sort of like, yeah,
+this module affects its own tests,
+and that's pretty much it.
+- Okay, yeah, I'm sure you get a feel for it over time.
+You're like, these are the kinds of far-reaching changes,
+And these are the kinds of things I can stay really focused on. This portion of Talk Python to Me is brought to you by user interviews. As a developer, how often do you find yourself talking back to products and services that you use? Sometimes it may be frustration over how it's working poorly. And if they just did such and such, it would work better? And it's easy to do. Other times? It might be delight. Wow, they autofill that section for me? How do they even do that? Wonderful. Thanks.
+While this verbalization might be great to get the thoughts out of your head, did you
+know that you can earn money for your feedback on real products?
+User interviews connects researchers with professionals that want to participate in
+research studies.
+There is a high demand for developers to share their opinions on products being created for
+developers.
+Aside from the extra cash, you'll talk to people building products in your space.
+You will not only learn about new tools being created, but you'll also shape the future
+of the products that we all use.
+It's completely free to sign up and you can apply to your first study in under five minutes.
+The average study pays over $60.
+However, many studies specifically interested in developers pay several hundreds of dollars
+for a one-on-one interview.
+Are you ready to earn extra income from sharing your expert opinion?
+Head over to talkpython.fm/userinterviews to participate today.
+The link is in your podcast player show notes.
+Thank you to User Interviews for supporting the show.
+The other requirement you said that you had was that any changes must be rollback safe.
+Can you speak to that? I'm thinking like database migrations or that, right? What are you thinking here?
+Yeah, I mean, it's, I think database migrations are a good example of that type of thing.
+We didn't really run into a situation where we actually had to do any schema changes to databases.
+although there was a thing where we had to do,
+we had to make some changes to some data
+such that it would be parsed properly under both
+Python 2 and 3.
+But yeah, what you always want to do is you want to say like,
+"Okay, if I undo this later,
+maybe like a week later, someone realizes,
+'Oh, this change made a problem, has a problem,'
+we don't want to be in this position where we say,
+'Oh, we can't undo that.'
+Something else, you know, it depends on it,
+and we can't undo it."
+And so that was like a main thing.
+and it was just sort of like, don't do these things
+where you're just sort of like,
+oh, well, once we do this, we can't go back.
+Like, no, don't do that.
+If you need to like do some extra work
+where you like build up scaffolding or whatever,
+then like do that work instead.
+And it might take a little bit longer in the long run,
+but it makes us have less risk.
+- Yeah, I'll save diving into this
+for later in our conversation.
+But one of the things that you were able to do
+because of that is you were able to run
+apps simultaneously in two and three
+and use URL reverse proxy like Nginx or something to say,
+this part of the web app runs Python 3,
+and this one over here is running Python 2,
+and filter the traffic and switch it
+based on how it's performing or behaving.
+If it goes wrong, you can switch it back quick.
+If you didn't have that compatibility,
+it would be like, all right, today we pulled a switch,
+chunk, and then you deal with the consequences
+for how long Yelp is down, right?
+So that's an interesting consequence of this idea
+that it should be able to be rollbackable
+as you can actually run both versions
+and then sort of migrate more cautiously.
+You had a cool picture,
+and let me put it on the screen for us here,
+where you talked about the four different steps,
+the phases and timelines,
+and how much time you spent in there.
+You wanna talk us through this?
+- Yeah, sure.
+So this is just sort of like,
+if you wanna think about,
+okay, you've got some Python 2 code,
+and you want it to get it to Python 3.
+It's very easy to think about it in a sort of atomic way,
+as you sort of like, "Oh, make it Python 3 compatible."
+And it's like, okay, it makes sense on small stuff.
+You know, if you're like, "Oh, I got my 500 lines back,
+and I'm gonna migrate to Python 3 today," you know.
+But on big stuff, when you're talking about millions of lines of code,
+you want to think about it in terms of, in sort of level of compatibility.
+And so the three levels that we had to deal with here
+were parsability, which basically just means
+if you try and run this module with Python 3,
+will it fail with a syntax error or not?
+- Okay. - And so that's the main thing.
+And parsability, it turns out, is pretty easy to fix
+because there were not a huge number of syntax changes,
+and they're pretty easy to detect and fix in an automated way.
+Yeah, did you use some tooling like PyUpgrade or any of those types of things?
+PyUpgrade we used a little bit.
+It's not super designed for this,
+but there was one specific thing that was really nice about it,
+which is that it could detect octal literals.
+So if you put like zero and then a number,
+that's an octal literal in Python 2,
+that's not allowed in Python 3,
+so you have to do zero, O, number.
+It was able to detect those really easily and fix them, which was really nice.
+>> Those things, it sounds like,
+"Oh, well, that's not that much work or that much help."
+But when you're doing it across millions of lines of code,
+anything you can automate,
+it's got to be really welcome, right?
+>> There's a relatively common pattern.
+The reason that I remember that one is there was a relatively common pattern where like people would
+create like date time objects and then they would write
+year, month, day. And if the month
+or a year was single digit, they would prefix it with a zero.
+Which works in Python 2. They probably didn't mean to make it octal, but that's what they did.
+And so it kind of worked.
+And so people and so that existed in a lot of places and it was like a popular pattern.
+But yeah, so PyUpgrade was useful in that way.
+It was useful later on when we were like,
+like, blowing away all the sick stuff,
+because it's able to fix all those things automatically,
+which is nice, or most of them.
+Python Modernize was where a lot of,
+most of our automation went,
+because it could fix a lot of this stuff.
+Yeah.
+So that was parsability.
+Importability is similar, is that
+you try to import it, and then you say,
+you say like, "Okay, this is
+failing with an import error," like,
+or something is making it fail to import, like,
+usually running code at the top level.
+And that was a little bit longer.
+A lot of that was fixing standard lib imports,
+making most of those use 6 shim.
+If they change, there's 6 shim for that.
+And then some of it was also upgrading the packages
+so they could be used under Python 3 and imported.
+But there was a little bit of top-level stuff
+where it was like, "Oh, this top-level thing is
+calling dict.iteritems or something, and you gotta fix that."
+Yeah, so that's, that probably gets maybe a little into the functional parity,
+which if people look at your talk, they'll see there's a couple weeks of the parsability,
+maybe a month or two of the importability, then a whole bunch of the functional parity.
+And it reminds me when I was learning C++ way, way, way back.
+And I got really excited because I finally got some complicated code to compile.
+Not really knowing like, oh, no, no, no, no, no,
+you're only at the beginning of figuring out what's wrong with this.
+The compile is the part where it shows you what's wrong.
+Now it's like the mystery tour.
+And this is after that, right?
+This is like kind of once you get past parsing and importing,
+then you're into the how are they different behaviorally.
+Yeah, and this is, it's just sort of like,
+I alluded to this earlier, but basically the idea of
+you run all of your tests.
+And luckily we had already built up a lot of infrastructure
+that was really useful to us.
+So one of the things that Jolt was able to do
+is it was able to do some normalization of tracebacks,
+and then be like, "Oh, these tracebacks are similar enough
+that I'm going to group them together as a single error."
+And say, "Oh, this many tests are failing with this traceback."
+That was really useful because we were able to be like,
+"Okay, here's where the error is,
+and it's going to fix this many tests."
+Or at least unblock this many tests.
+So that was about a year of basically going through all of those test failures
+and figuring out, okay, why do they fail under Python 3?
+And just fixing them.
+So a lot of it was like, oh, this thing's supposed to be a string,
+but it's bytes or vice versa.
+They're calling .items, but that used to be a list and it's not a list anymore.
+Yeah, so you can index it.
+Yeah, so there's all sorts of nitty gritty things
+that you just have to go through and fix them
+Some of them are automatable, but like, you really need to,
+but not everything is, and some of them are more subtle.
+What was your target Python 3 version?
+So we originally targeted 3.6.
+At the time, it was the newest version.
+When we started the project, it was like the newest version that we had available.
+That was, that we were like, we're like, you know, we're sort of ready for, if you will.
+Yeah.
+During the project, because obviously a long project, we were able to get 3.7 available.
+And it was actually really great because we were like, I don't know,
+less than a month out from when we were like, oh, we're going to start doing the rollout.
+And my coworker, Chris, who wrote dumb PyPI,
+was working on this project at the time. And he was like,
+"You know what, I bet we could migrate this to Python 3.7."
+And I'm like, "Go for it. Let's see how hard it is."
+And he did it in like a day.
+So it was just like, oh, he just upgraded it.
+It was like, I think there were like maybe a few...
+3.7 does have like that one backwards incompatibility
+where it makes async a keyword.
+So there were a few packages where he needed to upgrade,
+but he was able to do it really quickly,
+and we were just like, "Okay, and now we're going to roll out to 3.7."
+So that was nice that it was sort of like we were working on 3.6 for most of it.
+We switched to 3.7 near the end, and it just sort of worked.
+It sets the foundation for going to the next version after that, right?
+It's actually really weird.
+Chris is working on that again.
+He's going to be trying to upgrade us to 3.8 this week, basically.
+Okay, cool. That's really excellent.
+What was the emotional state of you and the team
+as you were going through that year of fixing?
+No, it's list of dict.items, not list.items
+or dictionary.items.
+And probably excited in the beginning,
+but six months, then what was that like?
+Were we making progress or like,
+"Oh God, it's still here, we're not done."
+I knew what it was going to be like going into it.
+Like I was like, I mean, not exactly,
+but like I was like,
+"I know that it's going to be this thing
+where it's like, we're going to make some progress
+and then it's going to taper off
+because of the way that these things work.
+But it was definitely like,
+it was sort of like you were just sort of doing your tasks every day,
+and each task in and of itself was not valuable, right?
+It was sort of like, "Oh, well, I fixed three tests today," you know, kind of thing.
+But ultimately, I was able to see where the end was.
+So for me, I was like, "Yeah, we're going to do this. We're going to do it."
+I think not everyone on my team was necessarily as sort of buying the prize as I was,
+which is fine. I think we ended up swapping out...
+Basically, everyone on the team ended up working on it at one point or another,
+but it was only me and another one of my colleagues
+who worked on it basically the whole time.
+So I think part of it was that some people
+were like, "Okay, I'll work on that a little bit,
+but I don't want to only work on that." And that's totally understandable.
+I think that this type of work is kind of tedious.
+And this is sort of like...
+This is another argument against monoliths.
+It's sort of saying, "If you have to do this
+when you need to do these separate migrations,
+it becomes really punishing on software engineers.
+>> If you haven't done linting ever,
+and then five years into it,
+you're like, "Oh, let's see what's wrong with it."
+You run into a hundred thousand errors,
+like, "You know what? We're not doing that.
+We're just going to ignore those.
+Let's just stay." Because you can't just stop and go do 100,000 fixes.
+There's more value on the other side of this.
+So it makes a lot of sense.
+But it must have felt pretty good to get it all done though.
+>> It really did. I mean, it's weird how
+these projects work is that like, you're sort of like you're doing the work, you're doing the work and then like one day you're just sort of like, and we're done. And it's been a year and a half of my life, you know, like, but it's exciting. It was I had multiple people tell me, they said to me, Hey, it's so cool that you that you know, we were able to do that, because I never thought it would happen. Yeah, it's kind of amazing to do something that some people are like, this won't ever happen. But I did it happened and we made it happen. And I think that was, you know, really great.
+Let's talk a little bit about how you were able to run this on Python 2 and 3.
+What did you do? You basically create two virtual environments, one from each setup,
+and then, or each version, and then run tests there, try it out there.
+Yep, that's basically it. I mean, there is a technique to having like code that runs under Python 2 and 3,
+which is that, you know, you basically have to make sure that you're using compatibility layers,
+and we use 6 for that.
+that was something that me and most of the people on my team had some pretty significant experience doing,
+because that's basically how we wrote all of our libraries, our internal libraries,
+and actually a lot of our open source ones as well,
+because for a long time there, you were like, "Okay, I want to have Python 2 and 3 compatibility."
+So having code that works under both was pretty normal.
+Making sure that that code can run under Python 2 and 3,
+and then building the virtual one,
+There was a little bit of nuance or like a there was a snag there
+Which is that like something that comes up every once in a while when you're doing this kind of stuff
+And this still this is still a thing that happens to this day is you have you have to deal with backport packages
+so there's like the futures backport, which was
+The concurrent which like concurrent futures was added in might have been 3.0
+I don't remember exactly what version of python 3 python it was added in and there was like a few other backports
+functools32's backport for adding some of the stuff in Python 3.2's functools, like lru-cache,
+which is something we used a lot of. So those were both packages where we needed to actually
+install them in Python 2, because there are packages somewhere in our dev tree that needs
+them. So what we ended up doing is we made this silly little script that just took our requirements
+and then filtered out the things that don't install under Python 3
+and just spit out a new one, and that's the one we built our Python 3 virtual link with.
+And so then, now we have Python 2 and Python 3 virtual link,
+and they're like really similar, not exactly the same, but close enough,
+and then we can run the test against either one of them.
+And then eventually we would do the rollout.
+It doesn't sound like one of the challenges had to do with caching,
+And you have a way in which you were using pickle
+to stuff some results into memcached.
+Is it memcached D or memcached like past tense?
+I never know how to pronounce that one right.
+- I looked at their website like a year ago
+or like I guess two years ago or something
+when I was actually working on this.
+And I'm sure that I know, I'm sure that I read it
+'cause it said it there I remember
+but I don't remember what the answer is.
+- Yeah, no worries.
+So let's go with memcached, I'll call it memcached.
+So you were, previously you were pickling things.
+You were CPickling, but then that just became pickling.
+But at some point, it's one thing to say
+at the database query level,
+well, deserialize and Serialize an ORM object
+to match the schema.
+It's a whole nother to say the binary shape of this thing
+is the same across Python versions,
+which is highly unlikely, right?
+Which is pickle.
+- It's basically impossible.
+That was like the, yeah,
+that was one of the big problems that we had.
+So we were basically taking,
+we were basically like, so we would pickle,
+There's a cache key and then there's a cache value.
+We'd pickle both, and then the cache key we would like hash
+so that it could be a specific binary sequence.
+And then we'd key into that
+in order to get stuff out of the cache.
+But it turns out that for a multitude of reasons,
+both the key, like you said, the key is not going to be binary the same.
+So that's one of the problems.
+And the other problem is that there's a lot of weirdnesses
+when you end up like either reading Python 2 Pickles in Python 3,
+or reading Python 3 Pickles in Python 2.
+It seems like Pickles are kind of meant to be transient.
+They're not meant to be long-term storage
+because there's not a lot of guarantees around their parsability.
+We were like, okay, well, what's a thing that we can do
+where we don't have to start being like,
+okay, now we have to write complicated serialization and stuff.
+And we were like, well, probably JSON. JSON will work.
+And so this is something I worked on for about three months or something,
+was just migrating all of our caches to use JSON instead of Pickles.
+Yeah, you had this kind of fallback mechanism or this slow upgrade mechanism
+that said, try to get the JSON version from Memcache.
+And if you got it, awesome, go with that.
+But then fall back and try to get the binary Pickle,
+but then immediately replace it with the JSON version
+so that it just grows over time.
+I mean, thinking about that much code and that many services,
+there must just be a ton of startup cost
+if you just kick all the servers over and clean the cache.
+We've never tried it.
+I think everyone's a little bit too scared.
+But it's definitely not something we wanted to do.
+And we wanted to be able to be like,
+okay, if we're, when we cut over to Python 3,
+we're not just going to lose all of our caches.
+I think this is actually a really great example
+of something we were discussing before the recording started
+of doing a sort of incremental upgrade.
+And one of the other things I didn't super get into
+with in my talk is that like,
+one of the things that I felt was a really cool technique,
+and this really depends on whether or not this is worth it,
+depends on like how you end up,
+what the value of your like uptime is basically
+compared to your dev time.
+But what I did is I sort of logged,
+what I would do is I would like,
+for every cache, I'd be like, okay, I'm gonna try to log this to JSON.
+And then if it failed, I wouldn't just fail,
+I'd do the normal stuff, I'd do all the pickle stuff, whatever,
+but then I'd log it somewhere.
+And so that way I could just look at this log and be like,
+"Oh, here's where my errors are."
+So it wasn't just like, "Oh, I would like ship changes
+and then see if there were actual errors on prediction."
+It's like, there's no errors on prediction,
+there's just errors in this log that I can fix and iterate on,
+and no user ever sees a 500.
+Not everything's going to fit into that,
+But I think that's a really useful technique.
+Yeah, that is really cool because
+no matter how much testing you do on something this big,
+it's not until you really put it out there
+you see that 100% sure it's going to hang together.
+But if it can fail silently in a way that people don't see,
+but you get notified about this and can start working on it,
+that's really valuable.
+Another thing that you did that I thought was pretty clever
+was the way that you did the rollouts
+where you were able to say,
+Even though this is one huge monolith of code, it doesn't mean it breaks evenly.
+Right? Once you get it past the parsability stage, there could be some URL
+endpoint that's going to fail if you request it.
+And another that works totally fine.
+All right.
+So what you were, what you all did is you created a reverse proxy.
+And I was imagining Nginx.
+What were you actually using here?
+So it's kind of Nginx.
+It's OpenResty, which is a framework where you can write
+plugins for Nginx in Lua.
+So you can do some sort of general logic in that.
+- So you're basically able to say,
+when you go to yelp.com/something
+or api.yelp.com or whatever it is,
+as far as a user, it's the same.
+But some of those URLs are hitting the Python 3 version
+of this large monolith app running,
+and some are hitting the Python 2.
+and you could move it URL, URL, endpoint at a time, right?
+Yeah.
+Talk to us about that. That's pretty clever.
+Yeah, this was a super cool technique.
+So we already had the reverse proxy layer, we had the routing service.
+This is something that we had built for just sort of consolidating a bunch of logic
+in a general place where like everything could rely on it.
+But it was a really great place for us to be able to put this logic as well.
+And I'm going to say him again, Chris Keel, my colleague on my team,
+came up with this idea as well.
+So it's such a great idea, and it applies, I think, really generally.
+Like, you can just sort of say, "Okay, anytime I'm doing some sort of rollout
+where the setup is in such a way that I can't do it within my application,
+like there's something about the application setup,
+if you have this external layer, then you can pretty easily do it."
+And yeah, it was basically just sort of like,
+we would have a configuration and it would say,
+"Okay, this endpoint prefix
+would go to Python 2, or this one would go to Python 3."
+And we could actually even be a little bit more granular than that.
+We could actually give it a percentage of the time.
+So basically, 20% of the time it goes to Python 2,
+80% of the time it goes to Python 3.
+And so we could do these sort of slower rollouts
+if people wanted to be more careful.
+I see.
+So maybe it goes like it's on Python two.
+Now 1% of the traffic goes to Python three.
+Is it dying or no, it seems okay.
+It seems okay.
+All right.
+Now 20 now 80, like you could like slowly move it over.
+So if it fails, at least it fails just for a few people.
+And even you don't even roll it back.
+You just stop sending traffic there and fix it, which is really good.
+Yeah.
+Yeah.
+Very clever.
+And it certainly makes sense for large projects, but it was great.
+Is that lets you start getting your Python three version in production.
+Way earlier, right? You're not waiting on the last endpoint.
+You just need the first endpoint. I mean, probably you didn't do this very,
+like, one URL works, put it out there, but like,
+you could do it much sooner than you would otherwise, right?
+For various sort of practical reasons,
+we didn't want to actually start the rollout until we were like,
+"Oh, all of the tests pass under Python 3."
+Because we didn't want people to be like,
+"Oh, I'm running my tests and they're not passing and that's bad.
+and I'm either going to like ignore them
+or try to fix them in a bad way and stuff like that.
+But like, I mean, it was like a two month process
+where we were like from the first endpoint
+to the last endpoint, it was like two months.
+And so that was able, that was really nice
+because it was like, oh, we would disect issues
+and then we would, but we would keep rolling out other stuff
+and then, you know, the teams
+or we could try and fix the issues and so.
+- Very neat, that's great.
+All right, let's wrap this up.
+We're getting short on time here.
+you had some clear benefits,
+even though you went to Python 3.6,
+which I think you'll see those benefits again
+if you go to 3.11, all right?
+But even so, going from, where'd you go from 2.7 to 3.6?
+- We went from 2.7 to 3.7.
+- 2.7 to 3.7, right on, okay, cool.
+And you said it got faster and used less memory.
+That's pretty good.
+- I don't remember the exact numbers.
+It was in my talk.
+- I stole them from your talk.
+15 to 20% speed up and 20% less memory.
+That's tangible.
+That's right. That's right. Yeah. I remember this is something I didn't mention my talk, but I thought I think it's kind of interesting. So we have some stuff that is, you know, more CPU heavy, which we send to what we call VIP instances. So VIP, like containers have more memory and more CPU allocated towards them.
+And so I remember I talked to someone
+who was involved in doing a lot of that sort of operational stuff.
+And after that migration,
+they looked at numbers and they were like, "Oh, we can now
+scale down the VIP to what the old normal one was."
+And the normal one is now scaled down even more.
+Oh, that's cool.
+Yeah, which was super cool. So it was super good to do that.
+And I think that beyond just sort of like,
+"Oh, this gave us this immediate,
+or this gave us this outcome, it's like, we weren't
+going for this outcome, but I think it really shows how
+this type of work, if you're like,
+I think very often it's easy to look at
+base level infrastructure work as like, oh, well,
+it's just maintenance and you just need to do it and blah, blah, blah, and
+it's not really benefiting anything. And it's like,
+no, we did this and it saved money on our bottom line.
+And not necessarily everything is going to be like that, but I think that
+thinking about base level infrastructure is like,
+it does have a benefit.
+It might not necessarily be obvious
+before you do it,
+but this is an example of
+okay, if you're doing your upgrades,
+you get to take advantage of all the really hard work
+that all of the people on the Python language team have done
+to make it more efficient and faster.
+Yep, and it probably opens up other possibilities.
+The previous show I just did, which
+not out yet, so you wouldn't know, but I was talking about Ruff,
+the linter written in Rust for Python.
+But you have this ability to integrate with more modern tools and modern language.
+It's like, oh, if we got to rewrite this section and Rust for that computation,
+it's trivial now, where probably it wasn't before.
+I would imagine. I haven't tried integrating Python 7 with things like that,
+but I bet it's not as easy as the new tools.
+>> Yeah, for sure.
+>> All right. Well, let's leave it here.
+I think that's all the time we got to talk about it.
+But you must be enjoying it,
+enjoying work on the projects and the features more now.
+you can just, the world is your oyster again.
+- Yeah, I love using,
+the project that I've been working on actually lately
+is we've been adding a lot of type annotations internally.
+That's a Python 3 feature right there.
+- Yeah, absolutely.
+You can use F strings, you can use type annotations,
+you can start using tools like MyPy,
+not just standard type annotations, just for editors,
+but yeah, Pydantic, for example, all those things, right?
+Very cool.
+All right, now before you get out of here,
+I got two questions.
+always says at the end of the show,
+if you're gonna write some Python code,
+what editor are you using these days?
+- I'm a Vim person.
+Do all my development in Vim.
+- Right on.
+And then notable PyPI package.
+Give a shout out to Python Modernize,
+but anything that stands out
+you wanna give a shout out to like that?
+- I mentioned Python Modernize,
+great, excellent tool for what it is.
+I also give a shout out in my,
+I give a shout out to a couple other things in my talk,
+but I think they're definitely worth
+giving a shout out to still,
+which is PyUpgrade, which we mentioned earlier.
+It has a lot of really nice features,
+but one of the other things is the other half of Python Modernize
+is that it can take your six shim-filled code
+and turn it into normal Python pre-code.
+And then another tool by a former colleague of mine, Anthony Stille,
+is Precommit.
+Modernize is a Precommit hook, PyUpgrade is a Precommit hook.
+That's a thing that we use extensively internally.
+super, super nice to be able to do all those sorts of things and do it in an incremental way, which is something that was really valuable.
+And then the last one, this is just a completely random one, but I just love it, is
+more itertools, one of my favorite packages. We have an internal package
+that has a lot of the functions that are in moreitertools, but they're worse,
+or quirky in some way that I don't like.
+And so that's something that was like,
+when I first found out about it, I was like, "Oh man, this is great."
+And I think it's pretty popular now, but like,
+I think it's one of those things where it's just sort of like,
+"Oh, there's all these little functions that you're like,
+'Oh, I could write that,' and it's like, you could, but you'd probably write it
+with bad edge cases or something."
+It's just, it's a great library.
+And it's better if you don't have to write it, that's for sure.
+- Yes. - All right.
+Well, Ben, thanks for being on the show.
+Final call to action, maybe some other people are out there facing
+this transformation they gotta do.
+like I said, not actually Python 2 to 3, but
+some major foundation in their code base to another.
+What do you tell them?
+Figure out a way to make it incremental.
+That's really, I think, the main takeaway for me is that
+incremental changes
+have multiple benefits.
+They make you less risky. You're able to
+do these types of changes
+in a way where you don't necessarily have to be like,
+"Oh, we have to schedule two years of work."
+It's like, no, you can do it a chunk at a time
+when you have time.
+and also it just generally makes you have less errors.
+Absolutely.
+Alright, well, thanks so much for being here.
+It's been great to have you on the show. Appreciate it.
+Thanks so much for having me.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering. It really helps support the show.
+Join Cox Automotive and use your technical skills
+to transform the way the world buys, sells, and owns cars.
+Find an exciting position that's right for you at talkpython.fm/cox.
+Earn extra income from sharing your software development opinion at user interviews.
+Head over to talkpython.fm/userinterviews to participate today.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at TalkPython.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app,
+and search for Python. We should be right at the top.
+You can also find the iTunes feed at /iTunes,
+the Google Play feed at /play,
+and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air,
+Be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
+[BLANK_AUDIO]

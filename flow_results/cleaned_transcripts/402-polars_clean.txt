@@ -1,0 +1,765 @@
+When you think about processing tabular data in Python, what library comes to mind?
+Pandas, I'd guess.
+But there are other libraries out there, and Polars is one of the more exciting new ones.
+It's built in Rust, embraces parallelism, and can be 10 to 20 times faster than Pandas out of the box.
+We have Polars creator, Ritchie Vink, here to give us a look at this exciting new DataFrame library.
+history. This is Talk Python to Me, episode 402, recorded January 29th, 2023.
+Follow me on Mastodon where I'm @mkennedy and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances, there are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by Taipy. Taipy is here to take on the challenge of rapidly transforming a bear algorithm in Python into a full fledged decision support system for end users.
+Check them out at talkpython.fm/type  t-a-i-p-y.
+And it's also brought to you by user interviews, earn extra income for sharing your software developer opinion.
+Head over to talkbython.fm/userinterviews to participate today.
+Hey, Ritchie, welcome to Talk Python to Me
+I feel like maybe I should rename my podcast, talk rust to me or something.
+I don't know.
+Rust is taken over as the low level part of, of how do we make Python go fast?
+There's some kind of synergy with rust.
+What's going on there?
+Yeah, there is.
+I'd say Python always already was low level languages that succeeded that made Python a success.
+I mean, like NumPy, Pandas, everything that was reasonable fast was so because of C or Cython, which is also C, but Rust different from C, Rust has made low level programming a lot more fun to use and a lot more safe.
+And especially if you regard multi-threaded programming, parallel programming, concurrent programming, it is a lot easier in Rust.
+It opens a lot of possibilities.
+Yeah.
+My understanding, I've only given a cursory look to Rust, just sort of scan some examples and we're going to see some examples of code in a little bit, actually related to Polars, but it's kind of a low level language.
+It's not as simple as Python.
+No, it's a JavaScript, but it's, it is easier than C, C++, not just in the syntax, but you know, it has, it does better memory tracking for you and the concurrency, especially, right?
+Yeah.
+Well, so Rust has got a, brings a whole new thing to the table, which is called ownership and a borrower checker.
+And Rust is really strict.
+There are things on Rust we cannot do in C or C++ does at a time.
+there can only be one owner of a piece of memory and other people can you can lend out this piece of memory to other users but then they cannot mutate so it can be only one owner which is able to mutate something and this restriction makes rust a really hard language to learn but once you once it's clicked once you went over that that steep learning curve it becomes a lot easier because it doesn't allow you things that you could do in C and C++ but those things were also things you shouldn't do in C++ because they probably led to set faults and memory issues.
+And this borrow checker also makes writing concurrent programming safe.
+You can have many threads reading a variable all they want.
+They can read concurrently.
+It's when you have writers and readers that this whole thread safety, critical section, take your locks or the locks re-entrant, all of that really difficult stuff comes in.
+And so.
+Yes.
+Sounds like an important key to me.
+Yeah, and Rust, and the same board checker also knows when memory has to be freed and not.
+But it doesn't have to, unlike in Go or Java, where you have a garbage collector, it doesn't have to do garbage collection and it doesn't have to do reference counting like Python does.
+It does so by just statically, so at compile time, it knows when something is out of scope and not used anymore.
+And this is real power.
+I guess the takeaway for listeners who are wondering, you know, Why is Rust seemingly taking over so much of the job that C and variations of C, right, like you said, Cython, have traditionally played in Python. It's easier to write modern, faster, safer code. Yeah. Yeah. And it's more fun too, right? Yeah, definitely. And it's a language which has got its tools right. So it's got a package manager, which is really great to use. It's got a real create something which is similar to the PyPI index. It feels like a modern language.
+Yeah builds low level more low level code. You can also write high level stuff like Rest API's which is I must say it also for high level stuff I like to write it in Rust because of the safety guarantees and also the correctness guarantees if I if my program compiles on Rust, I'm much more certain it is correct then when I write my Python program, which is dynamic and types can are not enforced So it's always a bit graying on that side.
+Python is great to use, but it's harder to write correct code.
+Yeah.
+And you can optionally write very loose code or you could opt into things like type hints and even MyPY, and then you get closer to the static languages, right?
+Are you a fan of typing?
+Definitely.
+But because they're optional, they are as strong as the weakest link.
+So one library, which you use, if it doesn't do this type correct, or it It doesn't do it. Yeah, it breaks. It's quite brittle because it's optional.
+I hope we get something that really enforces it and really can check it.
+I don't know if it's possible because of the dynamic nature of Python.
+Python can do so many things just dynamically.
+Statically, we just cannot know, probably.
+I don't know how far it can go.
+In Polars as well, we use MyPy typehints, which prevent us from having a lot of bugs and also make the IDE experience much nicer.
+Yeah, Typehints are great.
+They really help you also think about your library.
+I think you really see a shift in modern Python and Python 10 years ago, where it was more dynamic and the dynamic dynamic of Python were more seen as a strength than currently, I believe.
+- Yeah, I totally agree.
+And I feel like when Typehints first came out, this was, yes, wow, at this point, kind of early Python 3, But it didn't feel like it at the time, you know, Python 3 had been out for quite a while.
+When type hints were introduced, I feel like that was Python 3.4. But anyway, that was put it maybe six years into the life cycle of Python 3. But still, I feel like a lot of people were suspicious of that at the moment. You know, they're like, Oh, what is this weird thing? We're not really sure we want to put these types into our Python. And now a lot less. There's a lot less of those reactions. I see, yeah, yeah, I see Python having to, probably more, but I often see Python as the really fun, nice to use, Duct Tape language where I can, in my, for instance, in Jupyter Notebook, I can just hack away and try interactively what happens, and for such code, type hints don't matter.
+But once I write more of a library or product or tool, then typehints are really great. I believe I believe they came about the Dropbox really needed them.
+They had a huge Python program.
+It's a really trouble making it without Pythons.
+But I'm not really sure.
+- Yeah, and I heard some guy who has something to do with Python used to work there.
+- Yeah, yeah, yeah.
+- Guido used to work there, I think even at that time.
+All right, so a bit of a diversion from how I often start the show.
+So let's just circle back real quick and get your story.
+How'd you get into programming and Python and Rust as well, I suppose?
+- I got into programming, I just wanted to learn programming.
+of mine who did the program, the love of PHP said, learn Python like that.
+An interactive website where I could do some, some puzzles and I really got hooked to it.
+Was a fun summer and I was programming a lot. I started automating. My job was a civil engineer at the moment that I started. It was a lot of mundane tasks, repetitive, and I just found ways to automate my job. And eventually I was doing that for a year or three or, and then I got into to data science and I switched jobs, became a data scientist and later a data engineer.
+Yeah, so that was Python mostly.
+I've always been looking for more languages.
+I've been playing with Haskell, I've been playing with Go, I've been playing with JavaScript, not just with the JavaScript, but playing with Scala.
+And then I found Rust, and Rust really, really made me happy.
+Like, you learn a lot about how computers work.
+So I had a new renaissance of the first experience with Python, another summer at Rust, and been doing a lot of toy projects, like writing an interpreter, I don't know, a lot of projects, and Polars became one of those hobby projects just to use Rust more.
+- Now it's got quite the following, and we're gonna definitely dive into that, but let me pull it up.
+It does right here, 13,000 GitHub stars.
+That's a good number of people using that project.
+- Yeah, yeah. - It's pretty crazy, isn't it? - Yeah, it is.
+It's on GitHub stars.
+It's the fastest growing data tool, I believe.
+- Wow, incredible.
+You must be really proud of that.
+- Yeah, yeah.
+If you would have told me this two years ago, I would never leave it.
+But those, it happens slow enough so you can get accustomed to that.
+- Yeah, that's cool.
+Kind of like being a parent.
+The challenges of the kids are small.
+They're intense, but there are only a few things they need when they're small and you kind of grow with it.
+So a couple of thoughts.
+One, you had the inverse style of learning to program that I think a lot of computer science people do, and certainly that I did.
+It could also just be that I learned it a long time ago.
+But when I learned programming, it was I'm gonna learn C and C++, and then you're kind of allowed to learn the easier languages, but you will learn your pointers.
+You'll have your void star star, and you're gonna like it.
+You're gonna understand what a pointer to a pointer means, and we're gonna get, I mean, you start inside, and you, of the most complex, closest to the machine, you worked your way out, you kind of took this opposite, like let me learn Python, where it's much more high level, it's much, if you choose to be, you often stay very much more away from the hardware and the ideas of memory and threads and all that.
+And then you went to Rust.
+So was it kind of an intense experience?
+You were like, oh my gosh, this is intense.
+Or had you studied enough languages by then to become comfortable?
+- Well, yeah, yeah, no.
+So the going from high level to low level, I think it makes natural sense if you've learned it yourself.
+There's no professor telling me you learn your pointers.
+So I think this also helped a lot because at that point, you're really accustomed to programming, to algorithms.
+So you can, I believe you should learn one thing, one new thing at a time, and then you can really own that knowledge later on.
+But Rust, I wouldn't say you should learn Rust as a first language.
+It would be really terrible because you need, that would be terrible.
+But other languages also don't help you much, because the borrow checker is quite unique.
+It doesn't let you do things you can do in other languages.
+So what you learn there, the languages that allow you to do that, they just hurt you because you were--
+- They encourage the wrong behavior, right?
+- Well, yeah, so nine out of 10 times, it turns out by compiling, not letting you do that one thing, that one thing you wanted was probably really bad to begin with, led to really...
+So in Rust, your code is always a lot flatter.
+It's always really clear who owns the memory, how deep your nesting is.
+It's always one D deeper.
+Most of the times, it's not that complicated.
+You make things really flat and really easy to reason about.
+And in the beginning of a project, it seems okay, a bit over-constraining.
+But when, I mean, software will become complex and complicated, and then you're happy that the compiler notched you in this direction.
+- It seems like a better way, honestly.
+You know, you get a sense of programming in a more simple language that doesn't ask so many low-level concepts of you.
+And then you're ready, you can add on these new ones.
+So I feel like a lot of how we teach programming and how people learn programming is a little bit backwards, to be honest.
+- Yeah. - Anyway, enough on that.
+So you were a civil engineer for a while, and then you became a data scientist, and now you've created this library.
+Still working as a data scientist now?
+- No, no.
+I got sponsored two years ago for two days a week.
+And yeah, just use that time to develop Polar
+And currently I stopped all my day jobs and going full time on Polars.
+I'm trying to live from sponsorships, which is not really working.
+It's not enough at this time, but I hope to start a foundation and get some proper sponsors in.
+- Yeah, that'd be great.
+- Yeah, it's useful.
+- That's awesome.
+It's still awesome that you're able to do that, even if you still needed to grow a little bit.
+- Yeah.
+- We'll have you on a podcast and let other people know out there who maybe are using your library.
+Maybe they can put a little sponsorship in GitHub sponsors.
+I feel like GitHub sponsors really made it a lot easier for people to support.
+'Cause there used to be like PayPal donate buttons and other things like that.
+And one, those are not really recurring.
+And two, you've got to go find some place and put your credit card.
+Many of us already have a credit card registered at GitHub.
+It's just a matter of checking the box and monthly it'll just go.
+You know, it's kind of like the app store versus buying independent apps.
+It just cuts down a lot of the friction.
+I feel like it's been really positive, mostly for open source.
+- Yeah, I think it's good to, as a way to say thank you.
+It isn't enough to pay the bills.
+I think for most developers it isn't, but I hope we get there.
+I think companies who use it should give a bit more back.
+I mean, they have a lot of money.
+- I agree.
+really, really ridiculous that there are banks and VC funded companies and things like that, that have not necessarily in terms of the VC ones, but definitely in terms of financial and other large companies that make billions and billions of dollars in profit on top of open source technology. And many of them don't give anything back, which is, it's not criminal because the licenses allow it, but it's it's certainly borders on immoral to say, all this money and not at all support the people who are really building the foundations that we build upon?
+Most of my sponsors are developers. Yeah. So, yeah, let's hope it changes. I don't know.
+Yeah. Well, I'll continue to beat that drum.
+This portion of Talk Python to Me is brought to you by Taipy.
+Taipy is the next generation open source Python application builder. With Taipy, you can turn data and AI algorithms into full web apps in no time. Here's how it works.
+You start with a bare algorithm written in Python.
+You then use Taipy's innovative tool set that enables Python developers to build interactive end-user applications quickly.
+There's a visual designer to develop highly interactive GUIs ready for production.
+And for inbound data streams, you can program against the Taipy core layer as well.
+Taipy core provides intelligent pipeline management, data caching, and scenario and cycle management facilities.
+That's it.
+You'll have transformed a bare algorithm into a full-fledged decision support system for end users.
+Taipy is pure Python and open source, and you install it with a simple pip install taipy.
+For large organizations that need fine-grained control and authorization around their data, there is a paid TypeEye Enterprise Edition, but the TypeEye core and GUI described above is completely free to use.
+Learn more and get started by visiting talkpython.fm/taipy, that's T-A-I-P-Y, the links in your show notes.
+Thank you to Taipy for sponsoring the show.
+Let's talk about your project.
+So Polars and the RS is for Rust.
+I imagine at the end, but tell us about the name Polars, like Polar Bear, but Polars.
+Yeah.
+So I started writing a data from library and initially it was only for, for Rust.
+It was my idea until you get, until you saw all the people doing data science and Python, you're like, Oh, what can I do for these people?
+Right.
+Yeah.
+Yeah.
+And I wanted to give a wink to the Pandas project, but I wanted a beer that was better, faster, I don't know, stronger. So luckily, a Panda beer isn't the most frightful beer. So I had a few to choose. But the grizzly, yeah, the Polar has the RS, so that's a lucky coincidence.
+Yeah. So the subtitle here is Lightning Fast DataFrame Library for Rust and Python. And you You have two APIs that people can use.
+We'll get to dive into those.
+- Yeah, because we're using it in Rust, it's a complete different library in Rust and you can expose it to many front-ends.
+So front-end is already front-end in Rust, Python, Node.js, R is coming up, and normal JavaScript is coming up, and Ruby, there is also a Polar Ruby.
+So-- - How interesting.
+So for the JavaScript one, are you gonna use WebAssembly?
+- Yeah. - Right, which is pretty straightforward Rust comes from Mozilla WebAssembly, I believe also originated, they kind of originated as a somewhat tied together.
+Yeah.
+So Rust C++ C can compile to WebAssembly.
+It's not really straightforward because the WebAssembly virtual machine isn't like your normal OS.
+So there are a lot of things harder, but we're, we are working on the challenges.
+Okay.
+Well, that's pretty interesting, but for now you've got Python and you've got Rust and that's great.
+I think a lot of people listening, myself included when I started looking into this, immediately go to, it's like pandas, but Rust.
+(laughs)
+You know, it's like pandas, but instead of C at the bottom, it's Rust at the bottom.
+And that's somewhat true, but mostly not true.
+So let's start with you telling us, you know, how is this like pandas and how is it different from pandas?
+- Yeah, so it's not like pandas.
+I think it's different on two ways.
+So we have the API and we have the implementation.
+And which one should I start with?
+Bottom up?
+That's, I think, bottom up.
+Yeah, bottom up. Sure.
+Yeah.
+So that was my critique from Pandas.
+And that they didn't start bottom up.
+They took whatever was there already, which were good for that purpose.
+And Pandas built on NumPy.
+And NumPy is a great library.
+But it's built for numerical processing and not for relational processing.
+Relational data is completely different.
+You have string data, you have message data, and this data is going to be just put as Python object in those NumPy arrays.
+And if you know anything about memory, then in this array you have a pointer where each Python object is somewhere else.
+So if you traverse this memory, every pointer you hit must look it up somewhere else.
+That memory is not in cache, where the cache miss, which is a 200x slowdown per element you traverse.
+- Yeah.
+So for people listening, what you're saying the 200x slowdown is, The L1, L2, L3 caches, which all have different speeds and stuff, but the caches that are near the CPU versus main memory, it's like two to 400 times slower, not aging off a disk or something.
+It's, it's really different, right?
+It's really a big deal.
+It's a big deal.
+It's terribly slow.
+It also, Python has a gil.
+It also blocks multi-threading.
+If you want to read the string, you cannot do this from different threads.
+If you want to modify the string, there's only one thread that connects this Python gill.
+So they also didn't take into account anything from databases.
+So databases are basing from the 1950s.
+There's been a lot of research in databases and how we do things fast, write a query and then optimize this query because the user that uses your library is not the expert.
+It doesn't write optimized query.
+No, but we have a lot of information so we can optimize this query and execute this in the most, in a very efficient way.
+That's an interesting idea.
+Yeah, Pandas just executes it and gives you what you ask.
+What you ask is probably not...
+Yeah, that's interesting because as programmers, when I have my Python hat on, I want my code to run exactly as I wrote it.
+I don't want it to get clever and change it.
+If I said do a loop, do a loop.
+If I said put it in a dictionary, put it in a dictionary.
+But when I write a database query, be that against Postgres with Relational or MongoDB, There's a query planner and the query planner looks at all the different steps.
+Should we do the filter first?
+Can we use an index?
+Can we use a compo, which index should we choose?
+All of those things, right?
+And so what you tell it and what happens, you don't tell it how to do finding the data, the database, you just give it, here's kind of the expressions that I need, the, the, the predicates that I need you to work with.
+And then you figure it out.
+You're smart.
+You're the database.
+So one of the differences I got from reading what, what you've got here so far is it looks like, I don't know if it goes as far as this database stuff that we're talking about, but there's a way for it to build up the code it's supposed to run and it can decide things like, you know, these two things could go in parallel or things along those lines.
+Right.
+Yeah.
+Well, it is actually very similar.
+It is a factorized query engine and you can, the only thing that doesn't make us a database is that we don't have any, we don't bother with, with file structures, right? Like the persistence and transactions. Yeah. So we have different types of late databases, you have all up and OTP transactional modeling, which works often on one. So if you do a rest API query, and you modify one user ID, then your transactional and if you're doing OLAP, that's more analytical, and then you do large aggregations of large whole tables, and then you need to process all the data.
+And those different database designs lead to different query optimizers.
+And Polars is focused on OLA.
+But yeah, so as you described, you've got two ways of programming things.
+One is procedural, which Python mostly is.
+So you tell exactly, if you want to get a cup of coffee, how many steps it should take forward, then rotate 90 degrees, take three steps, then rotate 90 degrees.
+You can write down the whole algorithm how to get a coffee.
+Or you could just say, get me a coffee.
+I'd like some sugar and then let the query engine decide how to best get it.
+Right.
+And that's more declarative.
+You describe the end result.
+And as it turns out, this is also very readable because you declare what you want and the intent is readable in the query.
+And if you're doing more procedural programming, you describe what you're doing.
+And the intent often needs to come from comments, like what are we trying to do when we follow this out?
+Right. Yeah, that makes a lot of sense.
+And that's why...
+Yeah, sorry. And that's why the...
+So the first thing is we write a database engine, a query engine from scratch and really think about multiprocessing, about caches, also out of core, we can process data that doesn't fit into memory.
+So we really built this from scratch with all those things in mind.
+And then at first we wanted to expose the Pondus API and then we noticed how bad it was for writing fast data.
+The promise API just isn't really good for this declarative analyzing of what the user wants to do.
+So we just cut it off and took the freedom to design an API that makes most sense.
+That's interesting.
+I didn't realize that you had started trying to be closer to pandas than you ended up.
+Yeah.
+Well, it was very short lived, I must say.
+It was painful.
+Yeah.
+And that's not necessarily saying pandas are bad, I don't think.
+It's approaching the problem differently and it has different goals, right?
+Yeah.
+So maybe we could look at an example of some of the code that we're talking about.
+I guess also one of the other differences there is much of this has to do with what you would call, I guess you refer to them as lazy APIs or streaming APIs, kind of like a generator.
+Yeah.
+So if you think about about a join, for instance, in pandas, if you would write a join and then they only do and only want to first 100 rows of that result, then it would first do the join, and then that might produce one million or 10 million rows, and then you take only 100 of them, and then you have materialized a million, but you take only a fraction of that.
+And by having that lazy, you can optimize for the whole query at a time and just see, oh, we do this join, but we only need 100 rows, so that's how we materialize 100 rows.
+So it gets you more of a holistic approach.
+- That's really cool.
+I didn't realize it had so many similarities to databases, but yeah, it makes a lot of sense.
+All right, let's look at maybe a super simple example.
+You've got on polar.rs.
+What country is rs?
+I always love how different countries that often have nothing to do with domain names get grabbed because they have a cool ending like Libya that was .ly for a while.
+You know, it still is, but like it was used frequently, like bit.ly and stuff.
+Do you know what rs is?
+- I believe it's Serbia.
+- Serbia, okay.
+- I'm not sure.
+- Yeah, yeah, very cool.
+All right, so polar.rs.
+like polar.rs.
+Over here, you've got on the homepage here, the landing page, and then through the documentation as well, you've got a lot of places where you're like, show me the Rust API or show me the Python API.
+People can come and check out the Rust code.
+It's a little bit longer because it's, you know, that kind of language, but it's not terribly more complex.
+But maybe talk us through this little example here on the homepage in Python, just to give people a sense of what the API looks like.
+- Yeah, so we started with a scan CSV, which is a lazy read, which is so read CSV tells what you do, and then it reads the CSV and you get the data frame.
+In a scan CSV, we started a computation graph.
+We call this a lazy frame.
+A lazy frame is actually just, it holds, it remembers the steps of the operations you want to do.
+Then it sends it to boiler, it looks at this very plan and optimize it, and it will think of how to execute it.
+And we have different engines.
+So you can have an engine that's more specialized for data doesn't fit into memory and I need to look more specialized for data that does fit into memory.
+So we start with a scan and then we do a dot filter and we want to use verbs. Verbs, that's the declarative part. In pandas we often do indexes for a... and those indexes are ambiguous in my opinion because you can you can pass in a NumPy array with booleans but you can also pass in a NumPy array with integers so you can do slicing, you can also pass in a NumPy, a list of strings and then you do column selection.
+So it has three functions.
+>> One thing that I find really interesting about Pandas is it's so incredible and people who are very good with Pandas, they can just make it fly.
+They can make it really right expressions that are super powerful.
+But it's not obvious that you should have been able to do that before you see it.
+There's a lot of not quite magic, but stuff that doesn't seem to come really straight out of the API directly.
+you pass in some sort of a Boolean expression that involves a vector and some other test into the brackets.
+I wait, how do I know I can do that?
+Whereas this, your API is a lot more of a fluent API where you say, PD, you'd say PL, PL.scan, CSV.filter.groupby.aggregate.collect, and it just flows together.
+Does that mean that the editors and IDEs can be more helpful suggesting what happens at each step?
+Yes, we are really strict on type.
+So we also only return a single type from a method.
+And we only a dot filter just expects a Boolean expression that produces a Boolean, not an integer, not a string.
+So we want our methods from reading our code, you should be able to understand what should go in there.
+That's really important to me.
+It should be unambiguous, it should be consistent, and your knowledge of the API should expand to different parts of the API.
+And that's where I think we're going to talk about this later, but that's where expressions really come in.
+This portion of talk Python to me is brought to you by user interviews.
+As a developer, how often do you find yourself talking back to products and services that you use?
+Sometimes it may be frustration over how it's working poorly.
+And if they just did such and such, it would work better and it's easy to do.
+Other times it might be delight.
+Wow, they auto-filled that section for me.
+How did they even do that?
+Wonderful, thanks.
+While this verbalization might be great to get the thoughts out of your head, did you know that you can earn money for your feedback on real products?
+User interviews connects researchers with professionals that want to participate in research studies.
+There is a high demand for developers to share their opinions on products being created for developers.
+Aside from the extra cash, you'll talk to people building products in your space.
+You will not only learn about new tools being created, but you'll also shape the future of the products that we all use.
+It's completely free to sign up and you can apply to your first study in under five minutes.
+The average study pays over $60.
+However, many studies specifically interested in developers pay several hundreds of dollars for a one-on-one interview.
+Are you ready to earn extra income from sharing your expert opinion?
+Head over to talkpython.fm/userinterviews to participate today.
+The link is in your podcast player show notes.
+Thank you to user interviews for supporting the show.
+- I just derailed you a little bit here as you were describing this.
+So you start out with scanning a CSV, which is sort of creating and kicking off a data frame equivalent here.
+- A lazy frame.
+- And then you, a lazy frame, okay.
+And then you say a dot filter and you give it an expression like this column is greater than five, right?
+Or some expression that we would understand in Python.
+That's the filter statement, right?
+Yeah, and then we follow with a group by argument, and then an aggregation where we say, okay, take all columns and sum them.
+And this again is an expression.
+These are really easy expressions.
+And then we take this lazy frame, and we materialize it into a data frame that column collect on.
+And collect means, okay, all those steps you recorded, now you can do your magic, where we optimize or get all the stuff.
+And what this will do here, it will recognize that, Okay, we've taken the iris.csv, which got different columns.
+And now in this case, it won't.
+So if you would have finished with a select, where we only select a few columns, it would have recognized, oh, we don't need all those columns in the CSV file, we only take the ones we need.
+What it will do, it will push the filter, the predicate, down to the scan.
+So during the reading of the CSV, we will take this predicate.
+We say, okay, the sample length is larger than five.
+The rows that don't match this predicate will not be materialized.
+So if you have a really large CSV file, this will really, let's say you have a CSV file with tens of gigabytes, but your predicate only selects 5 percent of that, then you only materialize 5 percent of the 10 gigabytes.
+>> Yeah. So 500 megs instead of 10 gigabytes or something like that, or 200 megs, whatever it is, quite a bit less. That's really interesting.
+This is all part of the benefits of what we're talking about with the lazy frames, lazy APIs, and building up all of the steps before you say go, because in pandas, you would say read CSV.
+So, okay, it's gonna read the CSV, now what?
+- Yes. - Right?
+And then you apply your filter if that's the order you wanna do it in, and then you group and then, and so on and so on, right?
+It's interesting in that it does allow more database-like behavior behind the scenes.
+- Yeah, yeah.
+In the end, in my opinion, the data frame should be seen as a table in a database.
+It's the final view of computation.
+Like you can see it as a materialized view.
+We have some data on this, and we want to get it into another table, which we would feed into our machine learning models or whatever.
+And we do a lot of operations on them before we get there.
+So I wouldn't see a data frame as a data.
+It's not only a data structure.
+It's not only a list or a dictionary.
+There are lots of steps before we get into those tables.
+We eventually will.
+- Right.
+So here's an interesting challenge.
+There's a lot of visualization libraries.
+There are a lot of other data science libraries that know and expect Pandas DataFrame.
+So like, okay, what you do is you send me the Pandas DataFrame here, or we're going to patch Pandas so that if you call this function on the DataFrame, it's gonna do this thing.
+And they may say, "Richie, fantastic job.
+you've done here in Polars, but my stuff is already all built around pandas.
+So I'm not going to use this.
+Right.
+But it's worth pointing out.
+There's some cool pandas integration, right?
+Yeah.
+Yeah.
+So this, so Polars doesn't want to do plotting.
+I don't think it should be in a different language.
+Maybe another language, another library can do it on top of Polars.
+If they feel like it, it shouldn't be in Polars in my opinion.
+But often when you do plotting, you're plotting the number of rows will not be billions.
+I mean, there's no plotting engine that can deal with that.
+So you will be reducing your big data set to something small, and then you can send it to the public.
+- There's hardly a monitor that has enough pixels to show you that, right?
+So, yeah.
+- You can call it two pandas, and then we transform our Polars data frame to pandas, and then you can integrate with scikit-learn.
+And we often find that progressively rewriting some pandas code into Polars already is cheaper than keeping it in Pandas.
+So if you do, if you go from pandas to polars, do a join in polars and then back to pandas, we probably made up for those double copies.
+Pandas does a lot of internal copies.
+If you do a reset index, it copies all data.
+If you do, there are a lot of internal copies in pandas which are implicit.
+So I wouldn't worry about an explicit copy in the end of your ETL to go to plotting when the data is already spawned.
+- Right, right.
+So let's look at the benchmarks 'cause it sounds like to a large degree, even if you do have to do this conversion in the end, many times, it still might even be quicker.
+So you've got some benchmarks over here, and you compared, I'm gonna need some good vision for this one.
+You compared Polar's, Panda's, Dask, and then two things which are too small for me to read.
+Tell us what you compared.
+- Modin and Vax.
+- Modin and Vax, okay.
+And for people listening, you go out here and look at these benchmarks, link right off the homepage.
+There's like a little tiny purple thing and a whole bunch of really tall bar graphs, cut the rest.
+- Yeah.
+- And the little tiny thing that you can kind of miss if you don't look carefully, that's the time it takes for Polars.
+And then all the others are up there in like 60 seconds, a hundred seconds, and then Polars is like quarter of a second.
+So, you know, it's easy to miss it in the graph, but the quick takeaway here, I think is, there's some fast stuff.
+- Yeah, yeah.
+We're often orders of magnitudes faster than pandas.
+So it's not uncommon to hear it's 10 to 20x times faster, Especially if you write proper pandas and proper polos, it's probably 20x if we deal with I/O as well.
+So what we see here are the TPCH benchmarks.
+TPCH is a database query benchmark standard, which this is used by every query engine to show how fast it is.
+And those are really hard questions that really reflects the muscles of a query engine.
+So you have joins on several tables, different group by different nested group by etc. And yeah, yeah, I really tried to make those other tools faster. But so in memory, Rust and modem, that was really hard to make stuff faster than pandas. Now on some on a few occasions, once we include IO, all those tools first needed to go via pandas. And yeah, what this sort of shows is that we have pandas, which is a single threaded data frame engine, and then we have tools that parallelize formats, and it's not always, they don't, just parallelizing formats doesn't make it faster.
+So if we have a filter or a element-wise multiplication, parallelization is easy.
+You just split it up in chunks and do your parallelization, and then those tools win.
+- You got 10 cores, you can start 10 threads, and I can take 1/10th the data and start to answer yes or no for the filter question, for example.
+Most people don't realize that a lot of data frame operations are not embarrassingly parallel.
+A group by is definitely not embarrassingly parallel.
+A join needs a shuffle.
+It's not embarrassingly parallel.
+And that's why you see those tools being slower than pandas because they're string data and then you have a problem.
+Or we need to do multiprocessing and we need to send those Python objects to another project can we copy data, which is slow, or we need to do multi-threading and we're bound by the GIL and we're single-threaded.
+And then there is the expensive structure.
+- Yeah, I think there's some interesting parallels for Dask and Polars.
+On these benchmarks, at least, you're showing much better performance than Dask.
+I've had Matthew Rocklin on a couple times to talk about Dask and some of the work they're doing there at Coiled, and it's very cool.
+And one of the things that I think Dask is interesting for is allowing you to scale your code out to multi-cores on your machine or even distributed grid computing or process data that doesn't fit in memory and they can behind the scenes, juggle all that.
+Yeah.
+I feel like Polar's kind of has a different way, but attempts to solve some of those problems.
+Yeah.
+The Polar's has full control over it, over everything.
+So it's built from the ground up and it controls the IO, it controls their own memory, it controls which trap gets which data and in DOS it goes through, it takes does this other tool and then parallelizes that, but it is limited by what this other tool also is limited by.
+But I think, so on a single machine, it has those challenges.
+I think Dask Distributed does have these challenges.
+And I think for Distributed, it can work really well.
+- Yeah, the interesting part with Dask, I think, is that it's kind of like Pandas, but it scales in all these interesting ways, across cores, bigger memory, but also across machines, and then, you know, across cores, across machines, like all that stuff.
+- Yeah, and that's--
+I feel like Dask is a little bit, maybe it's trying to solve like a little bit bigger compute problem.
+Like how can we use a cluster of computers to answer these questions?
+- Their documentation also says it themselves.
+They say that they're probably not faster than Pandas on a single machine.
+So they're more for the large, big data.
+But Pandas wants to be, and a lot faster on a single machine, but also wants to be able to do out-of-port processing on a single machine.
+So if you, we don't support all queries yet, but we already do basic joins, group by sorts, predicates, element wise operations.
+And then we can process, I process 500 gigabytes on my laptop.
+- That's pretty good.
+Your laptop probably doesn't have 500--
+- No, no, no, no, it's 16 gigs.
+Yeah.
+- Nice.
+It's probably actually a value to, as you develop this product, to not have too massive of a computer to work on.
+if you had a $5,000 workstation, you might be a little out of touch with many people using your code.
+- Yeah. - And so on.
+- Although I think there, I think Polar's like scaling on a single machine makes sense for different reasons as well.
+I think a lot of people talk about distributed, but if you think about the complexity of distributed, you need to send data, shuffle data over the network to other machines.
+So there are a lot of people using Polar's in our discord who have one terabyte of RAM and say, it's cheaper and a lot faster than Spark because they can run policies faster on a single machine and one, two, they have a beefy machine with like 120 cores and they don't have to go over the network to parallelize.
+And yeah, so I think times are changing.
+I think also scaling out data on a single machine is getting more and more.
+- It is.
+One of the areas in which it's interesting is GPUs.
+Do you have any integration with GPUs any of those sort of things?
+Not suggesting that necessarily is even a good idea.
+I'm just wondering if it does.
+No, I get this question, but I'm not really convinced I can get the memory.
+I can get the data fast enough into the memory.
+Like we want to process gigabytes of data and the challenge already on the CPU is, is getting the data from cache or memory fast enough on a CPU.
+This is, I don't know.
+I don't know.
+Yeah.
+So maybe we could talk really quickly about platforms that it runs on.
+You know, I just, this is the very first show that I'm doing on my M2 Pro processor, which is fun.
+I literally been using it for like an hour and a half, so I don't really have much to say, but it looks neat.
+Anyway, you know, that's very different than an Intel machine, which is different than a Raspberry Pi, which is different than, you know, some version of Linux running on ARM or on AMD.
+So where, where do these, what's the, the reach?
+Well, we support it.
+We support it.
+So, Polars also has a lot of SIMD optimizations. SIMD stands for Single Instruction Multiple Data, where, for instance, if you do a floating point operation, instead of doing a single floating point at a time, you can fill in those vector lanes into your CPU, which can fit eight floating points, and in a single operation can compute eight at a time.
+And then you have eight times the parallelism on a single core.
+Those instructions are only activated for Intel.
+So we don't have these instructions activated for ARM, but we do compile to ARM.
+How it performs.
+I think it performs fast.
+Yeah.
+But so if the standard machines, right.
+Mac OS windows, Linux or where I'm going to go and it ships as a wheel.
+So you don't have to have any, you don't have to have Rust or anything like that.
+We also have Conda, but the Conda is always a bit lagging behind.
+So I'd advise to install from pip because we can, we control this deployment.
+Yeah, exactly.
+You push it out to the PyPI and that's what pip sees and it's going to go right.
+Pretty much instantly.
+I guess it's worth pointing out while we're sitting here is, um, not that thing I highlighted this.
+You do have a whole section in your user guide, the Polars book called coming from pandas that actually talks about the differences, not just how do I do this versus, you know, this operation in pandas versus Polars, but it also talks about some of the philosophy, like this lazy concepts that we've spoken about and a query optimization.
+I feel like we covered it pretty well.
+Unless there's maybe some other stuff that you want to throw in here really quick, but I mostly just want to throw this out as resource, because I know many people that are coming from pandas and they may be interested in this.
+And this is probably a good place to start.
+I'll link to it in the show notes.
+I think the most controversial one is that we don't have the multi-index.
+You don't have anything other than zero based, zero, one, two, three.
+- Where is it in the array type of-- - Yeah.
+Well, we can, we will support data structures that make lookups faster, like index in a database sense.
+But it will not involve the, it will not change the semantics of the query.
+That's an important thing.
+Okay. Yeah, so I encourage people who are mostly pandas people to come down here and, you know, look through this.
+It's pretty straightforward.
+Another thing that I think is interesting and worth talking about maybe is we could touch a little bit on some of the How can I, in your user guide, you've got, how can I work with IO?
+How can I work with time series?
+How can I work with multiprocessing and so on?
+What do you think is good to highlight out of here?
+When the user guide is a bit outdated.
+So I think it's a year old.
+So the, for instance, IO is changing.
+Boiler just writes it as its own IO readers.
+So we've written our own CSV reader, JSON reader, RPC, Arrow, and that's all in our control, but for interaction with databases, often a bit more complicated.
+Deal with different drivers, different ways. And currently we do this with ConnectorX, which is really great and allows us to read from a lot of different databases, but it doesn't allow us to write from databases yet. And this is luckily changing. I want to explain a bit why. So Polaris builds upon the Arrow memory specification. And the Arrow memory specification is sort of the standard of how memory for data, how memory for columnar data should look into, how columnar data should be represented in memory. And this is becoming a new standard. And Spark is using it, Dremel, Pandas itself. For instance, if you read a Parquet in Pandas, it reads in first into error memory and then copies that into Pandas memory. So the error memory specification becoming a standard, and this is a way to share data to processes, to other libraries within the process without copying data.
+We can just swap our pointers if we know that we both support error.
+>> Error defines basically in memory, it looks like this.
+>> If you both agree on that, we can just swap our pointers.
+>> Right. Because a .NET object, a C++ object, and a Python object, Those don't look like anything similar to any of them, right in memory.
+And, you know, so, so this is from the Apache Arrow project. Yeah.
+And this is really, really used a lot by a lot of different tools already.
+And currently, there is coming the ADBC, which is the Apache Arrow database connector, which will solve all those problems, because then we can write, read and write from a lot of databases in arrow, and then it will be really fast and really easy for us to do.
+So luckily we, we, that's one of those foundations of folders.
+I'm really happy about it because supporting arrow and using arrow memory gives us a lot of interaction, interop with other libraries.
+Yeah.
+That's interesting.
+And when you think of pandas, you know, it's kind of built on top of numpy as its core foundation and it can exchange numpy arrays with other things.
+Yeah.
+Do that.
+So Apache arrow is kind of, kind of your, your base.
+Yeah.
+- Yeah, well, it's kind of full circle because Apache Arrow is started by Wes McKinney.
+Wes McKinney being known as the creator of Pandas.
+And when he got out of Pandas, he thought, okay, the memory representation of NumPy is just not, we should not use it.
+And then he was inspired to build Apache Arrow, which learned from Pandas and yeah.
+- So that's how you learn about these projects, right?
+This is how you realize, oh, we had put this thing in place.
+Maybe we work better, right?
+work on a project for five years.
+And you're like, if I got a chance to start over, but it's too late now, but every now and then you do actually get a chance to start over.
+I didn't realize that Wes was involved with both.
+I mean, I knew from pandas, but I didn't realize it.
+Yeah.
+He is a CTO of Fultron, which, uh, no, he started Apache Arrow and that's, Apache Arrow is sort of super big, like use everywhere, but sort of middle better. Like it's end users are developers and end users are developers who build tools and not developers who use libraries. That's something like that.
+Right. You might not even know that you're using it. You just use Agiles Polars. And oh, by the way, it happens to internally be better because of this. Yeah. Very cool. Okay, let's see. We've got a little bit of time left to talk about it. So for example, this some of these, how can I let me just touch on a couple that are nice here. So you talked about Connector X, you talked about the database, but it's like three lines of code to define a connection string, define a SQL query, and then just, you can just say PL.read SQL.
+And there you go.
+You've, you call it data frame or what do you call the thing you get back here?
+So reading is always a data frame.
+Scanning will be a lazy frame.
+Got it.
+Okay.
+Is there a scan SQL as well?
+No, this might happen in the future.
+The challenge is, are we going to push back our optimizations?
+So you write a polars query and then we must translate that into SQL, into the SQL we send to the database.
+But that needs to be consistent over different databases.
+That's a whole other rabbit hole we might get into.
+>> I'm not sure it's worth it because you can already do many of these operations in the SQL query that you're sending over.
+You have two layers of query engines and optimizers and query plans.
+It's not like you can't add on additional filters, joins, sorts, and so on before it ever gets.
+It would be terrible if someone writes select star from table and then writes the filters in polars.
+And then the database has sent all those data over the network.
+So yeah, ideally, we'd be able to push those predicates down into the SQL.
+Yeah, but you know, somebody is going to do it because they're more comfortable writing polar API in Python than they are running T-SQL.
+>> Yeah. If it's possible, someone will write it.
+>> It's not optimal. That is right.
+Let's see what else can you do here.
+We've already talked about the CSV files.
+This is the part that I was talking about where you've got the toggle to see the Rust code and the Python code.
+I think people might appreciate that.
+Parquet files. Parquet files is a more efficient format.
+Maybe talk about using Parquet files versus CSV and why you might want to get rid of your CSV and like store these intermediate files and then load them.
+The problem is it's really faulty as a reader.
+I really did my best on that one.
+But if you can use Parquet or Arrow, like you see, because your data is typed, there's no ambiguity on reading.
+We know which type it is.
+Right.
+Because CSV files, even though it might be representing a date, it's still a string.
+We need to parse it.
+And it's all over.
+Yeah, it's slow to parse it.
+There's also we can just--
+so Parquet interacts really nicely with query optimization.
+So we can select just a single column from the file without touching any of the other columns.
+We can read statistics.
+And so a Parquet file can write statistics, which knows, OK, this page has got this maximum value, this minimum value.
+And if you have written a Polars query, which says also only gives me the result where the value is larger than this.
+And we see that the statistics say it cannot be in this file.
+We can just skip the whole column.
+We don't have to read.
+- Oh, interesting.
+- So there are a lot of optimizations, which, so the best work is work you don't have to do and Parquet allows it.
+- Exactly.
+Or you've done it when you created the file and you never do it again or something like that.
+Yeah, so you've got a read Parquet, scan parquet, I suppose that's the data frame versus lazy frame.
+And then you also have the ability to write them.
+That's pretty interesting.
+JSON, multiple files.
+Yeah.
+Yeah.
+There's just a whole bunch of how do I, how can I rather, but bunch of neat things.
+What else would you like?
+I think the most important thing I want to touch on is the expression API.
+So that's a bit, you go a bit higher.
+So just follow up.
+They got her own chapter.
+One of the goals of the Polar's API is to keep the API service small, but give you a lot of things you can do.
+And this is where the Polar's expressions come in.
+So Polar's expressions are expressions of what you want to do, which are run and parallelized on a query engine.
+And you can combine them indefinitely.
+So an expression takes a series and produces a series.
+And because the input is the same as the output, you can combine them.
+And as you can see, we can do pretty complicated stuff.
+and you can keep chaining them. And this is the same like, I'd like to see it for instance, the Python vocabulary is quite small. So we have a while we have a loop, we have a variable assignment. But if you I think it fits into maybe two pieces of paper. But with this, you can write any program you want with the combination of all those, all those, yeah, this vocabulary. Yeah. And that's what we want to do with the Polars expressions as well.
+So you've got a lot of small building blocks which can be combined into...
+Yeah, so somebody could say I want to select a column back, but then I don't want the actual values.
+I want the unique ones, a uniqueness. So if there's duplicate, remove those and you can do a .account.
+Then you can add an alias which gives it a new, which basically defines the column name.
+Yeah, you could read it as...
+It's not names, it's...
+- You could read it as an S.
+So take column names as unique names to in SQL, but as is a keyword and Python, so you're not allowed to use it.
+- Right.
+(laughs)
+It means something else, yeah.
+- That's interesting.
+- Okay, yeah, so people, they use these expressions to do lots of transformations and filtering and things like that.
+- Yeah, so these expressions can be used in a select on different places, but the knowledge of expressions extrapolates to different locations.
+So you can do it in a select statement, and then you select column net, you select this expression, and you get a result.
+You can also do this in a group by aggregation.
+And then the same logic applies.
+It runs on the same engine, and we make sure everything is consistent.
+And this is really powerful because it's so expressive, people don't have to use custom apply with lamda.
+Because when you use lamda, it's a black box to us.
+It will be slow because it's Python, and we don't know what happens.
+So lamda is, it will be slow, it will kill parallelization because it gils work, but yeah, Alanda is three times better.
+Right. It gets in the way of a lot of your optimizations and a lot of your speed there.
+That's why we want to make this expression API very complete. So you don't need them as much.
+Yeah. So people are wanting to get this, get seriously into this, they should check out chapter three expressions, right? And just go through there. Probably, especially, you know, you know, sort of browse through the Python examples that they can see where, go back and see what they need to learn more about.
+But it's a very interesting API.
+The speed is very compelling thing.
+I think it's a cool project.
+Like I said, how many people we got here?
+13,000 people using it already.
+So that's a pretty big community.
+- Yeah, so if you're interested in the project, we have a Discord where you can chat with us and ask questions and see how you can best do things.
+It's pretty active there.
+- Cool, the Discord's linked right off the homepage.
+So that's awesome.
+People can find it there.
+Contributions, people want to make contributions.
+I'm sure you're willing to accept PR's and other feedback.
+- Before you put in a really large PR, please first open an issue with a, to start the discussion.
+This contribution is welcome.
+And we also have a few getting started, good for new contributors.
+- Okay, yes, you've tagged or labeled some of the issues as look here if you want to get into this.
+I must say, I think we're an interesting project to contribute to because we're, you can, it's not, not everything is set in stone.
+So there are still places where you can play.
+I'm not sure.
+- There's still interesting work to be done.
+It's not completely 100% polished and finalized.
+- Yeah, on the periphery, yeah.
+- Yeah, very cool.
+Let's wrap it up with a comment from the audience here.
+Ajit says, "Excellent content, guys.
+It certainly helps me kickstart my journey from pandas to polars.
+Awesome, awesome.
+Glad to help.
+I'm sure it will help many people do that.
+So Ritchie, let's close it out with final call action.
+People are interested in this project.
+They wanna start playing and learning polars.
+Maybe try it out on some of their code that is pandas at the moment.
+What do they do?
+- I'd recommend if you have a new project, just start in polars.
+Because you can also rewrite some pandas, but the most fun experience will just start a new project in pandas because then you can really enjoy what Polars offers.
+Learn the expression API, learn how you use it declaratively, and yeah, it will be, then it will be most fun.
+Absolutely.
+Sounds great.
+And like we did point out, it has the to and from Pandas data frame.
+So you can work on a section of your code and still have it consistent, right?
+With other parts that have to be with Pandas.
+You can progressively rewrite some performance heavy parts.
+I also think, so Polars is really strict on the schema, on the types.
+It's also, if you write any ETL, you will be really happy to do that in Polars because you can check the schema of a lazy frame before executing it.
+Then you know the types before running the query.
+And if the data comes in and it doesn't apply to this schema, you can fiil fast instead of having strange outputs.
+Oh, that's interesting because you definitely don't want zero when you expected something else because it could be pars or other weird, whatever.
+Right.
+Yeah.
+So this was my, so missing data in Polar doesn't change the schema.
+Yes.
+So Polar is really, the schema is defined by the operations and the data and not by the values in the data.
+So you can statically check.
+Excellent.
+All right.
+Well, congratulations on a cool project.
+I'm glad we got to share with everybody.
+Thanks for coming on the show.
+Bye.
+You bet.
+Bye.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Taipy is here to take on the challenge of rapidly transforming a bare algorithm in Python into a full-fledged decision support system for end users.
+Get started with Taipy Core and GUI for free at talkpython.fm/taipy, T-A-I-P-Y.
+Earn extra income from sharing your software development opinion at user interviews.
+head over to talkpython.fm/userinterviews to participate today.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at TalkPython.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct rssfeed@/rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
+[BLANK_AUDIO]

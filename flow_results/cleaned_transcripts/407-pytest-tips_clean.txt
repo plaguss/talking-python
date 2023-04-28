@@ -1,0 +1,753 @@
+If you're like most people, the simplicity and ease of getting started is a big part of PyTest's appeal.
+But beneath that simplicity, there's a lot of power and depth.
+We have Brian Okken on this episode to dive into his latest PyTest tips and tricks for beginners and power users.
+This is Talk Python to Me, episode 407, recorded February 27th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by Microsoft for Startups Founders Hub.
+Get early stage support for your startup without the requirement to be VC backed or verified at talkpython.fm/foundershub.
+It's also brought to you by brilliant.org.
+Stay on top of technology and raise your value to employers or just learn something fun in STEM at brilliant.org.
+Visit talkbython.fm/brilliant to get 20% off an annual premium subscription.
+Brian, welcome back to Talk Python to me.
+- Well, thank you.
+It's good to be back.
+- It's really good to have you back.
+I don't know if you've noticed, but over on Talk Python, I put up a guest page.
+And who is out of the 440 guests we've had, you are the most common guest and you are now pulling further away from Brett Cannon and Anthony Shaw who are hot on your tails there.
+So I'm sure people know you and are familiar with your work, but for those who don't, quick introduction.
+People probably know me from Python Bytes actually.
+And also I have a test podcast called Test & Code that's kind of on pause right now, but it'll start up again in a month or so.
+Okay, so I am a software developer, mostly embedded as so day job software embedded to C++ stuff. Work with RF test equipment. I got involved with Python and pytest around the testing part of that the the system level testing.
+And then I started writing about PyTest and about test stuff, and then I started podcasting about it, and then I started writing books about it and all that sort of stuff.
+So all of this came from me, and my love for Python and PyTest came from my embedded world.
+I suspect a lot of people don't really think about it that often, but Python is great for testing things that are not just other Python code.
+Yeah. I mean, there's a lot of people that, like, for instance, use it even to test websites that are not written in Python, just because or not written in Python or not written.
+Like you can test, you can really test any website.
+So if you can get access to it from Python, you can test it with PyTest.
+>> Right on. We're going to see a whole bunch of cool tips and tricks and ideas about how to do that with PyTest and do it better.
+Because as I said, you've been using it in your day job.
+You've also been using it in a semi non-standard way, like testing both C++ code and actual hardware, which is pretty awesome.
+And you've got a lot of exposure through your book and other things.
+So it's going to be really fun.
+I also wanted to say that early on, so getting started with podcasting is nerve-wracking.
+It's a stressful thing.
+And way back when, when I was just starting out on testing code, you were very encouraging and wanted me to be successful and keep going.
+And that's meant a lot. So thank you.
+No, thank you for saying that here on the show.
+I really appreciate it.
+And five, six years later, however long it's been, you're still going for sure.
+I mean, tomorrow we're doing another show on Python Bytes.
+- Yeah, it's been great.
+- Yeah, thanks.
+And I guess I did want to give a shout out to Python Bytes.
+I don't speak about it that often on Talk Python.
+Every now and then I do, but usually I'm speaking to guests who maybe are not familiar with it.
+But that's the show you and I do.
+And so I really want to encourage people who like the show to also check that one out.
+Tell people what Python Bytes is real quick, Brian.
+Well, it's Python headlines and news and headlines delivered directly to your earbuds.
+But the gist of it is, is we both pick a couple topics per week, and we don't even really talk about it ahead of time. We just pick a couple of Python related topics that we want to talk about.
+And could be like a new library, could be an old library or a tool or a blog post, or something happening in the news. And then we just talk about it for a few minutes.
+and then the other one asks questions.
+And when we have guests on, they come in too.
+One of the things I really like about it is it's always fresh.
+And then also, people have said, if a topic I'm not interested in, I just wait a few minutes and there'll be something else I can listen to.
+So that's cool.
+Exactly. That's really fantastic that it's just, it's always something new.
+And, you know, it's great for us.
+We are always on top of things, always learning, but it's, I think it's really cool.
+Way to stay on top of what's happening in the Python space.
+Yeah, and for me personally, it's an excuse to stay on top of things in the Python space.
+So, yeah.
+Not just an excuse, a requirement.
+You got to be on the microphone in two hours.
+We're going to figure it out.
+Yeah. Awesome.
+All right.
+Now, also, I do want to point out that over on Talk Python Training, you did a really great course calling Getting Started with PyTest.
+And people can check that out, as well as for a couple years now, Now you've iterated on your book, Python Testing with PyTest.
+On to the second edition.
+So those are two really good resources.
+I feel like you're probably gonna be drawing from for some of these tips, right?
+- Yeah, definitely.
+And the first book launched into having the ability to be able to teach more people.
+So I was able to teach other corporate people and individuals.
+And then I took that learning from like how to teach people how to use PyTest and use that to influence the second edition, a complete rewrite, and then took all of that and leveraged it into the short three, it's like three and a half hours, it's really short, for the Getting Started with PyTest course.
+I really kind of like what we've done with that.
+You helped out a lot with that course as well.
+- Yeah, I feel, I look back on my college career, I don't know how you feel about this, Brian, but I look back and think, you know, a lot of times there's sort of the meme, like that could have been an email for a meeting these days.
+Like, I kind of feel that way about college.
+Like a lot of stuff I did in college could have been, it could have been four hours.
+I could have been a four hour course that I spent a week on, but no, I spent a whole semester and you know.
+- Yeah, exactly.
+- Six hours.
+You feel the same way looking back?
+(laughing)
+- I do and yeah, there's a lot of stuff that I'm like, wow, that could have been like even a half an hour course.
+- Yeah, exactly.
+So I feel like you've condensed it down really well here.
+So people can check out the course and they can check out the book as well.
+So a lot of kind comments in the audience as well.
+I'm seeing for your book, so thank you folks.
+- Nice.
+- Yeah, well, I guess I envisioned us to kind of talk about this as a podcast, but you leveled this up a little bit here.
+You took this and put it together as an article, so people will be able to come back to it, right?
+This whole idea of these tips and tricks.
+- Yes, because we were bouncing around ideas for what to do, and you mentioned like maybe some tips and tricks from the course and pulling them together as an episode, and I'm like, you know what, I haven't ever done that.
+So I pulled together a blog post called PyTest Tips and Tricks.
+And it is a blog post, but it's at pythontest.com.
+But I do want to keep it going.
+So I'll probably, some of these topics, I'll probably bring into, create full articles out of them.
+And some of them are just as good as is things.
+- It's a living blog post.
+- Yes.
+You started it.
+There was a bunch of the, you started a document that had some of the stuff that you pulled out.
+I don't know where you got all this stuff that you started.
+- I went through your course.
+- I paid attention.
+- Nice.
+- It's good.
+There's a lot of, you know, for a, like a getting started sort of story.
+There's a lot of really good tips that I think are, are useful for a lot of folks.
+All right, well, let's jump in.
+There's, you've broken into these different areas and I mean, let's, maybe I'll, I'll kick it over to your screen for you to, to follow along.
+Yeah.
+But yeah, let's kick it off.
+- I want to start out really with one of the things that it's so simple to start PyTest.
+So they like the, and I think a lot of people get into it.
+So it's really simple and easy to use.
+If you, to start with, you can just write a file called test_something, and then stick a function in it called test_something, and that PyTest will run that.
+And if you can access, whatever you can access with that, you can get started.
+And I think it's a really cool feature of PyTest that you can get started that easily, but also I don't think very many people like learn too much more.
+They'll like look up, they'll like, somebody will mention fixtures, So they'll look that up or parameterization, they'll look that up.
+- Probably they'll say, how do you catch an exception?
+This is supposed to be an exception.
+Like, how do I do that?
+And maybe that part, that aspect of it confused me a little bit when I first did PyTest.
+I'm like, well, how do I make it do PyTest things?
+I just, it's just a file.
+And then I sure I can do Python asserts, but how do I do like tell PyTest is it supposed to be greater than seven or not?
+- Yeah.
+- There's a lot of sort of implicit magic behind the scenes as part of that, right?
+- There is, and I, like for instance, just using normal asserts, because with like unit tests, you have to do a whole bunch of extra assert methods and helper methods and stuff, and you have to derive, with unit, it's often people coming from unit tests or some other X unit style that are confused at the simplicity, because people are used to deriving from a test class or something.
+And then I actually had saw the reverse of it.
+I saw people that were not used to X unit style.
+I just wanted to write some test code.
+And this whole notion on the unit test of deriving from a class, I saw a whole bunch of people that I tried to teach at unit test to say, oh, well, I'm gonna have to go and learn about like object oriented programming.
+And I'm like, oh, you don't, it's just the structure.
+That's all, you don't need to know how to use it.
+But so that's one of the nice things.
+So I have on the screen, just a simple test.
+I've also had a lot of people ask me, well, can you give me a template for what a default template for a unit test or a test?
+And I'm like, well, it's just test underscore, that's your template.
+I mean, there's nothing to put in it.
+I've said, okay, for my template, you get at the top of your test, you write getting ready, like a comment that's like getting ready for setup or something.
+And then you set up all the stuff.
+And then you do an action in the middle.
+And then at the end, you assert what, if the action worked.
+And there you go, there's a template.
+- There's two traditional styles of structuring this.
+The early testing days were the three A's, the arrange, act, and assert, which is kind of a little bit like what you got here.
+And then there's the given, when, then, which I feel like a little more BDD world, maybe.
+What do you prefer?
+- I learned given, when, then with some of the early writings around BDD.
+And I just liked it.
+I liked the notion of like, oh, given some state, if I do that, when I do something, then something happens and I can test that something.
+Now there wasn't any structure around it.
+There wasn't any code.
+So now BDD has these Gherkin syntaxes and stuff.
+And for people that that works for, awesome.
+It just doesn't work for me.
+But the notion of behavior-driven development, not the syntax, but the notion of, think about the different behaviors of the system and test for it.
+That I love.
+But the give and win then and arrange active search essentially the same thing.
+Do you feel like the nomenclature of BDD maybe hampered its adoption?
+Like talking about cucumber and gherkin and--
+you go to your boss and say, we're working on the gherkin fathering, and you need to do real work.
+I don't want to be a pessimist, but I really think what happened--
+my guess is that it's such a simple concept that there wasn't hardly anything to charge people for as a consultant.
+Yeah, or to give speeches and conference talks about or whatever.
+But if you add this extra gherkin layer on top of it, now you have something you can train people about.
+There you go. Way to productize it.
+Maybe. So I think it's all good, just don't pay for it.
+All right. Before we move on from this topic, I think the Arrange, Act, Assert or the Give and Win Then is a really nice way to think about it.
+I think there's still a large set of folks who struggle to know what scale should this be.
+Should I do 15 asserts? I've done all the work to get them ready. Should I do one assert? If I do two, am I failing? I was supposed to do one, now two is the wrong, you know, two is too many.
+How do you feel about what goes under those three comment sections?
+I'm glad you brought that up. Really the one action should be like one function call or one method call or something, if you can get away with that.
+And the getting ready stuff, it could be a lot, especially for the first time.
+So, one comment, dollar driven development, that's funny.
+We're going to get to fixtures later, but I think it's okay if it's a whole bunch of setup.
+So it could be like a ton of setup that you have, like most of your code of your function might be getting ready to test something.
+And especially for the first iteration of the test, that's fine, I think.
+And that's where it's good to have comments or a comment, even like a very visible comment block with a bunch of lines and stuff like that to separate the different parts.
+As far as the asserts, there's a lot of people that think, like, you have to do just one assert, and you're failing as a developer if you do more than one assert.
+And I think that's not true.
+There's problems with doing more than one assert.
+But am I doing an action?
+And if there's, like, several things I have to test about whether or not the action is right?
+Like in my world with the RF systems, if I'm setting up a signal and I'm measuring a signal, now, what is the, if I test that I got the right signal, at the end, I might be testing the power level and the burst width and the burst length, and I might be testing a whole bunch of stuff around it.
+And yes, I could separate those all into different tests, but if it's really just, it's really conceptually the same thing, I think it's fine to have multiple asserts.
+But if you really don't want to, there's ways to get around not doing multiple.
+- So you use semicolons, a lot of ands?
+- Well, you can, like you can stick like, for Booleans, for instance, if you had like six Booleans that you were testing, you could stick those in a list and compare the list to a list of expected Booleans.
+- Sure, you could, I mean, you're kind of like saying, like, how can we draw this out?
+But there are legitimate ways, like you could use the any iterator type of thing, or you could use the all, say, all of these things have to pass this or if any of them fail, then that's a certain not any, something like that.
+>> One of the problems of not doing that is that your test stops at the first failure.
+If that's a problem, and sometimes it is, you really do want to see the entire state of all of the, because it might help you debug it.
+Oh, the return code of a web page was like 400, and I expect it to be 200.
+But if you could see the message, it would be so much better.
+>> Yeah, if you could see more or if you're testing the title and that's wrong, but you know what I mean.
+If you see more than one bit of information, it helps.
+This portion of Talk Python to Me is brought to you by Microsoft for Startups Founders Hub.
+I'm here to tell you about a fantastic opportunity for startup founders, especially those of you interested in artificial intelligence.
+With over six figures and benefits, this program is a game changer for startups.
+you'll get $150,000 in Azure credits.
+And Founders Hub is offering a unique chance to access OpenAI's APIs as well as a new Azure OpenAI service, so you can easily infuse generative AI capabilities into your applications.
+The team at Microsoft will also provide you with one-on-one technical advice to help you with architectural plans, scalability, implementation best practices, and security.
+Plus, you'll have access to the network of mentors plugged into the startup world, which is a huge asset when building your network.
+You'll get expert help with topics like products, fundraising, go to market, and more.
+And the best part, the program is open to everyone and has no funding requirements, whether you're in idea phase or further along.
+It just takes five minutes to apply and you'll get massive benefits immediately.
+Harness the power of AI for your startup.
+Sign up for Microsoft for Startups Founders Hub today at talkbython.fm/foundershub.
+This is a no-brainer opportunity for startup founders, so don't miss out.
+Oh, and one more thing, just to make a point of how powerful these offerings are, I use the same AI on offer above to completely write that ad you just heard.
+It's incredibly powerful, and if you have the chance to incorporate OpenAI into your startup, you'd better not miss that chance.
+Sign up and get access today at talkbython.fm/foundershub.
+Thank you to Microsoft for sponsoring the show and to OpenAI for helping write this ad.
+- Now, I think that's also to be differentiated, as we'll get to later in some other tips, from, well, there's different cases, like what if I pass it a zero, and I pass it a 10, or something above 100, all these different inputs, and then I wanna test every, that's a different story.
+- Oh, yeah.
+- Right, right, so we'll get to that.
+All right, what's next?
+- Well, I wanted to, since we're talking about structuring a test function, I thought it'd be great to just remind people that you have a whole suite, so it's good to function, to think about how you're structuring your whole test suite.
+And by test suite, I just mean a directory of stuff that has tests in it.
+You can, being PyTest allows you to have your tests interspersed with your code, but I haven't seen that for a long time.
+A lot of people just have really a tests directory and that's what I'm used to.
+Anyway, or a couple, a couple of directories.
+Like I often have an examples directory that I want to make sure all those examples still work, like for PyTest plugins.
+And I also want to have the tests themselves pass.
+But anyway, structuring the test directory is good.
+I like, there's a bunch of ways to do it.
+I like to separate based on like functionality.
+So different like behaviors of a system and conceptual separations of the system into different functionality bits and separate those into directories.
+You can also structure it based on like some actual software subsystems in your software.
+And then some people do like the same code structure.
+So they have like the exact same directory structure in their tests as they do in their source code.
+But I think just thinking, making sure you think about it and don't just know, don't just think there's one answer.
+It's really how you wanna run the tests.
+And it helps me if I'm, like if I'm working on a behavior or sub, if you're normally working on a subsystem at that level, then subsystem makes sense to test.
+So you can just, like I'm working on my particular bit of code And so I'm running those tests related to that.
+You know, it's how you're running the test is how you're going to, anyway.
+- Depends how you think about it, right?
+And how it's organized in your brain.
+- Also, there's reporting considerations.
+So if you have to, if you're reporting to outside people that you're like tests are passing in different chunks, it might, the reporting might be easier if you're structured one way versus another.
+- Structured like your software or subsystems, that's straightforward to me.
+Like I've got a data access layer.
+So here's my test that tests the data access layer, presumably mocking out the database, but maybe not.
+When you think about having it in subdirectories, you would just have maybe subdirectories of those.
+And I guess another you could think about is like really, really slow integration style tests versus more units, for lack of a better word, tests.
+Right, like these are ones I can run now.
+These are the ones that take an hour.
+Let me run the ones I could take now.
+What's your style?
+- So I don't, not really that great at throwing in unit tests, 'cause I don't really see much value in unit tests.
+I know that I have to have behavior and tests that test the end user functionality.
+At the point where that is testing all of my code, then I don't feel the need to add unit tests, but there are times where they are needed, which is great.
+I do think it's great to separate those.
+The top hierarchy of separating behavior versus unit tests into one big chunk.
+>> Yeah.
+>> The main reason why I like that is because I really want my behavior tests to be, if I'm going to do coverage, I really want to know if my behavior tests are covering all of my code.
+It doesn't really help me much to know that my unit tests are covering all my code because that could lead to dumb tests.
+There might be a corner case in my code that I can write a unit test for, but I can't reach otherwise, so I think it's better just to delete the code.
+We might get our Pytest certifications taken away, or our Agile certifications taken away.
+I don't really have one.
+But I agree with you completely that some of these larger scale tests that kind of test larger bits of code, they're really, they might not be 100% on catching all the little things you could test, But usually if I break something, many of those break.
+You know, it's usually enough to catch the mistakes.
+- Yeah.
+- They're easier to write 20 big scale tests than a thousand small ones.
+- I've also never had a customer reported issue that could be reproduced as a unit test.
+- Avaro out there says, "Pytest docs introduces," or yeah, it talks about a slow mark just for that use case, which we will get to marks as well, but that's definitely a good recommendation.
+So maybe not actually using the directory structure for slow, but using marks.
+So coming back to that, but let's carry on.
+- Yeah.
+- That was structuring a test suite, which is excellent.
+- Well, okay, so I don't know how the transition is here, but I picked fixtures as the next thing.
+I think one of the first things people need to get used to with PyTest is fixtures, because it is the big brain shift from any other test framework.
+And it's, they're pretty cool.
+It's really just a function that's split in half.
+We've got a setup half and a teardown half.
+And they're separated by a yield keyword that separates the setup and teardown.
+And PyTest will call that before they're testing and then finish it up afterwards.
+That's about it.
+- Well, I think part of the transition is, you talked about the three A's, the arrange, act, and assert.
+The arrange part, if that's gonna get reused, well, fixtures are pretty well built for that.
+And you could have more than one fixture in a test, right?
+You could say this part arranges the database and this part arranges, I don't know, some set state of the app that you're gonna, you know, make them collide and see what happens.
+- Yeah, or connections to resources and all sorts of stuff, yeah.
+Or data, you can have fixtures that generate data for you.
+And there's many that do that.
+But one of the things, I guess I should have this one of the tips when writing a test, I recommend putting like, especially the first test for some something you write down, just write it in the test. Now, when you go to the right, the second one, that's a good time to go. How much of this setup is shared? And if the all of the setup is shared, mostly, then you can throw, maybe it makes sense to throw that in one or more fixture. I have seen people just copied it, just like take it and put into a fixture and I call the fixture setup.
+You can do that.
+It's a little dangerous though, because what are you setting up?
+I'd rather have it be maybe multiple different ones like setup database or configure the network or something like that.
+Have it be descriptive.
+You've got a word there, setup just doesn't say much, so say something, I guess.
+Well, that goes back to the whole part of testing that is documentation of how the system works.
+And part of that should be really good names for your tests.
+You have the advantage that no one is ever going to try to use your test code as an API.
+So it can be a ridiculous name.
+It's like 15, 20, 30 characters, because no one's going to be upset that the test runner doesn't care that the name is long, and no one's going to use it.
+The person that is going to look at it is either you or somebody else when something's broken and they're stressed out.
+So when they're trying to get done with their day and the test doesn't work, and they're looking at the code going, "What are we doing here?" So yeah, being verbose there is fine.
+In back to the RF world, like let's say I'm setting up both a transmitter and receiver before a test.
+I might be tempted to throw both of those in one fixture, and I have before, but I almost always end up splitting those up and have like setup transmitter, setup receiver, setup measurement system.
+have those separate because they're more reusable as parts later and stuff.
+>> Right. Maybe you need a receiver, not a transmitter for some particular reason somewhere.
+>> Another thing is, it's okay to not reuse fixtures, and they can be in the same file.
+If you just have this huge setup and a little tiny do something section, it's really nice to just throw that into a fixture.
+There's lots of reasons to throw that in the fixture.
+One of the great reasons is you can put asserts in the fixture.
+And you don't want to sprinkle asserts through your test because then your test fails and you're like, was the setup failure or not?
+But PyTest is awesome that if the assert happens in the fixture, it doesn't report the test as a failure, it reports it as an error.
+So fixture asserts are errors and then so you can separate when you're seeing the whole, all of your your entire system's failing, But there's really only one failure and all the rest of them are errors.
+It might be that like you're just not connecting to the database or something like that.
+Yeah, interesting.
+Out in the audience, Jeff says, "One thing I missed on my first trials, PyTest is the differentiation between error and fail." Yeah.
+Which sounds a lot like what you're talking about there.
+Oh yeah. And his comment around unit test, because unit test is a little different.
+Unit test makes the, I think it's the assertion error versus other exceptions.
+So I think that's the case in unit test, that if it's an assertion error, it's a failure.
+And if it's any other exception, it's an error.
+Py test, completely different.
+Any exception, assertion or otherwise, that happens within the test itself is a failure.
+And any exception that happens that's uncaught in a setup or in a fixture, that's an error.
+- Oh, that's cool.
+I didn't realize that differentiation.
+Also a question from Thomas.
+If you're just having the fixture there to provide data, is it necessary to use yield instead of just returning the value, the data?
+- I usually just return the value.
+I only use yield if I have some work to do for a teardown.
+- I think also, it's just kind of interesting, just that yield.
+Now what a clever use of generators, right?
+- It's very clever and also very nice because you can have variables there that are needed for the cleanup, but you don't need to return to anybody or something or save them in a global variable.
+They can just be in the function and that's it.
+So like, you know, database, connect to the database, keep a handle to the database so that you can close it at the end.
+It's very, very clean.
+- Right, or start a transaction and roll it back.
+So it's whatever you did to it, it's unaffected, yeah.
+- Oh yeah.
+- All right, what's next?
+That was fixtures?
+- Well--
+- Or unless you got more fixture.
+- You made this comment and I'm like, I've been doing PyTest so long that I forgot about it.
+- Old time PyTest stuff had to add finalizer before we kind of settled on the yield system.
+I would say avoid add finalizer, it's just gonna confuse people, so don't do that.
+Also, you can nest them, so leveraging, using scopes.
+So you can have like, connect to a database by a session scope, and then cleaning up the database as a function scope thing, so that you, you know, save time.
+And then conf test files, if you wanna share in between, Just between tests, you can throw the fixture in a conf test file.
+>> Yeah, it's not necessarily obvious that if I put a fixture and then I have a bunch of tests below in the same file, it's obvious I can just use it.
+But then if I go to another one, I could be like, well, what about those over there?
+I want to share them across these files.
+So this conf test, this is what that's about, right?
+>> Yeah, and a lot of people think you can, or their first attempt is to throw them all into a different module and import the module.
+You can't do that.
+Don't do that.
+And you never want to import the conf test file.
+It's not an importable thing.
+It's just PyTest deals with it.
+>> Yeah, indeed.
+>> Okay. On fixtures, there's a bunch of built-in ones that are super cool.
+In the long time, if you've used PyTest for a while, we used to have, and we still do, a couple of fixtures called Tempter and TempterFactory.
+But there's newer ones, they've been in for a while, but some people don't know about them, called TempPath and TempPathFactory.
+They use pathlib path objects, which are awesome. So use that if you can.
+Took me a while to love path, the path class, but I love it now. It's really nice.
+I mean, the old one was like just this py.path.local object, which was very undocumented.
+So I don't recommend it.
+The temp files within PyTest, so it's great. If you're like gonna you're generating a file or whatever, you want to save some CSV stuff, it's good.
+It sticks around too, which is kind of cool.
+It sticks around for a little while. So you can interrogate your temp files like after a test run is done.
+You can look at the, and if you're trying to debug the failures, those temp files will still be there.
+They're not cleaned up directly after, they're cleaned up in a future test run.
+>> That's interesting.
+>> Yeah.
+>> They're like a N minus one or N plus one lifespan.
+Yeah. There's a bunch of built-in fixtures.
+There's only a handful I use very much.
+I use a Tempath and Tempath.
+So there's Tempath and Tempath Factory.
+The factory versions are used because Tempath is a per test run, like every function, it gets generated.
+You can't use it if you've got a SessionScope fixture.
+The factory ones are SessionScope.
+If you want to use it, anything larger than FunctionScope, use the factory to generate a temp directory. Use that.
+>> Cool.
+>> Capsys, if you want to look at, if you're checking your output, Capsys is good for checking the output of something, the standard out or standard error.
+>> Because PyTest captures and eats some of it, right?
+>> Yeah, by default, PyTest will always capture the errors and output, and it prints it out for failing tests.
+It'll say, "Oh, here's the output for the test and it failed." That's helpful, but it's normally gone.
+You can use Capsys also just to disable that for temporary bits of your code.
+If you want to throw a log out there all the time or something, you can use that. But I usually use it just to look at the output.
+Especially with PyTest plugins, I want to see if I've modified the output, I want to see the output, so I can use that to grab that.
+There's monkey patch as well.
+You can use this for all sorts of stuff, but if I'm doing fancy things, I usually actually use just mock, unit test mock.
+But for things like changing your environment, it's great.
+So you can change environmental variables or quick patches, it works great.
+The neat things about these, other than just doing yourself, is that it cleans up afterward.
+If you patch a system with a dummy bit of system or something, after your test is done, it goes back to what it was before. So that's pretty cool.
+>> Yeah. Because otherwise, you can end up with a problem of the order of operations that's left in this half patched state where if something else depends upon it, right?
+- PyTest config is used for grabbing command line flags a lot.
+That's mostly what I use it for.
+And then the only thing I usually use request for anymore is if from a fixture, I want to know what the test name was.
+I can use, you can use request node name to grab the test name.
+I don't think I use it for anything else anymore, except for parameters to grab the parameter values.
+Yeah, anyway.
+- Nice.
+All right.
+I pointed out Mark or audience.
+They pointed out Mark and here we are.
+Mark.
+Markers.
+Markers.
+Pytest.mark.whatever.
+You can use custom markers.
+Markers are great, but don't.
+I, when I learned about markers, I put them everywhere and then I'm like, Oh, that's just sort of, it ends up being messy.
+So it can be, but it's a great way to, you just, it's like just adding a tag to a a test or a test case or something to say, you can use it to run it.
+So you can say, I want to run all the tests that are marked, like user interface, you can run all the UI tests.
+If you didn't separate them by directory.
+Or like somebody said, you can mark all the slow ones and only run the slow ones or avoid running the slow ones.
+>> You can do a not in your execution.
+You can say run the things not marked slow.
+>> Yeah. You just say, well, it's -m, I should throw that in there, -m, like, not slow.
+- Got it.
+- But it's two words, so you have to put it in quotes, like -m, quote, not slow.
+It'll work.
+And you can mark files with a magic word, magic keyword called pytestmark, with no spaces.
+If you throw that in your file, PyTest will see it.
+There's a bunch of built-in ones.
+Marks, the ones that I think are probably most common are skip, skipif, and xfail.
+- X is you expect it to fail?
+Like, I know it's failing, but that's okay?
+- Yeah, so a lot of people might think, why would you ever expect a test to fail?
+You should just fix it.
+- No, I know, no, no, no, no.
+It's Friday, three o'clock, you got plans.
+What, you gotta fix the build.
+- Yeah.
+- No, seriously though, why would you use this?
+- Believe it or not, some people are not responsible for all the code.
+- Yeah.
+- There's teams.
+So one great reason to use XFail is to submit a defect, and then you say, I know this test is failing because of this issue.
+You've submitted defect, and then you throw the defect number in the XFail reason string and move on.
+Now your build is still working.
+And there's, but just be careful.
+I mean, XFail is this big thing.
+So I think as, whether or not you use XFail, it needs to be like your entire software team needs to understand it and agree on the process because there needs to be a process around how to utilize XFail because it can just sort of hide failures.
+and you don't want that.
+- Yeah.
+- That's one of the reasons why I really like XFailStrict.
+It makes it so that all, it makes it so that like, if they pass, if you mark it as fail and it passes, it'll just pass.
+But we want it to, well, it X passes.
+It expected, which means I expected it to fail, but it passed.
+But I like to just have it be a failure, which so that somebody can look at it and go, "Oh, yeah, we need to take these out of the test and close the defect or something like that.
+- This portion of Talk Python to Me is brought to you by Brilliant.org.
+You are a curious person who loves to learn about technology.
+I know because you're listening to my show.
+That's why you would also be interested in this episode's sponsor, Brilliant.org.
+Brilliant.org is entertaining, engaging, and effective.
+If you're like me and feel that binging yet another sitcom series is kind of missing out on life, then how about spending 30 minutes a day getting better at programming or deepen in your knowledge and foundations of topics you've always wanted to learn better, like chemistry or biology over on Brilliant.
+Brilliant has thousands of lessons, from foundational and advanced math to data science, algorithms, neural networks, and more, with new lessons added monthly.
+When you sign up for a free trial, they ask a couple of questions about what you're interested in, as well as your background knowledge.
+Then you're presented with a cool learning path to get you started right where you should be.
+Personally, I'm going back to some science foundations.
+I love chemistry and physics, but haven't touched them for 20 years.
+So I'm looking forward to playing with PV equals NRT, you know, the ideal gas law, and all the other foundations of our world.
+With Brilliant, you'll get hands-on on a whole universe of concepts in math, science, computer science, and solve fun problems while growing your critical thinking skills.
+Of course, you could just visit brilliant.org directly.
+Its URL is right there in the name, isn't it?
+But please use our link because you'll get something extra, 20% off an annual premium subscription.
+So sign up today at talkbython.fm/brilliant and start a seven day free trial.
+That's talkpython.fm/brilliant.
+The link is in your podcast player show notes.
+Thank you to brilliant.org for supporting the show.
+- The other thing that people should be aware of that I don't think a lot of people know is the dash dash run X fail flag.
+And this is especially useful like to just say, okay, screw it, ignore all the X fails and just run as if I haven't marked them X fail.
+Because maybe they are fixed and you don't know.
+Maybe they didn't take away the X fail.
+Yeah, but they might or you just want to make, like in a CI system for instance, like if you're running, most CI systems don't understand all of the different variations of outputs from PyTest.
+They don't understand X passes, X fails, and skips, and all that sort of stuff.
+A lot of times then X fails and X passes just show up because it just passes and fails.
+So you don't want it just to pass everything.
+So run xfail, if you just want to say, I want to just run everything, and if there's any failure, I want to see it.
+So that's good.
+But anyway, just be careful with xfails.
+I've seen it confuse people.
+- Yeah, it makes sense.
+What's the story with skip and skipif?
+- I guess it's the same.
+I mean, like, why are you skipping something?
+I guess you have to be careful.
+So, skip is just skip this test.
+It doesn't run it at all.
+And skip if, you can put logic in there to say, like, well, if it's on, and so a great example of skip if is if you've got operating specific, like maybe if you have operating specific chunks of tests or chunks of code or something.
+- Skip if platform equals Darwin.
+- Yeah.
+- Skip the Mac OS ones.
+- Something like that.
+- You got no chance.
+Or if we're talking coverage in unit test again, for example, maybe you've got functionality that depends on Python 3.12, but you're also wanna test on Python 3.7.
+And so you know some code is only gonna run, you're running different code for the same functionality on two Pythons.
+You might wanna like have two tests and one of them gets run on Python 3.11 and one of them or 12 and one of them gets run on all of the other versions.
+>> And you can use skip if to gate those.
+>> Interesting. >> Yeah.
+>> Okay, yeah, that's really cool.
+Hey, before we move on, we've got an interesting question or idea out here from Jeff in the audience, who also is a hardware tester.
+Said, I'd like to distribute fixtures in some way to people as a Python package.
+>> That's a great idea.
+>> Yeah, what do you think about that?
+>> I think that's a plugin.
+>> Okay.
+>> Let's jump to plugins then.
+>> Let's do it. >> Do I have a plugin section?
+I didn't, maybe I don't.
+Let's go to the top.
+- Notes for a new section?
+- Yeah, plugins.
+- It's a living blog post.
+- Yeah.
+Yes, I think it's important to be able to package them as plugins.
+And we don't cover, plugins are kind of a little advanced thing.
+I don't think we cover using plugins in the course, but in three and a half hours, I don't cover how to write a plugin.
+There's a ton of plugins on, yeah, you've got the PyTest plugin list on PyTest.
+But also you can search for, they're usually PyTest dash something.
+So you can search for that on PyPI as well and see a bunch of plugins.
+- Yep, you even have some out there for yourself, right?
+- Quite a few, actually. - There's a lot.
+I mean, I'm scrolling and scrolling, I'm still in the dash A.
+(laughing)
+That's a lot of content there.
+So I guess one tip is people should just go scroll through that list and go, look at all these things they could just fixture into their code, right?
+- Or, one option is to go to PyCascades this year and watch my talk because I'm giving a talk at PyCascades for about packaging PyTest fixtures.
+- That's cool.
+When is that?
+- It's in March.
+I should look it up.
+- Nice.
+- Real time.
+- Yeah, I'm pretty sure those videos will be online afterwards if people are not at the conference in Vancouver.
+Although Vancouver is lovely.
+- Oh yeah, they'll be online.
+And I'm also gonna publish the slides.
+I just got the slides done.
+So it's March 18th through the 20th.
+And I think mine's on the 19th.
+- All right, nice.
+- So anyway.
+- What section do you want to do next?
+we got a little bit more time.
+- So we talked about markers and fixtures.
+Parameterization is definitely something I think people should learn about.
+And because, especially if you, I've seen a lot of test writing, utilize copy, paste, modify.
+And it should be a red flag for all software engineers, but for some reason it happens a lot in test code of copy, paste, modify.
+You got a bunch of tests that are kind of the same, and you just take one that's similar to what you need and change it.
+And you end up with a lot of test code that way.
+And one way to fix it is to use parameterization.
+- Yeah, anytime you've got a lot of, you're like, this is happening over and over again in my code, it should be, it's a code smell, right?
+You should know there's some refactoring.
+Or alternatively, Brian, you could get this fancy new Stack Overflow keyboard.
+(Brian laughs)
+- That's awesome.
+>> Which has three keys.
+>> That's exactly. Go ahead.
+>> Three keys, one of them goes to Stack Overflow, one of them is copy, and one of them is C and V, so copy and paste.
+That's awesome.
+>> Power of copy and paste, indeed.
+>> I assume you have to have a mouse connected to select the stuff to.
+>> Yeah, probably.
+>> It really does happen a lot of people like copy another test, change what they need, and then run it.
+Now there's a bunch of problems with that.
+One is people sometimes forget to change the test name.
+And then the test, you can have two functions with the same name in Python and it just like, it just like runs the second one.
+So that's one of the reasons why I'd like to also run coverage.
+If I'm going to run coverage, I want coverage on my tests too.
+So I, and to make sure I have a hundred percent test code coverage.
+So what happens when you run into that scenario on PyTest?
+Does it just pretend the first one wasn't there and it got overwritten before it got to it?
+- Yeah, just like in any other Python module, if you write the function name again, and even if you have different parameters--
+- It's so easy to do, it doesn't care.
+- Python doesn't care.
+- So different web frameworks will handle this differently.
+Flask will throw an error and say, you've tried to use this function before, no, and you do an app.get or something on it with the decorator.
+But for example, Pyramid, which I've used a lot, It just erases it.
+So you just end up getting like 404s for whatever was there before.
+You're like, "Whoa, it was just working.
+"Where did it go?
+"I didn't even touch that part of the program "and it's just gone.
+"It's like, I don't understand." You know, and it's, I can only see that it's even less obvious with PyTest.
+Like that, you would, how much would you notice when it goes dot, dot, dot, dot, dot, that like it didn't increment a dot when you added a test?
+Might not.
+(laughing)
+- No, well, yeah, it's dangerous.
+But okay, so you get around that.
+It's the other thing of just like thinking about it.
+So if I write a test to begin with, and I think, well, I've set up like, okay, so if I go to this web, really I'm just making like a webpage thing.
+I just wanna make sure this page gets a 200.
+Is it 200, right?
+For the good? - Yeah, yep.
+Yep. - And I wanna make sure that gets 200 in the titles, right?
+Or something like that.
+Now, I might have just a list.
+I mean, that would be an easy test just to make sure all my pages, normal pages are alive, is to just go through and test all those.
+Now I could either just have a list of all the different pages I wanna go to and just ping through those.
+That could be a loop within my test, but that's a loop within a test at the assert at the bottom that doesn't count as the assert at the bottom because you're asserting through the whole thing.
+Mace will just make that a parameterization and go through all the different pages you wanna hit.
+And for each of those pages, make sure it's a 200.
+And then you can also like have the title in the parameterization to say, this is the page, this is the title.
+Now for each of those, go through and test it.
+And those are different tests.
+And it's gonna be almost as easy to write one test as it is to write now a bunch of test cases with parameterization.
+But PyTest has a whole bunch of cool parameterization tricks.
+You can do function parameterization, you can parameterize a fixture, You can even use PyTest generate tests to do some fancy parameterization.
+For the most part, if you're new to it, stick with function parameterization.
+It's powerful and hopefully that's all you need.
+- Yeah, if you've got all these different cases to test.
+I mean, the value of testing often is to give it the good value and see the good value comes out.
+- Yeah. - That's true.
+But it's also really valuable to give it all those weird edge cases where you wanna check boundaries.
+Like if I give it one less than it should have, it should tell me that's an error instead of crash.
+if I give it something, you know, like just all the little weird situations.
+So testing all the failing cases and having those scenarios as a parameterized story is nice.
+- And one of the comments, which I have seen before, and I kind of agree with, is that my code is dry and my tests are wet.
+What that means is because dry testing, people can go overboard with dry to the point where you can't understand what's going on.
+And so for, especially for tests, you want tests to tell a story of I'm doing this thing and I did this other action.
+And then now I can tell that it works because of this.
+And if you break that story up too much, then you don't know, you don't know what the story is.
+If you hide all of your asserts in a helper function that just says like check stuff, you don't know what you're checking and it hides it too much.
+If you're gonna do that, make sure that you like name it something that is meaningful.
+And I like to have all of my assert helpers be start with assert.
+So like I could say, assert 200 and correct title, for instance, you could do that.
+That'd be fine.
+But one of the reasons for parameterization isn't just to type less, it's to be focused on what's failing.
+So let's say in that case I had before, my test failed with the loop and I could say, well, okay, So one page on my website isn't working.
+Which one?
+I have to go figure that out.
+I have to look at the error message.
+But if I had them iterated on the page name, I could go, oh, my contact one isn't returning.
+So there's something wrong with my contact page.
+And I know exactly where to go.
+Isolating the test failure is good.
+- Yeah, there was a comment before about if you have multiple search, you might not see all of the errors, all the details about that.
+And we talked a little bit about that too.
+And this helps show the status for the different parameters.
+Instead of I just loop through all the options and make sure they all pass or there's an error.
+- Yeah, and look like a website, for instance, there might be two pages.
+Whereas if you had them all in a loop, you'd only see the one.
+You're like, oh, contact pages for it was broken.
+I'll go fix that.
+And you come back, oh, something else is broken.
+Whereas if it had like three failures, you'd be like, oh, like seven of them are failing?
+all of a sudden something else must be wrong.
+>> Yeah, related on that same side.
+In my mind, this is like it taken to the maximum of parameterization is things like hypothesis where you don't even tell what the parameters.
+You're like, "Vary some ideas and give it to the test." What do you think about this? Do you find this useful for you?
+>> I do. Hypothesis is an awesome tool.
+It helps you think about a problem differently because you have to think about, what are the, because you can't say, like, add, you can't test add by making sure that it returns four, because it's only going to return four in particular cases.
+But you can say, "Hmm, maybe test a whole bunch of positive numbers, and I want to make sure that the result is positive." There's like these aspects of your system that you can test for.
+But the other thing that Pythopothesis is awesome at, isn't actually testing the output, it's just making sure your code doesn't blow up.
+So throwing a hypothesis at systems, I think the first awesome thing about it is just it tests some corner cases that your code might not handle right.
+So anything that throws an exception is gonna get dealt with, as you know, PyTest is gonna fail because an exception's hit.
+So that helps.
+- Maybe not everyone is familiar with the hypothesis.
+Maybe just tell them like a little bit how it works and how it's like primitization, but not exactly.
+- Well, hypothesis is just going, so you set up strategies and different things around, and they're decorators you put on top of your test.
+And then like, you've got an example of like, given a string that's text, and then you have S.
+So somehow hypothesis will fill in the variables that you put there.
+Like normally if a test had a parameter, it would either be a parameterization or a fixture.
+But hypothesis utilizes that also and fills it in with hypothesis values.
+And so if you give it, if you say it's a string, it'll come up with a whole bunch of them and it'll run your test a whole bunch of times based on, and I don't remember what the default is, but it's quite a few.
+It also checks the time, I think.
+It doesn't make sure it doesn't like run for hours or something like that, but you can tell it how robust to do.
+And it just like makes up stuff.
+But the people behind the hypothesis actually are pretty good at coming up with some decent test cases that break a lot of kinds of software.
+That bit that we think of as the old style that you think of as a test engineer of coming up with wacky values, you don't need that anymore.
+You can just have hypothesis come up with wacky values for you.
+>> Right. Think of strategies of, well, these scenarios we should try to run through and just have it automatic.
+>> Things that you don't know that are constraints on your system, Like maybe your input system, hypothesis tells you, guess what, it like breaks on all German names or something like that, or Unicode.
+And you're like, oh, yeah, actually I don't, that's neat, but I don't actually expect it to ever get called with Unicode.
+So you can restrict the strategies and stuff.
+- Yeah, last thing on this one.
+Jeff asks, how reproducible are these?
+And I see that hypothesis says, it'll remember failing tests, yeah.
+- I can't hear you.
+- Yeah, just maybe the last thing on hypothesis here is, you know, Jeff asks, "How reproducible are tests with hypothesis?" - I don't know.
+- They do say that it remembers the failing examples, so into like SQLite database or something.
+So maybe it'll replay that, essentially.
+And I'll try the failing ones before, but I haven't played with that either.
+- I think it reports like some seed thing or something that you can reseed it to be the same run or something like that.
+- There's a whole section on reproducing failures here.
+And it does say you can provide, one of the things you can say is provide examples of, in addition to the random stuff you pick, please do these things.
+And so I suppose you could take a failing one and put it in there, or if you always do it with the same seed, it's randomness becomes deterministic.
+Which is kind of odd, but.
+- Pseudo-random is part of CS, yes.
+- Yes, indeed.
+All right, well, Brian, we're pretty short on time.
+What else do you want to throw out there real quick before we--
+I want to circle back to the beginning and just say, PyTest can do a whole bunch of cool stuff.
+Don't do it all at once.
+Gradually add bells and whistles, especially if you're working on a team, because it's a different mindset.
+So make sure that the team is all up to speed.
+You want to make sure that, like all software, don't design a system so complex that you're not smart enough to debug it.
+I love thinking about that.
+That's a really good way to put it, because if you write the most clever code that you can, you're right at the limit of your ability to like keep it in your mind and understand it and debugging code is harder than writing code.
+So you're not qualified to write in codes that you can't write code that your body can't handle, pay the check for or whatever.
+Yeah, I can't remember who said that first, but it's definitely very true.
+It is indeed.
+Yeah.
+Awesome.
+Well, thank you for putting this together.
+Obviously, I'll link to this in the show notes.
+People can check out your course, they can check out your book.
+And yeah, it's all your other PyTest things.
+I'm looking forward to having test and code back.
+And also everybody should, that's listening here, should be listening on Python Bytes.
+I think you'll enjoy it.
+I agree.
+A lot of fun over there.
+All right.
+Thanks a lot, Michael.
+Yeah.
+Thank you for being here, Brian.
+Thank you everyone for listening.
+See y'all later.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Don't miss out on the opportunity to level up your startup game with Microsoft for Startups Founders Hub.
+Get over six figures in benefits including Azure credits and access to open AIs, APIs.
+Apply now at talkpython.fm/foundershub.
+Stay on top of technology and raise your value to employers or just learn something fun in STEM at brilliant.org.
+Visit talkpython.fm/brilliant to get 20% off an annual premium subscription.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct rss feed at /rss on talkpython.fm. We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube. This is your host, Michael Kennedy. Thanks so much for listening. I really appreciate it. Now get out there and and write some Python code.
+[MUSIC PLAYING]
+[Music]
+(upbeat music)
+[BLANK_AUDIO]

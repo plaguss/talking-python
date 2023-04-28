@@ -1,0 +1,463 @@
+Michael Kennedy: When you think of popular Python packages, what comes to mind? There's a good chance that this week's guest, Kenneth Reitz (@kennethreitz), wrote the package you just thought of. He's the author of some of Python's most popular libraries, including: Requests, Records, Maya, and Pipenv. I've had a chance to catch up with Kenneth at PyCon 2017 this year. Here's the story. This is Talk Python To Me, episode 115, recorded live at PyCon on May 20th, 2017. Welcome to Talk Python To Me, a weekly podcast on Python, the language, the libraries, the ecosystem, and the personalities. This is your host, Michael Kennedy. Follow me on Twitter where I'm @mkennedy. Keep up with the show and listen to past episodes at talkpython.fm, and follow the show on Twitter via @TalkPython. This episode is brought to you by Codeship and Hired. Be sure to check out what they're offering during their segments. It really helps support the show. Kenneth, welcome back to Talk Python.
+Kenneth Reitz: Hi Michael, thanks for having me.
+Michael Kennedy: It's really nice to have you back. You always seem to have so many amazing projects and--
+Kenneth Reitz: Oh, thank you very much.
+Michael Kennedy: Your pulse on what's going on in the community. We happen to be right in the center of it today, right?
+Kenneth Reitz: Yes, over here at PyCon. This is my favorite week of the year by far. It's the highlight of my life.
+Michael Kennedy: It's definitely a highlight for me as well. The fact that I can drive to it and not fly to it.
+Kenneth Reitz: Oh, where do you live?
+Michael Kennedy: I live 15 minutes from here by car.
+Kenneth Reitz: Oh, I'm very jealous.
+Michael Kennedy: That makes it quite easy.
+Kenneth Reitz: It won't be that way next year.
+Michael Kennedy: No, next year is gonna be a four hour flight with no, if I'm lucky, right?
+Kenneth Reitz: Yeah, yeah.
+Michael Kennedy: It's all good though. I'm definitely making it there.
+Kenneth Reitz: We'll have the Rock &amp; Roll Hall of Fame. It'll be worth it.
+Michael Kennedy: It'll totally be worth it. There's a bunch of people that wanted to go to this one and it sold out, right?
+Kenneth Reitz: Yeah, it sells out every year.
+Michael Kennedy: If you guys are listening and you're like, "This sounds so fun, I wanna come but it's sold out," get your tickets early.
+Kenneth Reitz: Yep, always get your tickets early. PyCon sells out every year.
+Michael Kennedy: Every year, okay. You don't need too much of an introduction, but--
+Kenneth Reitz: Oh, thank you.
+Michael Kennedy: You've done a ton of amazing projects that we're gonna talk about, but tell people what do you do day-to-day, like who are you?
+Kenneth Reitz: My name is Kenneth Reitz. I'm most well-known for being the creator of the Requests library and I work for Heroku. I'm the Python overlord at Heroku, so I'm the language owner of Heroku. It's not the language owner of Heroku. The language owner of Python at Heroku, meaning that everything that's related to Python, basically, that is about the Heroku product is something that I am in charge of.
+Michael Kennedy: I see, so if I wanna deploy my Pyramid or Flask web app--
+Kenneth Reitz: Yes, it's my job to ensure that you can, or decide if it's appropriate.
+Michael Kennedy: Yeah?
+Kenneth Reitz: Yeah, exactly.
+Michael Kennedy: Okay, yeah, that sounds like a pretty fun job. I've never really had a position where I had an overlord title.
+Kenneth Reitz: Oh, I give it to myself.
+Michael Kennedy: Yeah, well look, that's all right.
+Kenneth Reitz: They asked me what I wanted on my business cards when I started, and I said Python Overlord, so it stuck.
+Michael Kennedy: The fact that they let you do it, that's awesome. That's really cool.
+Kenneth Reitz: My official title is Senior Member of Technical Staff.
+Michael Kennedy: I see, that's way less fun than Overlord.
+Kenneth Reitz: I know, I know.
+Michael Kennedy: But no, it sounds like a pretty fun project. Do you like working at Heroku?
+Kenneth Reitz: I do, I've been there for five and a half years and I'm not planning on leaving anytime soon. It's a great company.
+Michael Kennedy: Yeah, you don't think this cloud computing thing, it's a fad?
+Kenneth Reitz: No, I'd say I think we're good.
+Michael Kennedy: I think it's gonna be around for awhile, right?
+Kenneth Reitz: Yeah, definitely. Platforms as a service is something that I think only more and more people are gonna be using. Infrastructure as a service, I think is probably gonna change a lot over the next several years, 'cause things like Docker are coming out, and becoming more ubiquitous. There's a lot of technologies and innovation happening in that space. I think that platforms as a service are gonna provide a stable platform for people to kinda like keep their heads on straight in that world.
+Michael Kennedy: Yeah, that sounds really interesting. I like Docker, but I feel like we're kind of, Docker is an intermediate evolutionary step of something else.
+Kenneth Reitz: Yeah, I know exactly what you mean.
+Michael Kennedy: Yeah?
+Kenneth Reitz: I'm not, I haven't used Docker too much. I've only done little toy experiments with it or building examples repos. To me it feels like a response to a need that exists, but it's not the answer. It's just the first answer, you know what I mean?
+Michael Kennedy: Right, we have these VMs. They take too long to setup, too long to start.
+Kenneth Reitz: The cache is ridiculous on your machine. If you use Docker in any capacity, you should check your disc cache for Docker. There's a command to do it and it'll be like 30 gigs. There's a lot of room for improvement but I have to give them a lot of credit. The Docker format client is stellar. It's a very nice client and they did a lot of work to build it the right way.
+Michael Kennedy: Nice, so do you guys have Docker support at Heroku?
+Kenneth Reitz: It's not GA yet, meaning it's not in general availability, but we do have it in beta.
+Michael Kennedy: Okay.
+Kenneth Reitz: Yeah. It's available, you can use it in production if you'd like, and I recommend people doing that. Especially if you're using scientific applications, it works very well for that on Heroku, so you can apt-get install anything you want. You can use Conda, for example.
+Michael Kennedy: Right, so you can have a lot of the machine learning stuff that's got lots of weird compilation all set up right on your Docker image, right?
+Kenneth Reitz: Yeah, exactly, exactly.
+Michael Kennedy: Okay, yeah, pretty cool. Maybe tell what is it like to deploy a Python web app to Heroku?
+Kenneth Reitz: git push heroku master.
+Michael Kennedy: Sounds all right.
+Kenneth Reitz: No, see, you have a requirements.txt file that you use to specify your pip requirements, and that's how we know that it's a Python app, and we install those requirements, and that's effectively it. Then when you have a proc file, which is standard on Heroku, which you use to say what your entry points are for your application, so you do web: command to start your application.
+Michael Kennedy: Got ya, okay. Yeah, sounds very cool.
+Kenneth Reitz: That's all you need.
+Michael Kennedy: This may be a good segue way over to the projects that you're working on. You've been doing some stuff trying to make virtual environments, or environments in general, better, right?
+Kenneth Reitz: Yes, yes, I'm working on a project right now PipEnv. It's had like 40 releases in the last three months. It's been quite a bit of work behind it. It's relatively stable.
+Michael Kennedy: All right, so what problem is it trying to solve?
+Kenneth Reitz: It's trying to solve, I'll try to be as succinct as possible, it's trying to combine the workflows of pip and virtualenv together, as well as make it as easy as possible to enable deterministic builds, and solve the UX problem of requirements.txt, because requirements.txt can be used deterministically, or you just specify all your requirements, and all your Pip versions, and it can also be used in a more human-friendly format where you just put the things that you want, and you may or may not put version numbers in there.
+Michael Kennedy: Right, and sometimes that's fine, sometimes it's not.
+Kenneth Reitz: There's a new project from the PyPA, the Python Package Authority, called Pipfile, and it's the new standard that will replace requirements.txt.
+Michael Kennedy: It's kinda like a YAML file, is that right?
+Kenneth Reitz: It's a TAML file.
+Michael Kennedy: TAML file, okay.
+Kenneth Reitz: Yes, YAML was discussed but TAML is what we ended up settling on. There are two components to it. There's a Pip file, which is the human part that you put in the things that you want like Flask, and then there's a lock file which is json, and it is generated by a machine, and can be parsed by machines, It has the deterministic list of all of your packages that you wanna have installed, including all the versions. If you had Flask in your first file, the second file would have Flask, Werkzeug, ItsDangerous, Click, et cetera.
+Michael Kennedy: I see, so that's cool, so does it capture the version?
+Kenneth Reitz: Yes, absolutely.
+Michael Kennedy: It captures the version and the transitive closure of your dependencies? You say the top-level dependencies and it gets the lock json is all the dependencies?
+Kenneth Reitz: Correct and you have two groups. You have default and develop, so you can have, you can say that there are things that you just want for development and things that you just want for production.
+Michael Kennedy: Right, like pytest.
+Kenneth Reitz: Exactly.
+Michael Kennedy: Probably not a good reason to deploy that--
+Kenneth Reitz: In production.
+Michael Kennedy: To production.
+Kenneth Reitz: Yeah, but there's no reason. It's not harmful.
+Michael Kennedy: No, it's not harmful.
+Kenneth Reitz: If you were doing something like Selenium, or Django toolbar, or something like that.
+Michael Kennedy: Right, you need the debugger toolbars that you give you extra actions.
+Kenneth Reitz: Yeah, exactly.
+Michael Kennedy: Maybe don't put that in the plain one, right?
+Kenneth Reitz: Exactly, exactly.
+Michael Kennedy: That's the new work that PyPA is doing?
+Kenneth Reitz: Yeah, that's what Pipfile is, and so what Pipenv does is it allows you to use, so Pipfile is gonna be put into Pip in the future.
+Michael Kennedy: Do you have any idea on the timing?
+Kenneth Reitz: There's a man named Donald Stufft who is solely responsible for almost all things Python packaging.
+Michael Kennedy: He is Mr. Pip.
+Kenneth Reitz: He is the GIL that is responsible for the contention lock on that project.
+Michael Kennedy: He's doing good work there.
+Kenneth Reitz: I've contributed to helping it come along, but he wants to rewrite it, and make it more functional, and less object oriented, and then eventually we were gonna land it in Pip proper, so Pip will support it. In the meantime, you can use it in Pipenv. You can use this great new functionality today. What Pipenv does is it takes away the brutal frustration of having to create and manage virtual environments. In addition, it also allows you to use the Pip file, and the Pip file that lock, and it gives you a lot of other niceties. For example, I was using, I was inspired by using Composer for a few moments when I was helping someone with some PHP stuff, which is not something I do, but it was something I was helping a new developer friend of mine walk through a tutorial. We did Composer install something, and it said, "Adding that package to composer.json," and that was when the light bulb struck. I thought that was a great idea, so when you do pipenv install requests it will automatically add requests to your pip file for you, so you don't have to go and manually curate this file. It'll add and remove packages from it.
+Michael Kennedy: The file exists, basically, as Pip installs things it'll--
+Kenneth Reitz: Pipenv installs things.
+Michael Kennedy: Env installs things. It will find that file and update it automatically?
+Kenneth Reitz: Precisely.
+Michael Kennedy: All right.
+Kenneth Reitz: You can lock it and then you can also specify if you wanna Python 2 or a Python 3 Virtualenv. It's really nice. They've put a lot of work into the UI, and it has some nice colors, and braille spinners, and it's a very polished product.
+Michael Kennedy: Really awesome. That's out now, right? People can find it?
+Kenneth Reitz: Yes.
+Michael Kennedy: The path, how do they go get it?
+Kenneth Reitz: Well, you can pip install pipenv, and also it's available at pipenv.org, and there's a nice little animated gif, or jiff, I'm not sure what the official terminology there is.
+Michael Kennedy: You're gonna start a gif/jiff fight.
+Kenneth Reitz: I don't remember; I'm too tired. It's PyCon.
+Michael Kennedy: Yeah.
+Kenneth Reitz: I actually don't know which one's proper. Anyway, there's an animated image file that allows you to see it in action. Yeah, pipenv.org. You can check it out.
+Michael Kennedy: Nice, and are you looking for people to contribute to it, or is it kinda doing its own thing, or what's the status?
+Kenneth Reitz: It's relatively stable. What I'm looking for right now is as much feedback as possible, so I can go ahead and iterate next.
+Michael Kennedy: Awesome, so people should just try it out?
+Kenneth Reitz: I want everyone to start using it, 'cause I think it's in a good, great place where it could become the next Virtualenv wrapper effectively, the thing that everyone uses to manage Virtualenvs, and be their go-to tool, and I think it's actually ready for that. I kinda just wanna market it, and get people to know it, and then once it gets enough, the snowball starts rolling. People use packaging tools because they're told to by other people, so it's need to be--
+Michael Kennedy: This tutorial says, "Type this."
+Kenneth Reitz: Exactly, exactly, so that's, it'll be a snowball effect. That's the goal for the project is to become the next defacto standard and to have all the best practices baked into it so that you don't have to worry about 'em.
+Michael Kennedy: Yeah, it sounds really nice. It also sounds beginner-friendly.
+Kenneth Reitz: It's very beginner-friendly. It's also very advanced user-friendly too, 'cause it just does all the stuff you would do by hand for you.
+Michael Kennedy: Yeah.
+Kenneth Reitz: Yeah.
+Michael Kennedy: Just the beginners don't know what the magic is, and the people who've been doing it a while it's like, "Oh, it's doing these three things," or whatever, right?
+Kenneth Reitz: Yeah, precisely. Precisely, but if you're a beginner or you haven't used Virtualenv and stuff like that, it just works. It tells you what to type next. You just type pipenv shell and it gives you a shell that has your new Python interpreter in it. It's much more approachable. It works on Windows. It's just a lot of UX polish into the whole process.
+Michael Kennedy: Yeah, it's good that it works on Windows. That means it's real easy to recommend for your tutorial and whatever project you're trying to get set up. Okay, so that's your new virtual environment dependency project. What else are you up to since we talked to you about two years ago?
+Kenneth Reitz: I've invented a couple of libraries that have been interesting. The one that I want to talk about the most is called Maya, which I think is very interesting.
+Michael Kennedy: How do you spell it?
+Kenneth Reitz: M-A-Y-A, Maya, like the Hindu philosophy of the illusion, because timezones are an illusion, so it is a datetime library that kind of turns timezones on their head, because when you're dealing with timezones you have to deal with localization if you're doing any timezone algebra normally, so it's if you wanna do any math to calculate this time zone versus that time zone, which is something that you have to do a lot if you're dealing with timestamps, effectively.
+Michael Kennedy: Well, if you're already--
+Kenneth Reitz: If you're parsing a website, for example. What were you gonna say?
+Michael Kennedy: I was gonna say, like if you're already dealing with timezones, your little one step down that path as well, of like, "Well,"--
+Kenneth Reitz: Yeah, you kinda always hack it to work, but if you're trying to do things the right way, I actually cannot figure out how to do it the right way without building this library. The problem for me was writing a little thing with like an RSS feed, and it would scrape the time from a website, and I told it what timezone it was in, and it would report back that the RSS feed was being published at like 2:00 in the morning, and everybody was like, "That was not the right time. "I wanted it to be at midnight," so I wanted to fix it the right way with a standard library. I worked on it for like four hours on these four lines of code, and I'm someone who knows Python pretty well. It shouldn't be this difficult. I spent all that time, and then I finally got it to work, and then I deployed it, and then it didn't work in the production because the server had a different locale than my local machine, 'cause the timezone algebra's different when you have different locales. That was the straw that broke the camel's back.
+Michael Kennedy: I see. It's one thing to have just timezones, it's another to have German timezones versus US timezones, or something like that, right?
+Kenneth Reitz: Precisely, precisely, yeah. When I'm doing math on timezones, I don't care what the machine, where my machine is located. It's the same everywhere; it doesn't matter. That should not be taken into account when I'm doing timezone algebra. Maya exists to have the philosophy that your data should always be in UTC all the time. You can import it from another timezone. You can export it to another timezone. You can do that very easily. You can generate datetimes with it, either naive or non-naive.
+Michael Kennedy: What's a naive datetime?
+Kenneth Reitz: A naive datetime is a datetime object that does not contain a timezone object.
+Michael Kennedy: Yeah, sure, so in Python--
+Kenneth Reitz: Which is surprisingly difficult to do. That's not like a one liner. That's like an eight liner in Python.
+Michael Kennedy: Which is crazy. If you've got one datetime that has--
+Kenneth Reitz: Oh, in Maya it is one liner.
+Michael Kennedy: Yes, of course.
+Kenneth Reitz: Yes.
+Michael Kennedy: You got a datetime with timezone and one that doesn't, you can't even subtract them, right? They can't be--
+Kenneth Reitz: I'm not sure what would happen. I think it would say it's incompatible.
+Michael Kennedy: Yeah, I think they're kind of incompatible with each other.
+Kenneth Reitz: Yeah, so the way that you should approach this if you're ever building an application is that all of your data should always be UTC all the time, and you should know that, so it should be timezone-aware. I should say, it's always UTC. You should never store it as anything else other than UTC. UTC has its problems because UTC is off by a second now and then, but that's okay. We're building, this is for humans here. This is datetimes for humans, so the idea is--
+Michael Kennedy: We're not working on particle colliders.
+Kenneth Reitz: Yeah, this is for parsing websites, and dealing with dates on websites, and things like that. This is not for scientific uses and stuff like that. It's all based on epoch time, and it does the math that way based on number of seconds since like January 1st, 1970, or something like that.
+Michael Kennedy: Something like that, yeah.
+Kenneth Reitz: It doesn't use any localization for any of its timezone algebra and it works very well. It allows you to just pass it in. It has two methods for importing stuff. It has .win, and you can pass in there any English, any human form of a date, and it'll give you back the Maya datetime object.
+Michael Kennedy: That's awesome. Give us some examples.
+Kenneth Reitz: Like a week ago, for example, 'cause that's something that you see on a website, right? Or you could, just like the way any human would ever write a date in any way, it'll--
+Michael Kennedy: Two hours from now.
+Kenneth Reitz: Yeah, two hours from now works. You could do like two, four, three, or two, four, fourteen, or something like that. That works. January 15th, 2015, stuff like that.
+Michael Kennedy: It can parse all these?
+Kenneth Reitz: Then there's .parse, and .parse gives you, it will read all known standards for machine-parsable dates, and it'll give it to you in the Maya datetime object which is in UTC. Then you can export it from there to a datetime object. Then it has methods to import and export from all the major RFCs for all the datetime objects. I'm very proud of this library. I think it's great and I think everyone should use it.
+Michael Kennedy: That's awesome. Yeah, yeah, I've definitely checked it out and done some stuff with it. You're right though, those are just surprisingly hard problems, and I don't know why.
+Kenneth Reitz: It took me a surprisingly lot of thought and work to build this library and it shouldn't have. It took me a good three days of solid work to build the prototype of it. I had the API in my head of what I wanted. Then to actually get it working properly by using the proper APIs and stuff, I had to look up so many Stack Overflow questions and stuff. That's the pain I'm trying to help people avoid is to ever have to ever do any of that work.
+Michael Kennedy: You're like, "Okay, we should solve this once and for all and forever."
+Kenneth Reitz: Precisely, precisely.
+Michael Kennedy: Awesome, all right, well thanks for that.
+Kenneth Reitz: Absolutely, so I want people to give that a try in Maya. If you ever have to deal with datetimes, especially if you're parsing websites or dealing with data from another source that has a datetime, you should check out Maya.
+Michael Kennedy: Cool, yeah, so that sounds really cool. There's two other projects that I know of that are kind of in this area. I know they're not necessarily solving the same problem. One is called Arrow.
+Kenneth Reitz: Yes.
+Michael Kennedy: Are you familiar with Arrow? Then the other is Python Dateutil. Can you just maybe say how those--
+Kenneth Reitz: Python Dateutil is a dependency of Maya. In Maya it also uses something called Pendulum, which is similar to Arrow, where it's kinda like this competition in this space, but we're all friends and we're building each other up. I'm using Pendulum to do some of the, I was doing my own date parsing with another, like Humanize or something. I have like five or six dependencies that do a lot of the stuff. I just wanted an API that put all the tools together and works great. Arrow, I'm not overly familiar. I have to look at the readme to know which one's which off the top of my head.
+Michael Kennedy: Yeah, I always confuse them myself.
+Kenneth Reitz: They all weren't what I wanted, because I really want this UTC is king/queen mentality in my head of that your data should always be UTC and that you can import and export to other things. A couple of them did have that, but it just wasn't as solidified as I wanted it to be.
+Michael Kennedy: Okay.
+Kenneth Reitz: So yeah.
+Michael Kennedy: Yeah, that's a really cool project. I've already played with it.
+Kenneth Reitz: Thank you. I was talking to someone here, David Golden, and he's talking about adding a relatively complicated class to add time ranges, so it may get the ability to do some relatively complicated time arrange algebra, right?
+Michael Kennedy: Perfect for calendars, like are there conflicts.
+Kenneth Reitz: Exactly, that's where it's coming from. Yeah, time conflicts for calendars for multiple, for like 25 people and stuff like that. That's what he wants to solve, so we'll see if we get there on Monday.
+Michael Kennedy: That'd be an awesome add-on. You're gonna do that for the sprint? You're gonna work on that?
+Kenneth Reitz: Potentially, yeah, if it's a good fit.
+Michael Kennedy: Okay.
+Kenneth Reitz: Yeah.
+Michael Kennedy: Yeah, very nice.
+Kenneth Reitz: This portion of Talk Python To Me is brought to you by Codeship. Try Codeship Basic, a free, simple, out-of-the-box, continuous integration service in the Cloud. Thousands of customers use Codeship Basic everyday. Its pre-installed CI dependencies make testing your software and deploying it work out-of-the-box. The average set of time for a Codeship Basic is less than three minutes. Codeship Basic comes with a free plan that grants 100 builds per month, unlimited projects, and unlimited users. Do you run an open source project? Those are always free on Codeship, and they just improved their Python support, so give Codeship a try, and visit talkpython.fm/codeship to learn more and sign up for free. That's talkpython.fm/codeship.
+Michael Kennedy: Another project that you're working on that I think is really nice and has a very, takes something kind of overly complicated and make it simple, is Records.
+Kenneth Reitz: Yes.
+Michael Kennedy: I don't think we've talked about Records before, did we?
+Kenneth Reitz: I don't believe so.
+Michael Kennedy: I don't remember.
+Kenneth Reitz: I don't remember. I think I wrote it after we talked last.
+Michael Kennedy: Yeah, so yeah, why don't you tell everyone about Records? Actually, someone came into the booth, my booth, and said, "Hey, tell me about Records. I heard you talking about it; it was really cool. Show me a demo of Records."
+Kenneth Reitz: Oh, cool, cool.
+Michael Kennedy: Isn't that cool? Yeah, those guys are fun.
+Kenneth Reitz: That's awesome.
+Michael Kennedy: Yeah, tell everyone else about Records.
+Kenneth Reitz: Records is, so SQLAlchemy is an incredible library for dealing with SQL, and it is really interesting when you work for an organization like I do, the way that we deal with data is that we use tools like Heroku Dataclips, and we use a tool called Looker, which allows you to access our data warehouse, and do some very advanced queries, and get SQL out of it. I want to be able to take raw SQL that is written that is trusted by a source, for example Looker, which is generated by our business team, Biz Ops team, and put it into my code. You can do that with Psycopg 2 very easily. You can just save/execute this SQL, but the SQLAlchemy gives you a lot of other benefits like connection pooling and has nice connection drivers.
+Michael Kennedy: You can figure out what kind of database engine to use on its own, right?
+Kenneth Reitz: Precisely.
+Michael Kennedy: Like SQLAlchemy, MySQL, it just figures it out.
+Kenneth Reitz: Yeah, and it has a very nice way of, and I also wanted to get back dictionaries of data, so each row is a dictionary. It's also a tuple as well as a dictionary. It acts as both at the same time.
+Michael Kennedy: Yes, like a named tuple, right?
+Kenneth Reitz: It's a named tuple that is also a dictionary. It's kind of both. It's a very cool little thing.
+Michael Kennedy: Yeah, and so I guess for people if they haven't used it, it's a little bit like just the DB API 2. One line of it, right? You just like--
+Kenneth Reitz: Well, the idea is if you wanna use SQLAlchemy, and you want to just do raw SQL, you have to Google a lot of stuff, and if you wanna do it properly it's a good 25, 30, 40 lines of code.
+Michael Kennedy: Kinda gotta break out of the object ORM side of things.
+Kenneth Reitz: Yeah, and then there's some niceties that you wanna build into it. Then it ends up being 100, 200 lines of code, 300 lines of code, so I built a library for that. In addition to that I also built exporting, because I have a leather library that's very old called TabLib, and it gives you tabular datasets that you can export as Excel, or as CSV, or as a bunch of formats, json YAML, so this supports that as well. You can take your raw SQL, you can get Excel out of it, you can get TSV, you can get CSV.
+Michael Kennedy: That's awesome.
+Kenneth Reitz: You can get HTML tables.
+Michael Kennedy: Yeah, very, very cool.
+Kenneth Reitz: It's just basically for taking a report from SQL, and sticking it into your code base, and either using it to power your application or to generate a report. There's a command line tool that comes with it too, so it's a very little, useful, small, little thing. It's a fun little toy but it's very, very powerful.
+Michael Kennedy: It's cool, it seems to me like if you just wanna connect, ask the database a quick question, this is a really nice way to do it.
+Kenneth Reitz: Exactly, exactly. Yeah, and you don't wanna use SQLAlchemy directly if you're doing that because, again, you have to look it up, and it's not very intuitive. There's, if you wanna parameterize your queries, it's not standard. It took me a while to figure out how to parameterize queries in a standardized way that works across all query languages, so I had to figure out a lot of stuff to get it to work, is what I'm trying to say. I solved all those problems with Records.
+Michael Kennedy: Yeah, nobody wants to be Little Bobby Tables.
+Kenneth Reitz: Yes, exactly, exactly.
+Michael Kennedy: By the time you put all the correct pieces together it's a lot of work.
+Kenneth Reitz: Yeah, exactly. I mean, it's easy if you're gonna use Psycopg 2 or something like that. They have good parameterization in Psycopg 2. I shouldn't say that. If you're gonna use something like SQLAlchemy or anything like that, if you're gonna be using raw SQL, it's really easy to not parameterize properly.
+Michael Kennedy: One little plus with the string and the variable, and it seemed all so innocent.
+Kenneth Reitz: Yeah, so innocent, so innocent. What could possibly go wrong? I just merged that one pull request that I got from that stranger, and then suddenly all my bank accounts were empty.
+Michael Kennedy: It didn't make any sense.
+Kenneth Reitz: I don't know what happened.
+Michael Kennedy: This world's complicated. Are there other projects you wanna talk about or maybe just stuff that inspires you?
+Kenneth Reitz: Interesting things in the Python world right now for me are APIStar by Tom Christie.
+Michael Kennedy: Yeah, so he's here, not far from my booth, and not too far from your booth. He's doing really cool stuff. He's the Django REST Framework guy.
+Kenneth Reitz: Yes, he is.
+Michael Kennedy: Yeah, okay.
+Kenneth Reitz: He builds this thing that is a new API framework for Python 3 only, and it uses type annotations in the first way that I've ever nodded my head in agreement. Whenever I've seen type annotations, I was like, "That's the stupidest thing I've ever seen in my life. Why'd I want that in my Python?" but when I see him using them, I'm like, "Oh, I get it. That makes sense." I think it's kind of a cool idea. I used it to throw together a little toy API the other day. The cool thing about it is that it's not Flask. I love Flask. Flask is incredible. I'm a contributor and maintainer of Flask. Flask is one of my favorite things in the world but it's just nice to change things up. The really cool thing about it is that it automatically generates documentation for you and it's interactive documentation.
+Michael Kennedy: Awesome, and it uses the type annotations to do that, among many other crazy uses of type annotations, right?
+Kenneth Reitz: Yeah, it's a really cool project. It's really early on but it's getting a lot of hype, so he's gonna put in all this work, and I think it's gonna soar. It might be like the next Flask for API design, maybe.
+Michael Kennedy: Yeah, it's looking really, really promising.
+Kenneth Reitz: There might be companies hiring APIStar developers one day.
+Michael Kennedy: Yeah, yeah, yeah, I can see that.
+Kenneth Reitz: It'll be, it's nice to be there at the beginning. I encourage everyone to check it out.
+Michael Kennedy: Yeah, it is really cool. I was impressed with it as well. I mean, I'm having him on the show in a few weeks.
+Kenneth Reitz: Yeah, it's also one of those things when I'm using it, it's so different than what I'm used to that I found it a little cumbersome, so I'm not actually sure. I'm not endorsing it necessarily. I'm just saying that it's really interesting to me because it's something so different.
+Michael Kennedy: Here's something new and fresh.
+Kenneth Reitz: Yes, I need that. When I think, I really get bored with using the same libraries all the time, 'cause they're so good, the ones that we have. It's nice to get a new tool in my box that's like, "Oh, I could use this for something."
+Michael Kennedy: Yeah, for sure.
+Kenneth Reitz: That's a rare thing for me.
+Michael Kennedy: Yeah, it's really great. Also, I mean he's already been maintaining the Django REST Framework.
+Kenneth Reitz: Yeah, so he knows a lot about APIs. It's all about self-described APIs too, so he supports VDM and HAL, or is it HAL? I don't know. He supports all the self-described API stuff, so it's all hyper media-friendly, and it's very proper REST framework stuff. There's a project, well, I guess he's gonna talk about it, right?
+Michael Kennedy: Yeah, I guess so. You can go ahead and give us the preview.
+Kenneth Reitz: Okay, there's a client that comes with it too and it's called CoreAPI. It's the kind of the compliment to it, where any API you write with this you can consume with this thing called CoreAPI. There's a command line client for it, as well as a JavaScript client for it, as well as Python client for it. You automatically get, because they're self-described APIs that describe themselves, you get a fully, you don't have to write a client for your API. It's just already done.
+Michael Kennedy: Oh, that is cool, wow.
+Kenneth Reitz: The docs that he generates show you how to do it in all three of those languages, built-in. It's a really solid piece of work. I'm very impressed.
+Michael Kennedy: That is super cool. Yeah, the thing that I thought was interesting was here's a guy who's very committed to Django REST Framework creating a new framework. That caught my attention like, "Wait, weren't you doing that?" You know what I mean?
+Kenneth Reitz: Yeah, yeah, yeah.
+Michael Kennedy: It's like, well, he can't start from scratch with Django REST Framework. It's built on a long heritage of a way of doing things. This is like, "What if we could start again, Python 3 only, right now from scratch?"
+Kenneth Reitz: And what if we take Django out of the equation? That's really important because Django is not necessarily the best thing to be building APIs on, necessarily. It's not necessary.
+Michael Kennedy: Right, it's got a lot of stuff to support rich web apps.
+Kenneth Reitz: You can use Django as a library. You can import Django into an APIStar app, if you really want, and then you could just start using your models. I mean, there's nothing stopping you.
+Michael Kennedy: Yeah, yeah, how interesting. All right, what other projects?
+Kenneth Reitz: Projects that I love, I'm really in love with Docopt. I've always loved that.
+Michael Kennedy: Docopt?
+Kenneth Reitz: Yeah, Docopt and Click, they're two command line libraries.
+Michael Kennedy: I was playing with Click the other day. Click and Docopt are kind of like matter and antimatter with each other, like one--
+Kenneth Reitz: Yeah, they're very opposites of each other.
+Michael Kennedy: Exactly, tell us about 'em.
+Kenneth Reitz: Yeah, Docopt is, you, it's amazing. It's just the opposite of Argparse. It uses Argparse. It turns out when you type any command in Linux, and you do --help, and it prints out that thing with the brackets, and all this stuff with the commands...
+Michael Kennedy: Right, sometimes it's super complicated with lots of symbols separating things...
+Kenneth Reitz: Yeah, there's all these angular brackets and stuff. It's, you're just kinda like, "Okay, it can infer what that means." That's an anti-standard, it turns out. You just write that help string in Docopt in Python as a string. Then you say, "Parse my arguments," and it just magically knows exactly what to do, so you don't have to write any parsing code. It's just amazing. It's good for small things. If you're writing a command line thing that doesn't have any sub-commands, maybe one or two sub-commands, it's okay if it can fit into a single help printout screen, then Docopt is great.
+Michael Kennedy: It's an option, yeah.
+Kenneth Reitz: Click is fantastic and a very engineered piece of project from Armin Ronacher, the guy from Flask, a good friend of mine. He, again, it's very engineered. It's like everything from Armin is. In a good way, in a good way. You can dive deep into it. It is, if you're gonna build something that has a lot of structure, and something that has a lot of sub-commands, and something that has--
+Michael Kennedy: Right, something like Git, maybe?
+Kenneth Reitz: Yeah or Pipenv. Pipenv uses Click, for example, 'cause it has, I have like five or six sub-commands, and they all have different arguments, and different defaults, and Docopt wouldn't be a good fit for that, but Records uses Docopt. Different tools for different tools.
+Michael Kennedy: Yeah, different dependencies for different dependencies.
+Kenneth Reitz: Yes, precisely, precisely.
+Michael Kennedy: Awesome, other projects you've been loving lately?
+Kenneth Reitz: This is the things that comes to mind off the top of my head. I was talking to the BeeWare guys that are over here.
+Michael Kennedy: Yeah?
+Kenneth Reitz: I'll do you guys a little bit of evangelism for the project.
+Michael Kennedy: Cool project.
+Kenneth Reitz: It is a cool project. I knew about it last year but they've come a long way. BeeWare allows you to, in pure Python, with a Pip-installable module that is no C extensions or C dependencies at all, it's right in native Python with a very CSS-inspired graphical representation, that's how you manipulate the graphics is with like a CSS style Python thing, you can render Windows forms, Cocoa for MacOS, and UTK for Linux, and single-page web apps for the web, and Android apps, and iOS apps. All from the same code base. There's no C compilation whatsoever. The thing that I'm excited about, that I just learned about during PyCon, was that they have taken that, and they've made a project called Briefcase which allows you to package up your application into an executable distributable, which is something that I used to work with quite a bit. There's a lot of packages out there that allow you to do that, but they're very cumbersome, and they're all very different.
+Michael Kennedy: They sometimes work depending on your dependencies.
+Kenneth Reitz: They all, you can always get them to work, but it's a challenge sometimes. Yeah, especially if you're using something like PyQt and embedded web kits. It can be very cumbersome, so I'm very impressed with the demo that I got. I think it's pretty cool looking. Then, I might start playing with Briefcase, 'cause I like shipping executable distributables.
+Michael Kennedy: Yes, exactly. I feel like that's one of the shortcomings we have is that we don't ship that many. "Hey, here's my app. Double click it and look at the amazing stuff it does."
+Kenneth Reitz: As a Python community?
+Michael Kennedy: Yes, yes.
+Kenneth Reitz: I completely agree with you.
+Michael Kennedy: Yeah, at the keynote here we saw this hockey stick growth of Python, and you could see it across other metrics in Stack Overflow trends and other places. I think, "How much deeper would that be if we had a solid desktop UI story?"
+Kenneth Reitz: Yeah, yeah.
+Michael Kennedy: That could just like, people already love it so much--
+Kenneth Reitz: The second you said that, I was like, "I could fix that," but I have a policy of I don't wanna build things that I'm not dogfooding, or I'm not sipping my own champagne. I don't have any graphical user interfaces to build but I would love to. That'd be so much fun.
+Michael Kennedy: I would love to see that, that kind of--
+Kenneth Reitz: I could write the documentation for that.
+Michael Kennedy: There you go.
+Kenneth Reitz: That's what, it's just really a documentation problem.
+Michael Kennedy: Yeah, well, and those guys have some pretty solid stuff.
+Kenneth Reitz: You just have to say, "This is the proper way," and then people do listen to you. It's really cool.
+Michael Kennedy: Do it this way!
+Kenneth Reitz: Yeah.
+Michael Kennedy: Awesome, all right, so other projects? Top of the, run through your high level list?
+Kenneth Reitz: High level list, those are the ones that have come to mind. Flask, always great. I'm technically a core contributor. I've been running out of things to do in my free time lately. I've just been really bored. I've been dying to figure out something to do in open source lately, 'cause I've been working on Pipenv and stuff, and I've kind of atrophied with things to do there, 'cause it's kinda done. I have to wait until I make a new decision to make any progress there 'cause it's very stable.
+Michael Kennedy: Right, that's why you need people to kick it around a bit and then come back to that.
+Kenneth Reitz: Yeah, I need more users. Yeah, exactly. It has a nice user base but I need the masses to come.
+Michael Kennedy: Well, you're used to a different level of user base--
+Kenneth Reitz: Precisely, precisely, yeah.
+Michael Kennedy: "I only have 10 million users!" No, I'm just kidding.
+Kenneth Reitz: I don't remember where I was gonna go with that but what was your question again?
+Michael Kennedy: What other projects do you love that you're, like you said you were thinking about contributing to something, or something like that?
+Kenneth Reitz: Oh yeah, so I might make a point to start actually being a real maintainer of Flask. I think that would be good, help triage issues and stuff like that. I would be proud to say, I did say earlier because I'm planning on doing this, that I am a committer to Flask. I've had the commit bit for like three years but I've only merged like three pull requests. I've never really done anything with it, but I would be really proud to add that to my resume that I help maintain one of the most beloved pieces of software ever, in my opinion. I love Flask. I think it's just the best.
+Michael Kennedy: Yeah, I love the simplicity of Flask. They're such good frameworks, right?
+Kenneth Reitz: One of those things though where I, as a user, I don't have any complaints, so I don't know what to work on.
+Michael Kennedy: I don't wanna do a thing to it. Yeah, exactly.
+Kenneth Reitz: I'm sure if you open the issue tracker you'd find quite the opposite, but I don't have any complaints, so I don't have anything that I wanna work on on it.
+Michael Kennedy: Yeah, I guess--
+Kenneth Reitz: I don't have any ideas 'cause it's one of those things that's written by someone who's a lot smarter than I am, Armin.
+Michael Kennedy: Well, I think I ran into a lot of those things. One of the places where it could open up is the whole async/await stuff, but that's so much, the whole WSGI stuff--
+Kenneth Reitz: Well, that's WSGI. Yeah, that's a whole other animal.
+Michael Kennedy: Yeah, the whole stack is not really ready for that.
+Kenneth Reitz: Flask channels.
+Michael Kennedy: Yeah, yeah, exactly.
+Kenneth Reitz: Like Django channels?
+Michael Kennedy: Yeah, yeah, exactly.
+Kenneth Reitz: Yeah, yeah, we need Daphne for Flask.
+Michael Kennedy: Right, so I mean maybe that's somewhere that needs some pushing. I'm not actually familiar with all the options out there for that.
+Kenneth Reitz: Yeah, I don't know what that would look like. That would be interesting.
+Michael Kennedy: It's interesting to think about, but at the same time it might not be a problem you'll have, right? I find these web apps are actually quite fast already.
+Kenneth Reitz: Yeah, yeah, if you build things to be scalable, which just means they need to be predictably the same speed.
+Michael Kennedy: Less stateful.
+Kenneth Reitz: Then you really don't have any problems. I think that everything is pretty fine. I don't think we have to really go into some bleeding, cutting-edge, concurrent worlds if we don't have to. I think it's wise for things that you're consuming, for requests for example, we're planning on going to async.
+Michael Kennedy: You are? Yeah, I was about to ask you, what's the plans for request? Async is gonna make its way in there, so I could await a request.get. Maybe a get async?
+Kenneth Reitz: A get, yeah, exactly. There would be a new set of calls, like right now there's request.get, request.post, so there would probably be a request.async.get or something like that? Then you would await on that and it would just work.
+Michael Kennedy: That sounds like business.
+Kenneth Reitz: Yeah, yeah.
+Michael Kennedy: Are you familiar with, what is it? AIOHTTP clients? I don't know exactly what--
+Kenneth Reitz: Guido walked me through the code once and it seemed relatively straightforward. It seemed like GEvent but with explicit instead of the opposite.
+Michael Kennedy: Nice, so I'm really excited to hear about this asynch request stuff.
+Kenneth Reitz: Yeah, we're working on it during the sprints. Well, Cory is working on it during the sprints, I should say. There's a project that we depend on called Urlib3. That is something that is being, v2 is being worked on by Cory, one of the core contributors for Requests. He is going to work on the preliminary async stuff. He's gonna get ready. He's refactoring it, rewriting it. It's gonna be in preparation for adding asynch to that. Then once we add async to that--
+Michael Kennedy: It's replacing the holes and then you're like, "All right, we're gonna do this."
+Kenneth Reitz: Then we're gonna do it, yeah. Then, in maybe six years, we might get to flip those APIs around. Maybe the default bin request would be asynchronous, and then there'd be a synch that would be separate, but that would happen in like six years. That really depends on how the community moves and stuff like that. I highly, I honestly would be surprised if that's how things move.
+Michael Kennedy: I would as well.
+Kenneth Reitz: But I'll, we'll see. People find inconcurrency confusing. They really do. I am hoping that I can really help bridge the gap with Requests to make it be like, "This does not have to be scary. This can be exactly what you're used to, except for magically amazing."
+Michael Kennedy: I'm really excited to hear that. It is challenging, but I was talking to somebody, a listener of one of the other podcasts, Python Bytes that I do, and I'd covered the AIOHTTP client stuff. They said, gosh, I'm trying to remember the numbers. It was like, "Oh, I had this project where we do a lot of scraping, or API calls, or something, and it would take 16 minutes to run." They flipped it to the async version, and it ran in like 30 seconds, and it actually crashed the machine 'cause it was doing too much. They had to throttle it.
+Kenneth Reitz: Oh, they had to throttle it, yeah.
+Michael Kennedy: Yeah, yeah, so I mean just like--
+Kenneth Reitz: People, it's 'cause people don't understand, I'm not saying they don't understand, but I feel like there's a basic, simple computer science, I'm not a computer science student by any means, but you have two things that a computer is limited by, that your program is limited by. It's I/O bandwidth and CPU bandwidth. If you don't understand those things, it's very easy to, if you do understand those things you can not use these new async things, and you can get very good performance with just using threads, or just using multi-process, and doing stuff like that. The magic of async is that it just takes that to this logical extreme where you have these event loops that are just like, ...
+Michael Kennedy: Yeah, and I think actually what they were running into, I think they might've run out of memory 'cause they had too much pulled in at once--
+Kenneth Reitz: Yeah, yeah.
+Michael Kennedy: Something like that. Just the, I really--
+Kenneth Reitz: See, it opens up a whole new can of worms of things that people don't understand. That's one of the things, that I kinda prefer synchronous programming myself, 'cause it's something that is approachable and people understand, so I think I wanna encourage people to understand how to better optimize synchronous code. There's some great things for that. There's a product, Meinheld. Have you seen that?
+Michael Kennedy: No, I don't think so.
+Kenneth Reitz: It's a WSGI server that you can use with Gunicorn, and it uses an asynchronous event loop, but you just turn it on, and it just spawns. Every request gets a new green thread or something like that and your code just magically is asynchronous. It's just like, that's how Gevent works too, but it's not using monkey patching. That's the level of async that I like is where it's at the thread level. I don't want it to be at the code level necessarily unless it's something like Requests doing it. I don't personally wanna be writing code that is dealing with this stuff. I wanna be consuming the code that's dealing with that stuff.
+Michael Kennedy: Right, so I think those are solving slightly.
+Kenneth Reitz: As a software engineer, I don't think people should have to touch the async I/O APIs. I think that they should be consuming them.
+Michael Kennedy: Yeah, it's really interesting. I mean, on one hand any server environment, it's like almost by the time it gets to your code it should already have taken care of that problem.
+Kenneth Reitz: Precisely, precisely.
+Michael Kennedy: I mean, if you're on your one app--
+Kenneth Reitz: Unless you're working for a major company, a company that has some major technical issues. Not issues, but technical problems--
+Michael Kennedy: Challenge.
+Kenneth Reitz: Challenges, yeah. They're like, "We're gonna solve this problem in this really cool way," and then--
+Michael Kennedy: Your Disqus, your Instagram, or something like that.
+Kenneth Reitz: Yeah, Urban Airship or something.
+Michael Kennedy: Yeah, exactly.
+Kenneth Reitz: Yeah, precisely.
+Michael Kennedy: Exactly, but most apps don't totally need it, but that example of 16 minutes to 30 seconds really is like, "Well, you could really get a lot out of that," and to see if I could use Requests to do that, then that would just make me smile.
+Kenneth Reitz: Yeah, well, you can do things like that today, 'cause there's a library called Requests Futures, which is really great. It uses the concurrency.futures module to allow you to spawn off either threads, or sub-processes, or anything else. There's also Grequests, which I wrote a very long time ago, which is not very well maintained, but it allows you to use Gevents with Requests, so there are ways to do this today. Again, you can do it at that module level, so you just write your synchronous code, you just kind of wrap it in an asynchronous paradigm, use something like Celerate, then you get concurrency out the wazoo.
+Michael Kennedy: That's awesome, yeah, that's really cool.
+Kenneth Reitz: Yeah.
+Michael Kennedy: This portion of Talk Python To Me is brought to you by Hired. Hired is the platform for top Python developer jobs. Create your profile and instantly get access to thousands of companies who will compete to work with you. Take it from one of Hired's users who recently got a job and said, "I had my first offer within four days and I ended up getting eight offers in total. I've worked with recruiters in the past but they were pretty hit-and-miss. I tried LinkedIn but I found Hired to be the best. I really like knowing the salary upfront and privacy was also a huge seller for me." Well, that sounds pretty awesome, doesn't it? But wait until you hear about the signing bonus. Everyone who accepts a job from Hired gets a $300 signing bonus and, as Talk Python listeners, it gets even sweeter. Use the link talkpython.fm/hired and Hired will double the signing bonus to $600. Opportunity is knocking. Visit talkpython.fm/hired and answer the door. Let's maybe talk a little bit about PyCon. We're sitting here in an extremely large room that's actually luckily quite empty right now, so we can get some good audio, but it's been very busy.
+Kenneth Reitz: It has, it's been very exciting.
+Michael Kennedy: What's your takeaway for the week? You had a good time?
+Kenneth Reitz: I've had a fantastic time so far. I'm sad that you're speaking about it retrospectively.
+Michael Kennedy: It's in the past, right?
+Kenneth Reitz: It's halfway over, I guess-ish, right?
+Michael Kennedy: Yeah, more or less, yeah.
+Kenneth Reitz: That breaks my heart because it's my favorite time of the year, and I feel like I just got here, and I did just get here.
+Michael Kennedy: Yeah, it is really amazing. Every time I come here it's just so many great people to meet. This year I had a booth so I really got to meet more people. I didn't have to randomly run into them, you know?
+Kenneth Reitz: Yeah, yeah.
+Michael Kennedy: You have the Heroku booth that you're hanging out at.
+Kenneth Reitz: Yeah.
+Michael Kennedy: It's just--
+Kenneth Reitz: For me, PyCon is the one time of year that I, I have a family at home, of course, but it's really, the Python community is my true family. I get to really be with my family, and I get to do that when I, I don't really go to as many conferences as I used to go to, but PyCon has always been the home, like coming home conference because you get to see almost every single person, and they're my best friends in the world. It's utterly fantastic.
+Michael Kennedy: That's awesome. Yeah, there's a couple of people that I've been working with really closely for a long time but I've never physically seen.
+Kenneth Reitz: My biggest takeaway from PyCon so far has been these Fidget spinners.
+Michael Kennedy: The world has become Fidget-y. They're solving a Fidget-ing problem this year.
+Kenneth Reitz: Yeah, I went out to the Saturday Market here in Portland. They just got a higher-end one, 'cause there-- There was a booth here at PyCon that was giving out Fidget spinners.
+Michael Kennedy: All right, tell people what the heck is this Fidget-y spinner thing?
+Kenneth Reitz: It's something you hold in the center, and then you spin it, and then you can rotate it, and you feel the centrifugal force. It just gives you something to do with your hands.
+Michael Kennedy: Yeah, I guess I'll try to describe it. Imagine a little weighted circular thing with a fixed ball bearing, like an axle almost, in the middle. You spin it really smoothly.
+Kenneth Reitz: Yeah, they're kinda designed, at least the hype on the internet is saying that they're designed for kids with ADD, and I have ADD.
+Michael Kennedy: Yeah, okay.
+Kenneth Reitz: I find it to be very useful. I usually am vaping, like an electronic cigarette, and that gives me something to do with my hands, and I find it very pleasurable on many levels, and I find it difficult to be at PyCon because I can't be vaping when I'm walking around.
+Michael Kennedy: We're trapped inside more or less, yeah.
+Kenneth Reitz: Yeah, so I have like a nicotine patch on, and that helps, but as soon as I got one of these I totally forgot about smoking 'cause it's just giving me something else to do.
+Michael Kennedy: That's really interesting.
+Kenneth Reitz: I'm actually really loving it.
+Michael Kennedy: Yeah.
+Kenneth Reitz: Yeah, Fidget spinners. I think it's gonna help me a lot 'cause I work from home, and I'm in meetings, and I'm usually smoking during the meetings. It's kinda rude so I'm gonna start, and during my podcast, if you listen to Import This, you'll hear a little, this weird puff sound. It's 'cause I'm vaping. Maybe I'll start Fidget-ing instead.
+Michael Kennedy: Yeah, you'll be Fidget-ing, and those things are dead silent 'cause they're like smooth ball bearings.
+Kenneth Reitz: Yeah, yeah, do you wanna try it?
+Michael Kennedy: Yeah, let me check this out. All right, well this is high-end.
+Kenneth Reitz: Yeah, that one's really cool.
+Michael Kennedy: Wow.
+Kenneth Reitz: It was $25, that one was. This one was free and then this one was 15. I bought from a kid. They set up a little shop downtown and the kids were selling them.
+Michael Kennedy: Kids don't do ice cream stands and lemonade stands anymore?
+Kenneth Reitz: No, they're selling spinners--
+Michael Kennedy: That's awesome.
+Kenneth Reitz: To raise money for research for their autistic brother.
+Michael Kennedy: Wow, that is actually super cool.
+Kenneth Reitz: Yeah, it's a great story.
+Michael Kennedy: That's a really cool story.
+Kenneth Reitz: I had to buy one. I don't need three of them, but I--
+Michael Kennedy: You definitely had to get it at least, right?
+Kenneth Reitz: I had to get it. You can't say no to that.
+Michael Kennedy: Yeah, that's right. Did you go check out the keynotes?
+Kenneth Reitz: No, I do the hallway track at PyCon, so I make a point to not go to almost any talks. I went to, Corey Benfield did a talk on Requests under the hood, and I went just to go support him at his talk. That's the only talk I've been to so far. There's a really great talk at the end of the day tomorrow on NES video games and hacking them with Python.
+Michael Kennedy: Yeah, that's got a lot of--
+Kenneth Reitz: I'm probably gonna try to make it to that one.
+Michael Kennedy: Yeah, I mean people should check out, what is it? youtube.com/pycon2017, it's already, the videos are already showing up there.
+Kenneth Reitz: Oh, really?
+Michael Kennedy: Yeah, yeah. I don't know about the talks yesterday but the two tutorials are up.
+Kenneth Reitz: Yeah, and they have, they're transcribed live.
+Michael Kennedy: Yeah, it's really amazing. These guys do a great job putting that on there.
+Kenneth Reitz: I'm really impressed with the accessibility of this conference. I've seen people here with wheelchairs which is, I've never noticed that before. I'm sure it's been a thing but they also have teleprompters. Not teleprompters, but what's the opposite of a teleprompter, telescribe?
+Michael Kennedy: Yeah, like a live transcriptionist type thing. Whatever that is.
+Kenneth Reitz: Yeah, like you have in court.
+Michael Kennedy: Yeah, exactly.
+Kenneth Reitz: Except for the videos during the talks. Even the questions that are being asked are being transcribed. I was very, it's just I love this conference. It's a great conference. I go to a lot of conferences and PyCon is by far my favorite.
+Michael Kennedy: That's cool. All right, so you've been walking around like I have been. I've not been going to, I went to Jake VanderPlas' keynote on why Python is popular in science, and it was actually brilliant, really brilliant.
+Kenneth Reitz: I talked to him about that yesterday afterwards but I missed.
+Michael Kennedy: It's inspiring.
+Kenneth Reitz: Was it really?
+Michael Kennedy: The short takeaway is he said, "Look, Python is a mosaic of people using it for different things, and they're coming at it from different angles." The way like an astronomer might pull up some data, and play, and iterate with it, is very different than you and I might write a web app. We want it very structured and it's like a static thing that we build up over an architecture. Just talking to people from different backgrounds who use the same tools in different ways gives you a really interesting perspective on life.
+Kenneth Reitz: Oh, it does, it does, yeah. Python gives us this common ground to build upon. You can meet people who work on satellites, and who work on web apps, and who hack.
+Michael Kennedy: Yeah.
+Kenneth Reitz: It's amazing. You're all like family with each other 'cause you just speak the same language.
+Michael Kennedy: Yeah, it's amazing. Last night I went to dinner with some of the guys from PyCharm and a bunch of people from the Data For Democracy group, bunch of data scientists that are doing volunteer work for democracy and freedom around the world. That's awesome right?
+Kenneth Reitz: Yeah, that's just ridiculous. I love this place. I truly always regret not staying longer, 'cause I'm staying for only one day of the sprints, and I always wish I'd stayed longer, because I really wish PyCon was all year around. I just wish this was my life 'cause it really is like coming home. It's really nice.
+Michael Kennedy: Yeah, I totally recommend the--
+Kenneth Reitz: If anyone is listening and hasn't come to PyCon, I want you to know that my first PyCon I paid for myself. I didn't have an employer paying for me to go and I wasn't making much money at the time. It was at very large expense but they do have financial aid. I probably should have applied at the time. It was worth every penny. It totally changed my life. I had been doing Python for quite a while at that point. It was a big deal for me to go to my first PyCon. I can't recommend it more.
+Michael Kennedy: That's awesome. I definitely wanna second that and as far as tech conferences go, this is pretty affordable for the size and scale. A lot, like OSCon--
+Kenneth Reitz: Oh yeah.
+Michael Kennedy: I looked at that, it was like 1,500 bucks.
+Kenneth Reitz: Conferences are extremely expensive. This is a very approachable and doable conference.
+Michael Kennedy: It's like $300 or something.
+Kenneth Reitz: Yeah, but when you add up the hotel cost and the flights--
+Michael Kennedy: With the travel.
+Kenneth Reitz: If you're not making a really good developer salary then it's a lot of money.
+Michael Kennedy: If you can't drive in from some four hour radius then it starts to really get intense, you're right.
+Kenneth Reitz: Yeah, especially the hotel costs, but they have financial aid available too. If there's any reason that finances are a reason that you can't come to PyCon, apply and they'll give you a free ticket.
+Michael Kennedy: It would be cool for somebody to set up some kind of web app before these events so people who are looking into room share and save money, they can kinda be like, "Find your PyCon roommate."
+Kenneth Reitz: Forgot about that.
+Michael Kennedy: Wouldn't that be fun? That'd be a fun project to set up.
+Kenneth Reitz: Well, I know in years past that was a thing. I remember the year I went myself, there was a mailing list of people trying to find room shares. I'm not sure, it must still be a thing.
+Michael Kennedy: Yeah, probably.
+Kenneth Reitz: I assume. Maybe not, I don't know.
+Michael Kennedy: It could be cool to make something like that.
+Kenneth Reitz: I assure it did exist.
+Michael Kennedy: Yeah, awesome. All right, so yeah, definitely, if you guys are out there listening, and you haven't come to PyCon, you should come, but you should get your tickets straight away or you won't be able to come.
+Kenneth Reitz: Yeah, it sells out and it's cheaper the earlier you buy 'em too.
+Michael Kennedy: Absolutely.
+Kenneth Reitz: Yeah.
+Michael Kennedy: All right, Kenneth. Thanks for being on the show, man.
+Kenneth Reitz: Always a pleasure. I'm a huge fan of the show and I wanna really thank you for all the great advice you give all these developers. I listen to you when I'm taking baths all the time.
+Michael Kennedy: Oh, thank you so much. That is awesome, I really--
+Kenneth Reitz: You're the only, actually, you're the only one I still listen to. I don't listen to podcasts often enough to be caught up on them but you're always the one I pull up to listen to.
+Michael Kennedy: Wow.
+Kenneth Reitz: I listened to you on the way here, actually.
+Michael Kennedy: How cool, awesome.
+Kenneth Reitz: Yeah.
+Michael Kennedy: Really quick before we go, tell people about your podcast.
+Kenneth Reitz: Oh, I have a Python podcast. It's called Import This. If you Google "Import This Kenneth Reitz," you'll find it. It's on SoundCloud. I do very long interviews with Python friends of mine. We just catch up and talk about Python. Actually, we talk about things that are unrelated to Python often, like their lives and stuff like that. I just put it, it's very unfiltered, un-candid.
+Michael Kennedy: Just a raw, natural conversation.
+Kenneth Reitz: Yeah, there's no editing or anything like that. I mean, it's produced, but it's not, I just hit record basically.
+Michael Kennedy: Awesome.
+Kenneth Reitz: It's a great little thing. Some people really like the longer format podcasts, so it's one of those. If you need something on your commute you should check it out.
+Michael Kennedy: Awesome, and I'll definitely be sure to link to it in the show notes, so people can just click on it and go there.
+Kenneth Reitz: Yeah, that'd be awesome.
+Michael Kennedy: All right, thanks again for being on the show.
+Kenneth Reitz: Yeah, definitely.
+Michael Kennedy: This has been another episode of Talk Python To Me. Today's guest has been Kenneth Reitz and this episode has been brought to you by Codeship and Hired. Do you have software? Would you like to know if it has bugs before you deploy it? Then jump over to talkpython.fm/codeship and set up a free Codeship Basic account. Ship tested software. Hired wants to help you find your next big thing. Visit talkpython.fm/hired to get five or more offers with salary and equity presented right upfront and a special listener signing bonus of $600. Are you or your colleagues trying to learn Python? Well, be sure to visit training.talkpython.fm. We now have year-long course bundles and a couple of new classes released just this week. Have a look around. I'm sure you'll find a class you'll enjoy. Be sure to subscribe to the show. Open your favorite podcatcher and search for Python. We should be right at the top. You can also find the iTunes feed at /itunes, Google Play feed at /play, and direct RSS feed at /rss on talkpython.fm. Our theme music is Developers, Developers, Developers by Cory Smith, who goes by Smixx. Cory just recently started selling his tracks on iTunes, so I recommend you check it out at talkpython.fm/music. You can browse his tracks he has for sale on iTunes and listen to the full-length version of the theme song. This is your host, Michael Kennedy. Thanks so much for listening. I really appreciate it. Smixx, let's get out of here.
