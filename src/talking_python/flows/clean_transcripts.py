@@ -20,11 +20,9 @@ or the computer may crash.
 import datetime as dt
 from pathlib import Path
 
-# IMPORT LOCAL DASK EXECUTOR
 import spacy
 from prefect import flow, task
 from prefect.logging import get_logger
-from prefect.task_runners import ConcurrentTaskRunner
 from prefect_dask.task_runners import DaskTaskRunner
 import json
 
@@ -38,18 +36,6 @@ log = get_logger()
 
 settings = setts.Settings()
 
-import logging
-import os
-# os.mkdir('log')
-LOG_PATH = 'log'
-class MyFileLogger(logging.FileHandler):
-    def __init__(self, filename, mode='a', encoding=None, delay=False):
-        filename = os.path.join(LOG_PATH, filename)
-        super(MyFileLogger, self).__init__(filename, mode, encoding, delay)
-
-fh = MyFileLogger('auto_ai.log')
-fh.setFormatter(logging.Formatter("[%(asctime)s] %(levelname)s - %(name)s | %(message)s"))
-log.addHandler(fh)
 
 def is_datetimelike(content: str) -> bool:
     """Check if a string resembles to a date.
@@ -84,7 +70,6 @@ def read_transcript(filename: Path) -> list[str]:
 
 @task(tags=["clean-file"])
 def clean_file(filename: Path, bs: int = 10) -> list[str]:
-# def clean_file(contents: list[str], bs: int = 10) -> list[str]:
     """Clean a single file. 
 
     Args:
