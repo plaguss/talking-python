@@ -1,7 +1,11 @@
 """General settings. """
 
 from pathlib import Path
+
+from dotenv import dotenv_values
 from pydantic import BaseSettings
+
+config = dotenv_values(".env")
 
 
 class Settings(BaseSettings):
@@ -11,6 +15,8 @@ class Settings(BaseSettings):
     transcript_filenames: Path = flow_results / "transcript_filenames.txt"
     cleaned_transcripts: Path = flow_results / "cleaned_transcripts"
     file_lengths: Path = flow_results / "file_lengths.json"
+    flow_environ: bool = True if config.get("FLOW_ENVIRON") == "local" else False
+
 
 settings = Settings()
 
@@ -23,7 +29,7 @@ if not settings.cleaned_transcripts.is_dir():
 
 
 def transcript_filenames() -> list[Path]:
-    """Get the filenames with the original transcripts. """
+    """Get the filenames with the original transcripts."""
     with settings.transcript_filenames.open() as f:
         filenames = [settings.transcripts_folder / f for f in f.read().splitlines()]
     return filenames
