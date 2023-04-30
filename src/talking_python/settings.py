@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     transcript_filenames: Path = flow_results / "transcript_filenames.txt"
     cleaned_transcripts: Path = flow_results / "cleaned_transcripts"
     file_lengths: Path = flow_results / "file_lengths.json"
-    flow_environ: bool = True if config.get("FLOW_ENVIRON") == "local" else False
+    flow_environ_local: bool = True if config.get("FLOW_ENVIRON") == "local" else False
 
 
 settings = Settings()
