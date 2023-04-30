@@ -15,26 +15,56 @@ the PREFECT_API_URL as informed.
 At least locally, its better to limit the maximum number of concurrent processes,
 or the computer may crash.
 
+To see the evolution of the flow:
+http://127.0.0.1:8787/status
+
 """
 
 import datetime as dt
+import json
 from pathlib import Path
 
 import spacy
 from prefect import flow, task
 from prefect.logging import get_logger
-from prefect_dask.task_runners import DaskTaskRunner
-import json
 
 import talking_python.settings as setts
-
-original_filenames = setts.transcript_filenames()
 
 nlp = spacy.load("en_core_web_sm")
 
 log = get_logger()
 
 settings = setts.Settings()
+
+
+if settings.flow_environ_local:
+    from prefect_dask.task_runners import DaskTaskRunner
+
+    task_runner = DaskTaskRunner(adapt_kwargs={"maximum": 4})
+else:
+    from prefect.task_runners import SequentialTaskRunner
+
+    task_runner = SequentialTaskRunner()
+
+
+@task
+def get_filenames() -> list[Path]:
+    filenames = []
+    for filename in settings.transcripts_folder.iterdir():
+        # Just check the filenames start with 3 digits and has .txt extension
+        if filename.name[:3].isalnum() and filename.suffix == (".txt"):
+            filenames.append(filename)
+
+    # Sort the filenames acording to the 3 first digits of the filename.
+    filenames = sorted(filenames, key=lambda x: int(x.stem[:3]))
+    return filenames
+
+
+@task
+def write_filenames(filenames: list[Path]) -> None:
+    with open(settings.transcript_filenames, "w") as f:
+        for fname in filenames:
+            f.write(fname.name + "\n")
 
 
 def is_datetimelike(content: str) -> bool:
@@ -47,7 +77,7 @@ def is_datetimelike(content: str) -> bool:
     except ValueError:
         try:
             return bool(dt.datetime.strptime(content, "%H:%M:%S"))
-        except:
+        except ValueError:
             return False
 
 
@@ -70,7 +100,7 @@ def read_transcript(filename: Path) -> list[str]:
 
 @task(tags=["clean-file"])
 def clean_file(filename: Path, bs: int = 10) -> list[str]:
-    """Clean a single file. 
+    """Clean a single file.
 
     Args:
         contents (list[str]): A whole transcript file read.
@@ -83,15 +113,15 @@ def clean_file(filename: Path, bs: int = 10) -> list[str]:
     cleaned = []
     for doc in nlp.pipe(contents, batch_size=bs):
         # Remove music insertions.
-        if (len(doc) == 0 or doc.text.startswith("[music")):
+        if len(doc) == 0 or doc.text.startswith("[music"):
             # Remove blank lines and music lines
             continue
         if is_datetimelike(doc[0].text):
             doc = doc[1:]  # Remove the time of a turn
             if (
-                doc.text.lstrip().startswith("[music") or
-                doc[:4].text.lower().startswith("welcome to talk python") or
-                doc[:5].text.lower().startswith("hello and welcome to talk")
+                doc.text.lstrip().startswith("[music")
+                or doc[:4].text.lower().startswith("welcome to talk python")
+                or doc[:5].text.lower().startswith("hello and welcome to talk")
             ):
                 # Some cases, like in 010.txt, a line with time just informs of music.
                 # Sometimes the presentation of the podcast can be easily ommited,
@@ -100,7 +130,7 @@ def clean_file(filename: Path, bs: int = 10) -> list[str]:
 
         else:
             # If its not a conversation, don't use it.
-            # NOTE: Also, this means losing some pieces, like in 
+            # NOTE: Also, this means losing some pieces, like in
             # transcript 311-get-inside-the-git-folder.txt
             # where some lines don't start with the time in the conversation.
             continue
@@ -110,9 +140,9 @@ def clean_file(filename: Path, bs: int = 10) -> list[str]:
     return cleaned
 
 
-@task()
+@task
 def count_file(contents: list[str], bs: int = 10):
-    """Count the number of words in a single file. 
+    """Count the number of words in a single file.
     Do it after it has cleaning it up.
     """
     return sum([len(doc) for doc in nlp.pipe(contents, batch_size=bs)])
@@ -121,14 +151,15 @@ def count_file(contents: list[str], bs: int = 10):
 @task
 def write_doc(contents: list[str], filename: str):
     with open(filename, "w") as f:
-        for l in contents:
-            f.write(l + "\n")
+        for line in contents:
+            f.write(line + "\n")
 
 
 class FileLengths:
-    """Store the file lengths, maybe loading them if there are already 
+    """Store the file lengths, maybe loading them if there are already
     written ones.
     """
+
     def __init__(self, path: Path = settings.file_lengths) -> None:
         if path.exists():
             try:
@@ -153,25 +184,22 @@ class FileLengths:
             json.dump(self._file_lengths, f, indent=2)
 
 
-@flow(task_runner=DaskTaskRunner(adapt_kwargs={"maximum": 4}))
-def clean_transcripts(filenames: list[Path]):
-    """Cleans the transcripts, prepares them to be processed as a dataset.
-
-    Note:
-        For a big number of files to read (say 20), its better to use the DaskTaskManager
-        with processes. The default ConcurrentTaskRunner fails for a big number
-        of transcripts, while Dask without processes works but slower than
-        using multiple processes.
-    
-    Args:
-        filenames (list[Path]): Names of the original transcripts.
+@flow(task_runner=task_runner)
+def clean_transcripts():
+    """Gets the filenames of the transcripts, cleans them and writes
+    the new files.
     """
+    filenames = get_filenames()
+    write_filenames(filenames)
+
     cleaned_transcripts_dir = settings.cleaned_transcripts
     file_lenghts = FileLengths()
     lengths = {}
     for filename in filenames:
         # TODO: Check only for files that weren't previously worked.
-        clean_filename = cleaned_transcripts_dir / f"{filename.stem}_clean{filename.suffix}"
+        clean_filename = (
+            cleaned_transcripts_dir / f"{filename.stem}_clean{filename.suffix}"
+        )
         if clean_filename.is_file():
             log.info(f"File already exists, skip: {clean_filename}")
             continue
@@ -190,4 +218,4 @@ def clean_transcripts(filenames: list[Path]):
 
 if __name__ == "__main__":
     # To run a subset of the files just pass a subset of the list
-    clean_transcripts(original_filenames)
+    clean_transcripts()
