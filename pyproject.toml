@@ -12,6 +12,7 @@ dependencies = [
     "prefect~=2.10.5",
     "prefect-dask~=0.2.3",
     "spacy~=3.5.2",
+    "python-dotenv~=1.0.0"
 ]
 license = {file = "LICENSE"}
 classifiers = [
