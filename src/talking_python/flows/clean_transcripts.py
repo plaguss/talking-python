@@ -37,6 +37,26 @@ log = get_logger()
 settings = setts.Settings()
 
 
+@task
+def get_filenames() -> list[Path]:
+    filenames = []
+    for filename in settings.transcripts_folder.iterdir():
+        # Just check the filenames start with 3 digits and has .txt extension
+        if filename.name[:3].isalnum() and filename.suffix == (".txt"):
+            filenames.append(filename)
+
+    # Sort the filenames acording to the 3 first digits of the filename.
+    filenames = sorted(filenames, key=lambda x: int(x.stem[:3]))
+    return filenames
+
+
+@task
+def write_filenames(filenames: list[Path]) -> None:
+    with open(settings.transcript_filenames, "w") as f:
+        for fname in filenames:
+            f.write(fname.name + "\n")
+
+
 def is_datetimelike(content: str) -> bool:
     """Check if a string resembles to a date.
     Used to remove the possible dates written in the trancripts.
@@ -166,6 +186,9 @@ def clean_transcripts(filenames: list[Path]):
     Args:
         filenames (list[Path]): Names of the original transcripts.
     """
+    filenames = get_filenames()
+    write_filenames(filenames)
+
     cleaned_transcripts_dir = settings.cleaned_transcripts
     file_lenghts = FileLengths()
     lengths = {}
