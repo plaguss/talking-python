@@ -52,6 +52,8 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+log.info(f"CHECK FILES FOUND IN ROOT: {list(settings._root.iterdir())}")
+
 if not settings.flow_results.is_dir():
     settings.flow_results.mkdir()
 
