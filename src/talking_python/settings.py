@@ -9,7 +9,7 @@ config = dotenv_values(".env")
 
 
 class Settings(BaseSettings):
-    _root: Path = Path(__file__).parent.parent.parent
+    _root: Path = Path(__file__).resolve().parent.parent.parent
     transcripts_folder: Path = _root / "talk-python-transcripts/transcripts"
     flow_results: Path = _root / "flow_results"
     transcript_filenames: Path = flow_results / "transcript_filenames.txt"
