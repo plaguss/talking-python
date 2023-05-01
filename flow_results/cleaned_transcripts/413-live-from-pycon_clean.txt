@@ -1,0 +1,714 @@
+Did you make this year's PyCon event in the US?
+There was a lot of excitement this time around in Salt Lake City.
+In this episode, I'll bring you a bunch of experiences we had this year.
+It starts with a frequent guest, Jay Miller, turns the tables and interviews me at the Microsoft booth on the Expo Hall floor in front of a live audience.
+And then you'll hear from Mario Munoz, Nick Moua, Chris Williams, Ray McClendon, and Sean Tibor about their time at the conference.
+This is Talk Python to Me, episode 413, recorded April 21st, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython.
+on bostodon.org. Be careful with impersonating accounts on other instances, there are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube. Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Airplane, the code-based developer platform for building custom internal tools. You can transform scripts, APIs, SQL queries, and more into internal UIs and frameworks and minutes. Check them out at talkpython.fm/airplane and it's brought to you by Sentry. Don't let those errors go unnoticed. Use Sentry. Get started today at talkpython.fm/sentry.
+I want to welcome everybody to the something something hundredth episode of of Talk Python to me.
+I am your host, Jay Miller.
+Our normal host, Michael Kennedy, apparently had some flight issues.
+Oh no, he's here.
+>> I'm here. Hello everyone.
+>> We talked about this and I said, "I have an idea, trust me." And you said, "Okay." >> I trust you, Jay. This is going to be fun.
+>> I think a lot of people have made that mistake in the past, but I'm going to be interviewing you.
+For those that don't know, I'm Jay Miller.
+I am a now six-time guest on the show.
+I think you get a jacket for that.
+- You're in the 1%.
+You're a 1%.
+- I am in the 1%. - The top 1% of guests.
+- The only person who's been on the show more times than me is my boss, which is annoying, 'cause he will rub it in after he hears this.
+But yeah, Mike, we've been kind of working together for, what, four years now?
+- Four or five years, yeah.
+- Four or five years.
+For those that don't know, I do a little bit of marketing behind the scenes.
+So, if you get that newsletter, if you're not subscribed to the Talk Python newsletter, you need to be. I work really hard on that.
+By the way, it may not come out this weekend because I'm here.
+Just so you know. But yes, so we've known each other for four or five years.
+I think I was on episode 15 or something like that.
+>> Yeah, quite early. About developer productivity.
+>> Yeah.
+>> It's wonderful.
+So, I wanted to take this time to ask you questions similar to what you would do.
+And let's start with one of the easiest ones of why a podcast?
+>> Why a podcast?
+Well, I've done a lot of different things trying to teach people coding and evangelize coding and that involve things like going to user group talks, or doing trainings and all these were like, "Hey, it's awesome.
+20 people showed up and are really engaged.
+But what if you leverage the internet to reach more people?
+That was really one of the motivations, is just how can you have a bigger impact.
+And when I got started with Talk Python, there were zero Python podcasts.
+I'm like, why are there zero Python podcasts?
+There have been some before, but they'd all shut down.
+And I'm like, that doesn't make any sense.
+Such a vibrant community and no one to interview and share the stories of it.
+So, here we are, seven, eight years later.
+>> Yeah. I mean, you've really trailblazed that industry.
+I think since your show, we've had Tobias started podcasting it.
+Dan has a Real Python podcast.
+I think Chris is running. Hey, is that Chris right there?
+>> Yeah, that is Chris. He's getting a shout out right here.
+>> Speaking of the Real Python podcast right there, I think Sean's here from Teaching Python.
+>> Sean and Tibor is here.
+We've even seen it expand into smaller niches like Django.
+We have the Django chats.
+>> Yeah, Django chats.
+>> Some of those shows and a little show, Python Community News on YouTube, go check that out.
+But it's great that you started this thing because there wasn't a thing there and then afterwards, a ton of shows showed up and I see some other podcasters in the audience.
+I think I see Python Bytes and Test and Code, Brian Aukin here as well.
+How does it feel to see that now that you kick-started things, the ecosystem is thriving?
+>> I think it's fantastic.
+Like I said, the goal was to share the stories of this community that weren't being told.
+And now I think so many people have taken up that torch.
+It's great. And I think there's room for all of us.
+We all have our own special flavor and people can gravitate to what they like.
+>> Yeah. And you've interviewed a few hundred people.
+>> I think we're over 450 different guests so far in the show.
+>> Did you think there was that much to talk about in the Python space?
+>> I had a plan, Jay.
+I had a plan and it involved five episodes.
+>> Okay.
+>> Okay. The first five, first one was me announcing the show.
+So four, I know four people who I can interview about this.
+I talked about SQLAlchemy, talked about Pyramid, the web framework, and a couple of other things.
+I'm like, "All right, now what?" But thankfully, so many people were really excited that, "Hey, there finally is a Python podcast." That was a great show. You should talk to so-and-so.
+Have you considered this?
+Now, it's just a snowball going downhill.
+It's great. But I had no idea it would make it this far, no.
+>> That's awesome.
+>> Yeah.
+>> So, I know that just between you and I working together, we have developed things for the show to make the show easier to manage and maintain.
+Has there been any projects that you've developed that have come out of inspiration from the show?
+>> Oh, yeah. There's tons of software behind the scenes that are all about automation and different kinds of things both for the podcast itself and the courses.
+It's amazing just how much these little tiny scripts or little things you can write in an afternoon that will just completely change your workday.
+You're like, "You know what? This used to be such a pain and now it's completely automatic or it's almost automatic." Really great transcripts of some of the new AI stuff, used to ship the files all over to different servers.
+Now, I've got to set up differently.
+But just a ton of software that's constantly written.
+It's never-ending fun and it's also a really cool playground.
+I really want to learn fast API, or I want to learn this thing.
+Let me just use that for this little small project I got, and now I have some experience with it. It's great.
+>> I have definitely gotten to witness like, "Oh, hey, just add this thing and now it'll run and do all this stuff." Then usually I come in and I go, "Hey, I built something too." You're like, "I can't get it to work." I go, "Oh, yeah, I broke it. I'm sorry.
+Your entire show is down." >> That's fine.
+>> I don't think I've done that yet. I haven't.
+I've brought an entire networks down.
+I don't think I've brought in the podcast down yet.
+>> I think the thing that took the site down for the longest was the Walrus operator.
+>> The Walrus operator.
+>> The Walrus operator.
+>> Shout out to the Walrus operator.
+That's my favorite part of Python.
+>> Thank you, Emily. No, the Walrus operator is awesome.
+But when the servers were running 3.7 and I was running 3.8 on my dev machine, I have these little management scripts for all this kind of stuff we're talking about, right?
+>> Yeah.
+>> And I'm like, well, that part's not part of the website.
+I'll do that. I'll write Walrus operator code and all sorts of stuff.
+When I shipped it, the framework tried to scan to see if there was any routes in there, and it couldn't parse it and it just couldn't start.
+I'm like, "Why won't there work?
+I haven't even touched it. What's going on?" I'm like, "Oh, the Walrus operator took it down." >> That's funny. So you've interviewed a ton of people, and I'm not going to ask you to say who's your favorite person to interview because we know the answer is me.
+>> Yes.
+>> But what were some of the most surprising interviews that you had?
+There's a whole set of categories, different categories of surprising, right?
+And your shows were very interesting and I really enjoyed talking to you about them.
+They're really inspiring because they're not just, here's this API, but they're higher level, right?
+Like developer productivity and stuff.
+However, I would say the stuff that surprises me the most is where people are doing things you wouldn't have expected with Python.
+Like, "Oh, hey, we're actually using machine learning and Python to find exoplanets in old kind of stale Kepler data." >> Yeah.
+>> And so, there's this group in Oxford who found 50 exoplanets running machine learning across data they thought was already analyzed and done.
+And you would learn weird things like they said, "We used to have grad students do it and that was okay, but it was really variable like the mood of the grad student matter.
+For example, at Oxford, they always had cookies and coffee at three, so more exoplanets were found after three than before three.
+There's no difference in the data, but you know, and they're like, if we could bring some automation, that might make science a little more scientific.
+- Developer productivity tip, add cookies and coffee to your daily routine, right?
+- Yeah, for sure, for sure.
+- So I'm thinking about a particular episode that I was on where you had Rivers Cuomo from Weezer.
+- That was one of the more notable ones, yes.
+- That was, I just, I remember getting the message from you of like, hey, you're gonna be on the show this week, and I was like, I can't, I've gotta, and he's like, no, no, no, no, no, you are going to be on the show this week.
+- You'll want to be here, trust me, yes.
+- And then just being like, having to pick my jaw off the floor because like, you know, you had a rock star on the show. - A little rock star, yeah.
+And I think that that is one of the beauties of podcasting is that just like Python is kind of stretched outside of developer community and is kind of branched into data science and branched into automation and hopefully we'll see Python in more and more spaces, like we're seeing it in places that no one would expect, like on stage, like with Rivers Cuomo.
+What was that like?
+How did that happen?
+So Rivers has an assistant who coordinates a bunch of stuff, and send me a message and said, the assistant sent me a message.
+Rivers would like to be on the show.
+I'm like, "That is amazing." But you do understand it's a Python show, and I hadn't realized how much coding he had done.
+So I actually got to go out and spend some time with him when he was in Portland at a concert.
+>> Rub it in. Rub it in. I like it.
+>> We hung out a little bit. He's like, "Let me show you all the code I'm writing." And we just had a great time geeking out before the show.
+And after I saw him like, "You have to be on the show.
+What you're doing is so awesome.
+So yeah, he's doing legitimately cool stuff.
+>> I think now he's actually contributing to open source in Python as well.
+>> Yeah, I saw him and Brett Cannon going back forth on some work.
+>> Let's not talk about Brett Cannon. He's not here right now.
+He'll be back tomorrow.
+You can ask him questions about that at the Ask Me Anything.
+>> Anyway, it was really awesome to have him on the show.
+It was cool to have you there as well.
+That was a real popular one.
+That was in the vein of what you opened this conversation with.
+It was a bunch of little automation tools that don't count as like, "Hey, I built Instagram," but they're like, "This is a really amazing thing I built, even if it only took a day, it was super powerful." >> Yeah. All right.
+So, we're about halfway through the interview.
+We understand that people want to get to talk.
+So, what we're going to do is we're going to go ahead and raffle off a pair of Surface earbuds.
+Also, if you want to catch the talks, feel free to go do that.
+This will be on the podcast.
+Where can people find the podcast while you're looking for a number here?
+I don't want to be biased.
+>> It's going to influence me. I'm not even looking.
+>> Yeah.
+>> Find it at talkpython.fm or if you go to your any podcast player and just search for Talk Python.
+>> Okay.
+>> How do I read the number?
+>> Yeah. Just read the number. Read the number.
+>> All right. I wasn't paid that much for this.
+So the last numbers are 548.
+>> 548. Congratulations.
+>> Thank you.
+>> Congratulations.
+>> This portion of Talk Python to me is brought to you by Airplane.
+Airplane is the developer platform for building custom internal tools.
+Airplane lets you transform scripts, APIs, SQL queries, and more into powerful and shareable internal UI tools and workflows in minutes.
+You can use Airplane to build internal admin tools, host scheduled operations, share scripts and on-call runbooks, create multi-step human and loop workflows, and more. Unlike no-code, low-code platforms that address similar For use cases, Airplane is code-based.
+Everything you create in Airplane can be version-controlled, integrated with the rest of your code base, and extended using third-party libraries.
+The building blocks of Airplane are tasks, which are single or multi-step functions that anyone on your team can use.
+Airplane also offers views, which allow you to quickly create custom UIs and dashboards.
+Airplane includes enterprise-grade features out of the box, including permission settings, audit logs, self-hosting, approval flows, and more.
+You can sign up for a free account at talkpython.fm/airplane and start building complex workflows and UIs within minutes.
+So get started now by visiting talkpython.fm/airplane.
+That link is in your podcast player show notes.
+Thank you to Airplane for keeping Talk Python flying high.
+- Going back to that kind of that idea of like, hey, these are little tools and now they're being used with like super amazing people in the Python space.
+Have you heard of anybody getting into Python because of your show?
+>> I've heard of a lot of people getting into there.
+You know, when I started the show, going back to the beginning a little bit, when I started the show, I expected, well, I tried to think, well, who will listen to a show about the people making these frameworks in these libraries?
+It's got to be the most hardcore developers, the people who maybe wrote that library or really, really into it, right?
+>> Yeah.
+>> Sure, people like that listening, it's great.
+But there's a bunch of people who listen and they'll say things like, "I'm starting to understand what you all are talking about after six weeks." I'm like, "Why have you listened to six weeks and not know what I'm talking about?
+It's really a kind of an honor, but why would you do that?" What they do is they're using it as language immersion.
+If I just immerse myself in this community, soon enough I will be a Python person.
+Like if I moved to Brazil, maybe I could learn Portuguese if I just force myself to it.
+And there's a lot of people like that.
+So, there are a lot of people kind of on that journey.
+>> And then I guess in the same vein, has any of the feedback from the show that you've done, kind of gone into some of the other things that you do like Talk Python Training?
+>> Constantly. Constantly. I'll talk about something like, this might be interesting and everybody's, this is so amazing, so interesting, I want to learn more.
+I'm like, okay, well, maybe I should put some more effort into it, either have more shows or do a course or something like that.
+Yeah, absolutely.
+- Very cool.
+So, I guess I got one more question and then I'm gonna go, I'm gonna do the thing that you do at the end.
+- All right.
+- So you have, the show itself has kind of migrated.
+It started as a podcast only, and then I saw you start doing some videos, and then of course the courses were always kind of a big part of this.
+And now you've kind of integrated that live stream component to it as well.
+How was making that change from it being a, you know, pre-recorded, pre-talk, just you and the person you're interviewing, to now you have all of those things, but also a live audience listening over the internet?
+- Yeah, so smash the bell on YouTube, right?
+- Yeah, no.
+Like and subscribe, ring the bell, all that stuff.
+- Yeah, so seriously though, It was a big decision to make it a live show.
+And there were two things I was worried about.
+One is, will the guests, who used to just sort of call up one-on-one and say, "Let's have a conversation," and then you'll edit it right?
+Because if I say something, "I'm really new to this," and if you edit it, I think I can build up the confidence to be on there, like, "Oh, guess what? We're live streaming it to the world, "and it'll be written in ink on YouTube." You know, like, that's a different sort of deal.
+And for the most part, people haven't minded.
+At first, they're like, "I'm a little nervous." I'm like, "You know, it's fine, really.
+"You'll be fine.
+"No, it has been fine every time." - It's always like the first time you go on a live stream, you're like, "I don't know what to do.
+"Do I stare at the camera?
+"Do I look at the screen?" But then after that, they're like, "Oh, that was so fun engaging with the audience live "and seeing the comments and doing all that stuff." - Yeah, absolutely.
+And from a logistics perspective, it's taken the effort down a little bit.
+Ironically, doing more, you'd think the live stream would add something, but we have people join the live stream and ask questions so we can kind of make the audience part of the show.
+I'm like, oh, I should have asked that question, but so and so in the live chat did.
+That helps.
+And then also, if it's already live, you don't have to edit it as much 'cause it's kind of, you're a little more on focus because you're like, instead of like, hey, can we do that again or can we talk, or can we pause it?
+Like, you know we're live streaming, we're just gonna go.
+And it works out, but it kind of takes away some of the going back and fixing it up.
+But it's been really cool.
+I got into it, I think the real motivation to get into it was through a common friend of ours, Cecil Phillip.
+- Okay.
+- Yeah, and I interviewed him and Brian Clark about their live streaming, their developer stuff.
+- Okay.
+- And I was like, that's pretty cool what they're doing.
+How are you doing it?
+- The stuff over at Stripe that they're doing?
+- No, no, when he was at Microsoft.
+- Oh, okay.
+- Yeah.
+- Some of the like, ask the experts stuff that we do.
+- Yeah, that kind of stuff.
+- Well now we're doing it on the Microsoft YouTube channel.
+was like the YouTube at Microsoft developer.
+>> Right on.
+>> Cool.
+>> So anyway, he got me inspired watching what they were doing and got me using things like StreamYard.
+Yeah, it's real good.
+>> Very awesome. I love it. All right.
+So normally, you have some rapid fire questions at the end.
+So I have some rapid fire questions for you.
+We're at PyCon 2023.
+What was your first PyCon US?
+>> My first PyCon US, I think was in Portland, my hometown, in 2015.
+>> In 2015.
+2015, 2016. The irony was for that one year I was living in Germany, so I had to fly back, rent a hotel, stay a mile from my house, who someone else lived in it at the time because I was renting it, and then go to PyCon. So it was like a huge trip even though it was only two miles, three miles from my house.
+But it was a great time.
+What is the one conference talk that you always go back and and listen to or watch?
+Oh, the one conference talk. Oh boy.
+It's, I would say, the birth and death of JavaScript by Gary Bernhardt, which is, have you seen this?
+>> I think I've seen it once.
+>> It's, whenever I got to do a reference stuff with like low-level JavaScript and stuff.
+I mean, I know this is Python and all, but I think he gave that out of Python conference as a comedy thing, but it's also a really interesting history of JavaScript as both drama.
+I don't know. If you haven't seen it, it's worth checking out.
+>> All right. Two more rapid fire questions.
+What is your favorite addition or update to Python since you've been using it?
+>> I thought it was going to, I almost started like, "Oh, that's easy." But then there's two things that are really, really, really.
+>> Okay. You can do two.
+>> I'm going to do two. I'm going to take two.
+Async and await, type hints.
+>> Okay. Shout out to type hints.
+Type hints is-
+>> Shout out, yeah.
+>> F strings are probably up there for me.
+F-strings are like in the top five.
+Type-ins are definitely up there.
+Walrus operator, we got a special place in my heart.
+>> You can take a site down.
+>> Take a whole website down in a matter of seconds with that.
+>> The Walrus operator is great.
+>> And then the last question is one that you normally ask, what is your favorite Python module or package?
+>> Yeah. What one?
+There's a bunch of interesting ones I run across with Python bytes like Brian Akin.
+We find a bunch there.
+- One that is really cool to me is Unsync.
+It just kind of unifies threading, multi-processing, and async and await in like a nice, cool way.
+I haven't been able to use it as much as I'd like, but I really like that one.
+And I just want to give a shout out to Latexify.
+- Okay.
+- Or Latexify?
+- You sure it's not Latexify?
+- Yeah, yeah.
+- You don't want the latex people, or sorry, latex people coming after us.
+- Let me re-say it.
+I meant Latexify.
+>> You can put a decorator onto a function.
+>> Okay.
+>> A Python function that does math inside and will write the symbolic mathematical representation of the Python code you wrote.
+>> Oh, that's really cool.
+>> It's insane.
+>> That's really cool.
+>> It can't do everything, but it'll be like, okay, well, that's an infinite sum from zero to infinity of this.
+How does it know? It's insane. Anyway.
+>> That's awesome. Well, Mike, again, thank you so much.
+Again, we've known each other for half a decade now.
+I hope we make it to a decade and more of working together and doing Talk Python stuff.
+And again, give people one more opportunity to know where they can learn more about the show.
+Yeah, if you're not subscribed, check it out, Talk Python.fm, or look for Talk Python in your podcast players.
+Really, really appreciate everyone.
+I mean, since I'm on this side of the microphone, I genuinely want to say thank you to everyone here, but everyone who listens to the show.
+It's been such an honor, and it's so cool to be able to do that.
+it's my full-time job now is running the podcast.
+>> That's awesome.
+>> When I started, I thought, "Oh, this would be a cool hobby on the side." Like I said, five episodes and I got to figure it out from there.
+It's just been such a great response from everyone and thankful every day.
+Thank you for working. I also, 10 years, let's do it. It'll be easy.
+>> Yeah. We'll make it happen.
+Thank you for letting us host this event at the Microsoft booth.
+I think we actually have a gift for you as well.
+Aaron, do you have one of the-
+>> We have an extra pair of Surface earbuds.
+>> Oh, that's awesome.
+>> Especially for you.
+As a thank you one for doing this, but also a thank you for all that you do within the Python community.
+Everyone, this has been Michael Kennedy, I've been Jay Miller, this has been Talk Python Live.
+Let's give Michael a hand, wonderful hand for all that he's done for the past several years.
+>> Thank you everyone.
+>> This portion of Talk Python to me is brought to you by CodeCov from Sentry.
+Have you heard about CodeCov?
+They are the leading code coverage tool on the market, and they just joined Sentry, the error tracking and performance monitoring company that you know and love.
+CodeCov is the all-in-one code coverage reporting solution for any test suite, giving developers actionable insights to deploy reliable code with confidence.
+CodeCov is easy to set up.
+If you are already both a CodeCov and Sentry user, GitHub integration is even enabled automatically for you.
+You'll get coverage insights directly in your workflows.
+Code coverage pull request comments allow you to quickly analyze your PR's coverage and risk without leaving your workflow.
+It'll reduce the guesswork.
+You set up customizable quality gates and let your continuous integration do the rest.
+And CodeCov identifies where tests can help you avoid errors in production through their Sentry integration.
+If an error does occur, You'll even see code coverage details directly in your stack traces.
+So you can see the untested, partially or fully covered code that may be causing errors to help you fix your tests to avoid similar errors happening in the future.
+Get started for free or take advantage of Sentry's promo pricing, where with a Sentry team or business plan, you can get your first five Pro CodeCov seats for just $29 a month.
+That's a 40% savings.
+Visit talkpython.fm/sentry to get started.
+Remember to use the code talkpython to let them know you came from us.
+It really does help support the show.
+That's talkpython.fm/s-e-n-t-r-y-sentry and the code talkpython.
+Thank you to Sentry and CodeCov for supporting the show.
+- Hey Mario.
+- Hey Mike.
+- Great to see you here at the conference.
+- I'm happy to meet you.
+- Yeah, same here.
+And you know, first of all, before we get into it, Just tell people quickly who are you?
+Sure.
+Introduce yourself.
+my name's Mario.
+I live in Southern California and I write a blog called Python by night, which, you know, it's my hobby thing I do when the, you know, the kids asleep, when my wife is asleep, that's, that's what I do.
+Yeah.
+Some people play games.
+We write code or whatever.
+Awesome.
+So how's, how's the commerce going for you?
+Oh man, I'm having a great time.
+Are you?
+It's, it's my second Python.
+And this morning I gave a lightning talk about being either a fly on the wall or a busy worker bee. And I've been a busy worker bee. Yeah. You said the first time you came here, we were speaking at lunch. You said the first time you came here, you kind of just held back. You're kind of just observing and watching from the outside and you kind of dove in with your feet first. You know, I tend to be in the background most of the time, but yeah, I saw a tweet, I think asking for help over at the Python Software Foundation booth last year.
+- Includes beanbags, by the way.
+- It includes beanbags. Anyway, I went and helped out last year, met a lot of cool people.
+Then I just thought I should volunteer more. I got to meet a whole bunch of people I had only heard of or seen online, like some, to me, Python heroes. And I thought this was excellent. So this year I just dove in and tripled that or quadrupled that, I guess.
+- Yeah. Awesome. Seems like you're having a great time.
+- I'm having a great time.
+Awesome. What is your plan Ben? Some people try to go all the talks, some people hallway track it, some people just go to the parties. What's your plan?
+Ah, let's see. So I guess I was so intent on getting my tutorial, which was on Wednesday, the very first tutorial that I hadn't even made a plan. I just was so focused on that.
+Once I gave the tutorial, I was breathing easy, but I had already volunteered to help with the online platform. I was helping with the booth again. So that kind of kept me busy. I had planned to attend a couple of talks. I've only been to two maybe.
+- Yeah, yeah, yeah. So the plan was survive the tutorial and then figure it out.
+- And then figure it out.
+- How'd it go? It was HTMX, right? One of the fine technologies integrated with Python.
+- Fantastic. I feel like I've been talking about it all conference. I've talked to people individually. I had an open space about it. I talked about it at lunch. There's a real kind of a very palpable energy that people feel when they see what it can do.
+It's pretty exciting.
+- A bunch of people have been putting off learning JavaScript 'cause they felt they have to.
+And you're like, wait, you don't actually have to do that.
+- You don't have to.
+- You have to.
+You really, keep your Python.
+- I haven't learned JavaScript, so.
+- Yeah, exactly.
+Not knocking on people who have and they're welcome to, but if you don't want to, you shouldn't be made to.
+- Yeah, it's not an either or, it's both and, but if you don't have to, you don't have to.
+- Yeah, the irony is even Node.js JavaScript, people like it because they don't have to write front-end JavaScript, they can write back-end JavaScript.
+- Right, yeah.
+in it for everyone. Yeah, so that's been mostly it. I love the hallway track. I love meeting people.
+I got a picture with Ned who, you know, he gave an awesome opening keynote.
+You know, all sorts of people that I'm meeting for the first time, other people I met last year.
+It's fantastic. Yeah, awesome. What's your big takeaways? What has stood out for you? I mean, there's a bunch of cool stuff back here behind us at the expo hall and other things you probably I saw talks like what stood out?
+What stood out?
+I think, you know, part of it is just coming, coming away from it from these past couple of years, I've been tough.
+Just not seeing a lot of people.
+And it is still kind of weird to see a lot of people.
+You feel that kind of hesitancy.
+People are still kind of feeling it out, but in spite of it all, I just think the Python community embraces people of all walks of life, no matter where you're coming from, even flies like myself who tend to be, you know, trying to masquerade as a bee. Even so, I feel like it's a safe space to be vulnerable, to learn a lot, and to teach a lot.
+- Yeah, absolutely. It's a very welcoming space and we're stronger together.
+That means we ought to take time to be together, right?
+- Yeah, correct.
+- Right.
+- Well, thanks for taking the time to share your experience.
+Great to see you.
+- All right. Awesome.
+Thank you.
+- Yeah, thanks.
+Hey Nick, how you doing?
+- Hey, hey Michael.
+- Hey, it's good to see you.
+- Good to see you too.
+- Yeah, in person this time.
+- Yes.
+- Last time it was on Python Bytes, right?
+- Yes, last time it was on Python Bytes.
+- Yeah, but here on PyCon.
+- Yes, PyCon 2023.
+- Yeah, so I just wanted to get together with a couple of folks, including you, and just ask, you know, what's your PyCon experience this year?
+How's it going?
+- It has been actually quite amazing.
+this year was the first time I gave a talk at PyCon.
+- Okay. - My first ever talk.
+- How did it go?
+- It went really well.
+I think I felt so encouraged by the Python community, people that came up to me and really appreciated what I had to say, and that made me feel more engaged and wanted me to do it again.
+- Yeah, yeah, yeah, fantastic.
+What was it on?
+- It was on improving the transportation networks using Python.
+As a data scientist for Trimble Transportation, I work in the transportation industry and they face a lot of problems in terms of reducing waste, optimizing their networks.
+And that's what my team at Tremble do day to day.
+So I needed to share with the Python community the kinds of things that we do and try to really get at the core of it and show that we use really a lot of Python to do it.
+- That sounds awesome.
+I'm just kind of wondering as you're telling me that, Do you get extra frustrated at traffic jams and stuff?
+'Cause you know behind the scenes how much it could be better.
+- I get frustrated at when my Amazon package doesn't come on time.
+- Yeah, okay.
+- So, but then again, I also feel a lot of empathy too because I know these drivers that are driving.
+It's a lot.
+- I think like half the traffic in the world might actually be Amazon drivers.
+(laughing)
+- But anyway, more, here hold on, let me move this real quick.
+There we go.
+Tell me about what you thought this year.
+It seems like the conference, people really happy to be back, but what stood out for you?
+- I think what stood out for me is the number of new attendees we still got.
+- Yeah, quite a few, yeah.
+- Yeah, quite a few, and it's pretty amazing because there were a lot of layoffs and economic struggles.
+And the conferences, it's not like you're all free, but people still came, and I think that's partly due to the PSF and the great work they do with their financial program.
+- Right, some of the scholarships, yeah.
+- Companies that we see here in the booth really understanding the importance of sending their people out here.
+So it's really great to see all those first-time attendees.
+Yeah.
+- Yeah, excellent.
+You said you're kind of trying the hallway track out this year?
+- Yes, that is a secret feature of PyCon.
+- The one thing not on YouTube.
+No live stream, none of that.
+- None of that.
+And I was at the keynotes with Ned Batch Elder And he really talked about talking to people because we have, and also like Marietta, the chair of Picon this year, talked about there's 2000 people here, like over 2000 people here, and this is the only time you're going to get to talk to them.
+Yeah.
+So I opted, made a conscious effort.
+Yeah, sorry.
+I got cut off there, but the hallway track.
+Yeah.
+The hallway track.
+And Ned talked about talking to people.
+Yeah.
+Ned talked about, Ned and Marietta talked about talking to people.
+So I made a conscious effort to try and interact with the fellow people that are walking around this hallways and this expo booth and does get into on this.
+And I really got a lot of like really nice interactions.
+I met up with old friends, people I met at PyCon, but we're going to do activities together and all that stuff.
+So it's been really, really, really like fruitful.
+Yeah.
+Awesome.
+Well, great to run into you.
+Same.
+Likewise.
+Yeah.
+Yeah.
+And thanks for, thanks for taking the time to talk to everyone and sharing your, your experience.
+- Bye guys.
+- Bye.
+- Bye.
+- Hey Sean.
+- Hey Mike, how's it going?
+- It's fantastic to see you again, and in person, imagine that.
+- I know, first time in a few years, it's been great.
+- It has, since the before times.
+- I know, right?
+- Since the before times.
+But here we all are back together at PyCon, and yeah, it's great.
+Before we get into it, just tell people quickly about yourself.
+- Sure.
+- Fellow podcaster.
+- Sure, so my name's Sean Tyber.
+I'm a senior cloud engineer at Mondelēz International, which nobody knows except for we make all of the Oreos and the Nilla wafers and Cadbury chocolates, all the good stuff.
+And we also do a lot of really cool stuff in the cloud.
+So I'm also the co-host of the Teaching Python podcast.
+I feel like I'm missing my right arm 'cause Kelly couldn't make it this time.
+- Shout out to Kelly.
+Kelly, you should be here, we miss you.
+- Yeah, well, we'll get her next year.
+- Yes, exactly.
+- Yeah, and just here running the education summit on Thursday and attending the rest of the conference and enjoying it like any other Pythonista.
+- How was the education summit?
+- It's amazing.
+We had some wonderful speakers, educators coming from all over the country, from all over the world.
+We had people speaking from as far away as South Korea at the education summit, and it's the one time of year when people who are teaching computer science and teaching Python specifically get a chance to come together and talk about what they do with other people.
+It's just a unique experience.
+- Yeah, it's excellent.
+And if you're teaching actual students, it's hard to get away, right?
+You've got the school year, and you've got a structure on that, so it's a big deal.
+- Yeah, it's been a great experience.
+We did some workshops talking about the impact generative AI on education, some of the implications of that, and just, you know, try to figure out what it's gonna look like in the future.
+So what did you decide ChatGPT is gonna do to our education system?
+Well, we still have way more questions than we have answers, but we also are looking at it from the lens of there have been other tools that have transformed education.
+Calculators were supposed to ruin the teaching of math, and yet we figured that out. So we're confident we can do the same here.
+Same thing for search and the internet. Also kind of broke it, right? How's your, how are you going to test if people know history if they can just type in when was the war of 1812? Right and we what we found is that we these are skills that we can teach we can teach students how to search more effectively how to find things how to solve problems and I think with generative AI it's about how to evaluate what's happening what you're asking for and making sure that it is appropriate to the problem you're trying to solve. How do you ask your questions and then how do you assess whether it's real what it said? Exactly. All right well what stood out for you at the show so far how's it been? I mean it's the people Like always, it's the people getting to see everyone, getting to have those great conversations, to sit down and have lunch together and talk about things. And just, I find myself looking at everyone's badges to figure out where they're coming from and what kind of cool work they're doing. And I'm just curious about what, how they're using Python and how I could connect with them and make something cool happen together. - It's always surprising. You run into such, such cool people. And that is my favorite part as well. It's just kind of the, Honestly, the hallway track, I know, not dissing the speakers, I'm looking forward to those talks on YouTube, but it's the parts that are not recorded and are spontaneous that really make it worth coming to, I think.
+That's true. And I've been enjoying the talks too. There's been some really phenomenal talk tracks this year. We're just seeing, I think, a new wave of energy coming out of the pandemic.
+Yeah.
+And I can't wait to go to Pittsburgh next year and do this all again.
+- I know, that'd be awesome.
+Well, thanks for taking the time to share your experience.
+- It's my pleasure, Michael, thanks.
+- You bet, bye.
+- Bye.
+- Hey, Chris.
+- Hey, Mike, how are you doing today?
+- Really good, really good.
+Enjoying PyCon, how about you?
+- I am having an absolute blast here.
+- It's always fun, isn't it?
+- Oh, this is my favorite conference.
+The energy, the vibe, the people, the willingness to share is bar none the best conference that I've ever attended.
+- Yeah, it's--
+- And I've been to a lot.
+- Yeah, I know you have.
+It really is unique in that regard.
+Tell people quickly about yourself.
+- Hey everybody, my name is Chris Williams.
+I am the host of the vBrownBag podcast.
+I'm a dev rel manager for HashiCorp and an AWS hero.
+- Yeah, awesome.
+And I've been on your BrownBag a few times.
+That's been very fun.
+- You're a friend of the vBrownBag show.
+I am a friend of Talk Python.
+- That is right.
+Yeah, we're all friends here.
+It's amazing. - Yay!
+- So, how's this conference going for you?
+How is it in 2023?
+- It's been going really well.
+I'm glad that there's a bit more energy than last year.
+There's more interest.
+It's been, I think people are just exuberant to be out of the house and meeting new folks and getting back into the vibe of the before times.
+- Yeah, we miss people, right?
+- Yeah, exactly.
+- Zoom is fine.
+- But it's not a patch on actually hanging out with folks.
+- It's not a replacement, that's right.
+- Yeah, totally.
+So what's your game plan here?
+Are you on hit all of us talks?
+Are you on hallway track?
+Are you trying to get all the swag?
+What's going on here?
+- So I'm actually changing it up a little bit this year.
+I love the hallway track and meeting folks.
+So I found an entire contingent of people in Boston that I didn't even know were out there.
+The keynotes have been, I am now trying to find ways to improve my public speaking.
+So paying attention to truly good folks like James and Ned and their keynotes were masterclasses in presentation and humorous pauses and things like that.
+And so I'm furiously scribbling down notes, like, "Oh, that sounded great, "I'm gonna try that." - Ah, yeah.
+Yeah, you can watch the talks, or you can attend the talks, or you can study the talks.
+- Yes. - And whenever I go there, as somebody who's done a ton of public speaking, I'm like, "Oh, that was nice." I don't know if people caught that, but they appreciated that if they didn't.
+- Yeah. - So yeah, that's.
+So I'm doing the keynotes as a study session.
+I am doing the hallway track.
+Generally, if something is going to be recorded, I will catch it after the fact.
+So I tend to not do them unless there's something that I want to talk to the presenter about on the spot.
+Then I will tend that.
+But I'm just trying to catch up with some friends.
+A good friend of mine spent an inordinate amount of time teaching me new things in Python over the past couple of days.
+He's a contributor.
+And he was showing me some stuff that, as a newbie developer, I'm kind of too dumb to know the right questions to ask.
+And I know that people don't like saying you're too dumb.
+Nobody's too dumb.
+There's no dumb questions.
+But well, you do need to sort of find your way.
+The questions that I don't know I need to ask yet.
+Yeah, sure.
+So yeah, it's just been really good to catch up with folks, learn new things, and absorb as much as humanly possible in three days.
+Yeah, it is tiring, but it's fun.
+Converse is fun.
+After parties are fun.
+- Yep, yep.
+- Yeah, really, really good stuff.
+So, thanks.
+Before I let you out here, what in Python are you excited about right now?
+- So, I'm gonna be checking out the new releases in 3.12.
+They were making some announcements on f-strings that I need to dig into.
+Like, we're making f-strings better.
+I'm like, okay, wow.
+So, I'm gonna be doing a lot of Googling after everything is said and done to figure it out.
+And as a content creator myself, I'll be spending a lot of time parsing through the stuff that I've been making.
+And, and, you know, just finding new ways to, reach out to people.
+I mean, I don't know about you, but for me, this whole experience is a great way to find interesting people to talk to.
+Like you could have people on V brown bag, right?
+There's a, there's a bunch of resumes.
+They didn't know they submitted to you.
+Oh, yeah, absolutely.
+Yeah.
+I have, I have been, I've been scribbling down names and, my, my little, my My little notepad on my phone is filling up furiously as I find people to pester after this.
+Awesome.
+Well, thanks for taking your time to share your thoughts.
+Thanks, Mike.
+Appreciate it.
+Yeah, you bet.
+Bye.
+Hey, Ray.
+Hey.
+How are you doing?
+I'm doing wonderful.
+Great to meet you.
+You as well.
+Yes, yes, yes.
+Thank you.
+Tell people quick who you are, a bit about yourself.
+Let's see.
+So I'm Ray McLendon.
+I'm actually a data scientist at the Kansas City Fed.
+I mostly work in natural language processing, that kind of fun stuff.
+Yeah.
+really awesome. Yeah. So just talking to people about their PyCon experience and you know, how many times you've been here?
+So this is my second PyCon.
+Okay.
+My first one was last year.
+Yeah.
+Sort of like right on the back of everybody getting back together from the pandemic.
+Yeah. So I'm not sure how representative your experience was last time. It was a little, a little different, but how was it this year?
+Oh, I'm really enjoying it.
+I actually gave a tutorial this year.
+Oh you did? What was it on?
+feature engineering is for everyone.
+>> Uh-huh.
+>> So trying to just share our knowledge of feature engineering, I co-presented that with a co-worker of mine, Leah.
+Yeah, it was fantastic. We had a great time.
+>> Yeah. You had a good experience doing it?
+>> Absolutely. Looking forward to doing it again.
+>> Cool. What library is that, like PyTorch or what was it?
+>> That's really interesting. So it was a mix.
+There was some exploration with YData profiler.
+>> Okay.
+And then there was building various features.
+Some of it was kind of just using pandas or NumPy and Scikit-learn.
+We use some of the libraries for feature engineering that are built into that.
+So it's a mix of libraries.
+Cool. Well, what stood out to you so far this year?
+Well, I guess the interesting part that I did was I went to OpenSpaces.
+I didn't do that the previous year.
+and I went to one this year around civic data.
+So that was really fascinating.
+- Yeah, yeah.
+- Enjoyed the real community vibe and learning about, I guess, honestly, how difficult it is to get your hands on civic data, quite frankly.
+- Yeah, I can imagine that it is, but we can complain a lot about the government and systems, and that's easy to do, but at the same time, we have all this technology and all this data and people can really put in, make a difference.
+I see actually the US digital services have a booth over there.
+Right.
+And that's kind of like trying to bring people in from industry to say like, look, you built Instagram.
+Now, could you help us build something else for the government?
+We could, so people won't complain.
+It's kind of cool actually.
+Yeah.
+So they were at the civic data group and I hate to say it.
+I had never heard of the US digital service before, so I was really excited to hear about the efforts and the work that they're doing, including some of and like best practices guides around UX and UI that they even provide.
+- Yeah, it's very cool service.
+I interviewed David on Talk Python years ago, but maybe I should talk to him again.
+But anyways, it's a cool service.
+So what stood out to you this year?
+- Strangely enough, I come to PyCon, I expect some really technical talks, to be honest.
+That's an expectation.
+It was really the keynote from the first day with Ted, where he kind of broke down like communication.
+- Yeah.
+- That strangely, that was the thing that stood out the most to me.
+- I've heard so many good things from his keynote and I was doing, preparing for a live event that started the minute it ended, so I couldn't be there like, but I'm gonna watch it on YouTube and I'll check it out.
+So cool. - Absolutely.
+- Yeah, you've been walking around doing the hallway track a little bit as well and joining me and people?
+- That's right, yeah, I sure have.
+I've bumped into a few folks and we've been throwing ideas around.
+I'm really big into the whole GPT thing.
+- Oh, it's crazy.
+- Yeah, it's pretty wild.
+So it's been interesting to see some folks that are really thinking deeply about ethics and security in that space and giving me new ideas to bring back.
+- Yeah, cool.
+There's a lot of ML and a lot of AI stuff around here this year.
+So, all right.
+Well, thanks for being on the show.
+Thanks for taking time.
+- Appreciate it.
+- Yeah.
+- This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+visit talkpython.fm/sentry and get started for free. And be sure to use the promo code talkpython, all one word. Want to level up your Python? We have one of the largest catalogs of Python video courses over at Talk Python. Our content ranges from true beginners to deeply advanced topics like memory and async. And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm. Be sure to subscribe to the show, open your favorite podcast app and search for Python. We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days. If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy. Thanks so much for listening. I really appreciate it.
+Now, get out there and write some Python code.
+[Music]
+(upbeat music)
+[BLANK_AUDIO]
