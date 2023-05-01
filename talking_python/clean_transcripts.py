@@ -25,10 +25,9 @@ import json
 from pathlib import Path
 
 import spacy
+from dotenv import dotenv_values
 from prefect import flow, task
 from prefect.logging import get_logger
-
-from dotenv import dotenv_values
 from pydantic import BaseSettings
 
 nlp = spacy.load("en_core_web_sm")
@@ -51,7 +50,6 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-log.info(f"CHECK FILES FOUND IN ROOT: {list(settings._root.iterdir())}")
 
 if not settings.flow_results.is_dir():
     settings.flow_results.mkdir()
