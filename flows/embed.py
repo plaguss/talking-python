@@ -56,6 +56,8 @@ log = get_logger("embed")
 if not chromadb_dir.is_dir():
     chromadb_dir.mkdir()
 
+# NOTE: The following checkpoint file only works if the batch size
+# for the dataset generator is 64
 if not checkpoint_path.exists():
     EMBEDDED_FILES = set()
 else:
