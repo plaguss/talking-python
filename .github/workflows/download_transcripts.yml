@@ -32,7 +32,7 @@ jobs:
       run: python -m spacy download en_core_web_sm
 
     - name: Run flow
-      run: python talking_python/clean_transcripts.py
+      run: python flows/clean_transcripts.py
 
     - name: Commit and push if it changed
       run: |-
