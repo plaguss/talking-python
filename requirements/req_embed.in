@@ -1,0 +1,4 @@
+-c requirements/base_flow.txt
+sentence-transformers
+datasets
+chromadb
