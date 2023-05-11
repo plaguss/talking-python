@@ -1,0 +1,795 @@
+At PyCon 2023, there was a section of the Expo floor dedicated to new Python-based companies called Startup Row. I wanted to bring their stories and the experience of talking with these new startups to you. So in this episode, we talk with the founders of these companies for about five to 10 minutes each. This is Talk Python to Me, episode 414 recorded on location at PyCon in Salt Lake City on April 22nd, 2023.
+[Music]
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org. Be careful with impersonating accounts on other instances, there are many. Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube. Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by Sentry and us over at Talk Python Training. Please check out what we're both offering during our segments. It really helps support the show. We kick off the interviews with Devin Peterson from Ponder. Ponder is taking Modin, a distributed compute library for Python, and pushing data science compute directly into the database. Welcome to Talk Python here on Startup Row. Thank you. Thank you. Yeah, it's fantastic to have you here. You know, we met yesterday here at PyCon US, and you were telling me about your project, Ponder, and how it's built upon Modin, the open source project. And as I looked around, I'm like, Like everyone here has a story.
+And I just thought it'd be so great to have you on the show along with all the others and just kind of tell your story.
+You know, how did you, how did you get here to start up Rho at PyCon?
+- Yeah, it's interesting.
+So Modin started as my PhD project and I was doing my PhD at Berkeley and I started in the genomics world, trying to build large-scale data science tools for, you know, the people who actually do the science.
+I'm not a biologist myself.
+I don't know the first thing about biology, honestly.
+- But you got some good programming skills and they can always use that applied to their data, right?
+- Right, right.
+The problem was we were building tools in Spark and it was really hard for these Spark-like APIs to translate natively to the way that they were reasoning about data.
+And like, they're using Python.
+And so, there's a very kind of natural way that scientists think about interacting with data that's not Spark, right?
+It's not as intuitive as Intuitive and Spark, even PySpark, right?
+- So a lot of Python people avoid databases as much as they can, at least SQL and directly talking to them like that.
+- Yeah, totally, because often the way, when you're exploring data, you have a mental model of how you want to interact with the data.
+And that is not SQL often.
+It's just the way that it is.
+So yeah, I had a moment there where a data scientist was like, "I don't want your tool.
+"Can you just make my tool run faster?" And so I was like, "Ah, yes, wait a second.
+"This is actually a real project." And so I started looking into pandas and looking into the world of databases and the kind of academic space, nobody had really dug that deep into pandas because in the academic sense, everybody was like, okay, pandas is just a bad database.
+That's what database people thought at the time.
+So we did a bunch of work and it kind of turned out that's not the case, they're totally new things.
+And so from there we built Modin and now with Ponder, we're kind of extending that to basically bridge these two worlds where you can use Python, but we're generating SQL on the back end and able to run pandas directly in your database or your data warehouse.
+- Yeah, fantastic.
+So when I first heard about what you're doing at Ponder, I immediately thought of Dask.
+And Dask is another popular startup success, open source startup success story with Matthew Rocklin and Forman Coil and stuff.
+And I mean, I think they may have outgrown Startup Row, but you know, good for them.
+- Yeah, totally.
+- My first thought was, okay, well, how is this different than Dask?
+But the big difference is Dask is grid computing and yours runs in the database.
+- Yeah, for Ponder definitely.
+Open source modem also integrates with Dask clusters as well.
+So Dask has Dask DataFrame and that runs on Dask clusters.
+We can also run a modem open source on Dask clusters.
+It's very important to us that whatever infrastructure that you have, you can run pandas on top of that.
+So Ponder is the next level of that where if your data is in the database, it doesn't leave, right?
+We can just execute it directly there.
+And all of your assumptions from Python and Pandas hold true in the database, even though the database actually doesn't like the assumptions that you might have in Pandas, right?
+Yeah.
+We emulate those behaviors.
+And we've done a lot of work to actually make that feel very native.
+So that is a key difference with Ponder and Dask, though, is that your data never leaves the database.
+So you don't have to have a separate Dask cluster to kind of pull the data into and execute on it there.
+You can just run things natively in the database with the data warehouse.
+If you have a large database, you already have a probably powerful database server, why transfer all the data off of that, load it into something else, analyze it, and throw it away, right?
+Just like make it run there.
+Exactly.
+Exactly.
+Yeah.
+So maybe a quick elevator pitch type of thing might be like, you all take pandas and turn it into SQL statements that run on the database, but people get a program in pandas.
+Yes.
+Exactly.
+That's exactly it.
+Yes.
+native and pandas, like describe for example, df.describe, super, super common.
+- It seems easy, like it just gives me some summary stats.
+- Yes, exactly.
+That's 300 lines of SQL.
+- No.
+(laughing)
+- Like you wouldn't believe it looking at it though, because it seems so simple, and it is a simple output, right?
+I wanna get some summary statistics for my data.
+But SQL is so declarative, and the language itself doesn't lend itself well to this type of iterative, interactive kind of workflow.
+- Right, and the notebooks, remember, step by step, they have like a history, sort of a memory, whereas SQL's, every statement is standalone.
+- Exactly, so all or nothing, basically.
+And you have to do the whole thing up front.
+And that's the thing people love about Pandas, is that you can incrementally build these things up.
+So we're giving that interface to SQL, basically.
+- Awesome, all right, well, let's wrap this up with a bit of a talk, how you got to Startup Row, how'd you start this company, where are you?
+So many people are excited to take their open source and instead of making it their side job or something they do part-time at their company, make it their full-time energy.
+And you're there. How'd you do it?
+Yeah, so the way that we started was we talked to a lot of companies where they basically asked us, "Can you make this work on top of our infrastructure?" We only supported in the open source, Ray and Dask.
+And we saw a motion there to have kind of an open core model.
+So we follow the open core model where these more enterprise-y features like security features and being able to push into data warehouses.
+An individual consultant may not have a data warehouse.
+They probably don't, but enterprises do.
+And these are the types of features that enterprises really care about.
+So this open core model, I think, lended itself really well to our business, particularly because enterprises will pay for these features.
+And then we went out and we raised a seed round and saw the opportunity to come here and be in PyCon Startup Row PyCon Startup Row, unfortunately, it's a competitive process, really it is.
+We feel very fortunate to be chosen among the few that are chosen here.
+But yeah, that's kind of our journey, is basically starting talking.
+So for folks out there who are interested in this, talk to people who are using this, people who are interested in the problem that you're solving, and figure out where the gaps are, and kind of ask questions.
+Don't be afraid to ask, would you pay for this?
+Or how much would you pay for this?
+Those questions, they're uncomfortable to ask.
+Especially the developer who's not used to presenting salesy type marketing things, you always, salespeople as kind of, yuck, I got it.
+It's a necessary evil.
+Totally.
+It totally is.
+Yeah.
+So, but you have to ask, because how do you know if you can kind of take that next step, unless you ask, Hey, would you pay $50 a month for this?
+Would you pay $10 a month for this?
+Right.
+You can't know unless you, unless you really go out there and ask.
+So that's what I would encourage folks to do if they're interested in this is, you know, find those gaps and really ask the hard questions that are kind of hard.
+But yeah.
+Awesome. Well, congratulations.
+Thanks for taking the time to talk to us.
+Thank you. Thank you.
+Yeah, you bet. Bye.
+Next up is Generally Intelligent and Josh Albrecht.
+Generally Intelligent is an independent research company developing AI agents with general intelligence that can be safely deployed in the real world.
+Josh, welcome to Talk Python to me.
+Hey, thanks.
+Hey, it's great to have you here.
+Tell people quickly who you are.
+Yeah, so I'm Josh.
+Josh Albrecht, I'm the CTO of Generally Intelligent.
+We're an AI research company based in San Francisco.
+- Awesome.
+I love the humbleness.
+Generally, generally intelligent, right?
+You're not a super genius, but no, it's a clever name.
+I like it.
+- Thank you.
+- Yeah, yeah.
+And what's the problem you're solving here?
+- Yeah, we, kind of as it says on the tin, we're working on artificial general intelligence.
+We don't usually like to use that term 'cause it can mean lots of different things to lots of different people, but in general, what we're working on is making more capable, safer, more robust AI systems.
+And in particular, we're focused on agents, so systems that can act on their own.
+And right now, mostly what we're focused on is agents that can work in your browser, on your desktop, in your code editor, those kind of virtual environments and digital environments.
+- How much of this are you envisioning running locally versus running on a big cluster in the cloud?
+- Yeah, I think it'd be nice someday in the future to have things run totally locally, but right now, a lot of these technologies do require a large cluster of GPUs, which are very expensive, And most people don't even have a GPU or have a bunch of GPUs at home, so it's kind of hard to actually get it running locally.
+Hopefully, someday in the future, we'll be able to do that, but for now, you'll probably need internet access to use a lot of these things.
+- Right, okay, so you're envisioning a bunch of these agents that have access to an API that can quickly respond over there.
+- Yeah.
+- Okay, so give us some ideas.
+- Yeah, so what this looks like concretely, you can imagine like a coding agent.
+So one thing you can do with GitHub Copilot right now is you can write a function declaration in a doc string and have it generate the function.
+But you can imagine for a coding agent, you can not only generate the function, but also generate some tests, run those tests, see errors in those tests, try and fix the errors, kind of do that whole lifecycle to ideally give you a output that's actually a lot better.
+And then also, if you're thinking about this as an agent, maybe it's more of a back and forth.
+It's not just an autocomplete in your editor, but it can come back to you and say, I'm sort of uncertain about this part here.
+What did you mean?
+Or, hmm, I wrote these tests, but I'm not sure if it's quite what you wanted.
+or maybe it's kind of running in the background and flagging different things that it sees in your code base.
+Maybe you made some change and it can detect that your doc string is out of date and flag that for you.
+So thinking about it more as an actual pair programmer.
+- Okay, and is it primarily focused on--
+- For example.
+- Yeah, are you thinking to focus mostly on programming or is it more broad like, "I'm looking for a great deal "on this classic car. Go scour the internet "and negotiate it for me." - Yeah, so the company is generally intelligent, so we certainly do want to be able to address address all these different use cases over time.
+I think for us right now, one of the domains that we are interested in is code, especially because it's so objective.
+You can know if it's right or wrong.
+You have tests, that sort of stuff.
+So it's a nice playground for ourselves.
+And it's something that we can build for ourselves to iterate on internally.
+But we're not exactly sure what the final product will be.
+We're also training our own large language models.
+We might productize some stuff around those.
+So there's lots of possibilities.
+We're not wedded to anything yet.
+Thankfully, we have the luxury to take a little bit of time to figure that out as a research company.
+- Yeah, that's excellent.
+- What about science?
+- Yeah, science is definitely a thing that we're interested in.
+It's pretty hard, and so, you know, do we necessarily want these things like, you know, running around, making things in test tubes or whatever, I think that's probably a little bit harder than coding, and coding's already pretty hard, so I think we'll get there.
+That's some of the stuff that we, like, personally on the team are really excited about, to see, you know, how can we use these to uncover new cures for diseases or whatever.
+I'm really excited for that kind of stuff a little further in the future.
+- Yeah, that'd be amazing.
+I was just talking to someone on the expo floor hall here about protein folding.
+- Yeah.
+- Right, that kind of stuff.
+kind of been elusive for people.
+We more or less have just tried to brute force it.
+- Yeah. - Right?
+With the folding at home thing.
+Let's just run every computer and just try every possibility.
+But there's a lot of possibilities. - Yeah, yeah, exactly.
+- Alright, so where's Python fitting here?
+What are some of the tools that you're using?
+- Yeah, so Python is-- we love Python.
+We basically write everything in Python, or Bash, but, you know, mostly Python.
+Or Python generates a little bit of Bash, you know, but it's mostly Python, so yeah.
+We use a lot of PyTorch for our models.
+And then other than that, you know, let's see, libraries to use.
+I mean, we use tons of Python libraries, like Numpy and Scikit and, you know, Adders.
+And just, there's so many, like, wonderful, you know, things that people have built that we just, yeah, that are just so nice to work with.
+So we love that Python, you can kind of take it, open it up, look at all the source, and like, really understand everything in that full stack.
+For us doing research, that's really valuable to be able to know everything that's going on.
+- Yeah, you have these Lego block types of things.
+Like, what if we arranged it like this?
+You don't have to write the whole machine learning bit.
+You can click a few pieces together and off it goes.
+- Yeah, yeah, we build on top of Mosaic, for example, or other open source libraries that people put together for training stuff and kind of adapt it for yourself.
+It's so nice that you can just pull things in and so easily change everything.
+- Yeah, awesome.
+I must have somehow blinked along the way and these large language models just seem to have come out of nowhere and all of a sudden, you know, AI is one of these things, it's kind of worked, kind of recommended stuff, and now all of a sudden it's mind-bogglingly good.
+- Yeah.
+- Do things like TensorFlow and stuff work with these large language models?
+Or do you need other libraries?
+- Yeah, so TensorFlow and PyTorch are probably the two main machine learning libraries that people do deep learning systems on top of.
+Pretty sure that GPT-3 and GPT-4 were probably trained on top of PyTorch.
+I think a lot of the stuff at Google, like Palm and Bard and those types of things are trained on TensorFlow, but at the end of the day, they're actually very similar, and they're sort of converging to kind of similar ideas too as well, so it's interesting to see them evolve.
+- Yeah, fantastic.
+All right, last question, close out our conversation here, is we're sitting here on Startup Row.
+- Well, just outside of startup row, I suppose.
+But it's, you know, there's a bunch of people out here who are working on open source projects who would like to make it, somehow find a way to make it their passion, their job.
+Spend more time on it, maybe make it a company.
+How'd you get here?
+Tell people your journey.
+- Yeah, so we got here in a little bit of a different route.
+So we, a lot of us were working at a previous company called Sorceress that did applied, more of an applied machine learning thing where we were taking machine learning and applying it to the job of recruiting and trying to figure out, can we find good people online that might be a good fit for a particular position and reach out to them and get them interested in the job and that sort of stuff.
+We went through YC with this in 2017 and we raised our Series A.
+Eventually, it was growing.
+We had a few million in revenue and customers and everything.
+In 2019, we were looking and it felt like there's so much really interesting stuff happening in self-supervised learning and in deep learning and in machine learning.
+It feels like recruiting is very important, but is this going to be the most important thing in the world?
+Is this going to really be the thing that changes the world?
+Or will there be something a little bit larger in this more general purpose AI?
+And the more we thought about it, the more we felt like, the AI stuff is probably going to have a huge impact.
+We should really be working on that.
+We kind of wound down the previous company.
+A bunch of us moved over and started up Generally Intelligent.
+And then we've been working on stuff ever since then.
+- Fantastic.
+Well, I know you've got some really cool stuff where the agents can sort of look at the code they're writing, think about it, evolve, and it looks like a really interesting take.
+So congratulations and I'll put a link to all your work in the show notes people can check it out.
+- Yeah, sounds good.
+- Yeah.
+- Thank you very much.
+- Yeah, thanks for being here.
+- It was great to chat.
+- Yeah, you bet.
+This portion of Talk Python to Me is brought to you by Sentry.
+Is your Python application fast or does it sometimes suffer from slowdowns and unexpected latency?
+Does this usually only happen in production?
+It's really tough to track down the problems at that point, isn't it?
+If you've looked at APM, application performance monitoring products before, they may have felt out of place for software teams.
+Many of them are more focused on legacy problems made for ops and infrastructure teams to keep their infrastructure and services up and running.
+Sentry has just launched their new APM service.
+And Sentry's approach to application monitoring is focused on being actionable, affordable, and actually built for developers.
+Whether it's a slow running query or latent payment endpoint that's at risk of timing out and causing sales to tank, Sentry removes the complexity and does the analysis for you, surfacing the most critical performance issues so you can address them immediately.
+Most legacy APM tools focus on an ingest everything approach, resulting in high storage costs, noisy environments, and an enormous amount of telemetry data most developers will never need to analyze.
+Sentry has taken a different approach, building the most affordable APM solution in the market.
+They remove the noise and extract the maximum value out of your performance data while passing the savings directly onto you, especially for Talk Python listeners who use the code Talk Python.
+So get started at talkpython.fm/sentry and be sure to use their code, Talk Python, all lowercase, so you let them know that you heard about them from us.
+My thanks to Sentry for keeping this podcast going strong.
+[AUDIO OUT]
+Now we talk with Mo Sarat from Werabots.
+They're building the database platform for geospatial analytics and AI.
+Hey, Mo.
+Thank you so much.
+Yeah, it's good to have you here.
+Let's start off with a quick introduction.
+How are you?
+Absolutely.
+So my name is Mo, and I'm the co-founder and CEO of a company called Werabots.
+Werabots' grand vision is enable every organization to drive value from data via space and time.
+Awesome.
+I love it.
+I love it.
+So yeah, thanks for being here on the show.
+Let's dive into whereabouts of what is the problem you're solving?
+What are you guys building?
+Think about, again, every single data record that is collecting on a daily basis.
+Even we're here right now, we're talking on this podcast at this specific location at this specific time.
+So if you think about the space and time aspect, it's actually a very important aspect of every single piece of data that is being collected.
+Right.
+If we're here next week, who knows why we're here?
+We could be here for a different reason.
+That might mean something different, right?
+Absolutely.
+Yeah.
+So that's exactly-- so that space and time lens that you can apply to your data can actually also tell you a better story about your data.
+You can drive more value, more insights from your data if you apply that space and time lens.
+And this is basically what we are.
+Not necessarily-- this is exactly what we focus on in our company.
+But more specifically, I mean, we are trying to build a database infrastructure to enable people to use that space and time lens to drive value from their data.
+OK, fantastic.
+Now, when you talk about space and time and data, are we talking records in a time series database?
+Are we talking regular database or NoSQL?
+Or could it be even things like the log file from Engine X about the visitors to my website?
+What's the scope?
+The scope is actually very wide.
+So think about any data could be structured, semi-structured, unstructured data that you have.
+And as long as it have a geospatial aspect to it, a geospatial aspect to here means like the record or the document has, was, let's say, created in a specific location or represent an event that happened in a certain location at a certain time, or represent, again, an object or an asset that you monitor at different locations at different times.
+Whatever it is, it can be stored in any of these kind of formats.
+As long as it have this kind of geospatial aspect to it, you can definitely apply that kind of geospatial or space time lens to it.
+- Right, okay, so what are some of the questions you might answer with--
+- Questions, it varies.
+I mean, so there are, it depends on the type of the data, depends on the use case.
+You have a horizontal technology that enable you to enable so many industry verticals, but I'll give a couple of examples.
+- Yeah, yeah, make it concrete for us.
+- Absolutely, think about like a logistics company or a delivery company, like the most, I mean, well-known delivery companies, Amazon, right?
+I mean, you go to the app, you purchase an item or a product and then the whole journey of that product from the supplier to the warehouse, to the driver, Amazon driver, all the way that makes it to your door.
+There is a whole kind of, everything has a geospatial location to it, attached to it.
+The package is moving around, you're located somewhere, their house is a certain location.
+Handling the logistics behind all of that, understanding how things are, you're monitoring all these assets in space and time.
+As it reaches the door, this whole journey, there's a lot of kind of data processing, data analytics happening that you have to do through, again, the geospatial kind of aspect, the geospatial contextual aspect of things.
+So this is one example.
+Another example could be if you're like an insurance company and you're insuring homes, for example, and you want to understand what are the nearby kind of climate conditions, natural disaster conditions compared to your home.
+This also-- the home has a location.
+These kind of natural disaster, weather changes at different locations all the time.
+that will impact how you take decisions about insuring these homes.
+- Do I buy it?
+Do insurers want to insure it?
+Or do I have to pay for that?
+- Exactly.
+So that's another example again, that the space and time lens, or the geospatial aspect impacts your decision when it comes to taking, it's an important decision that you take in here.
+So that's another example.
+So these are just a couple of use cases, but there are tons of other use cases and use cases that may not exist even yet.
+So there's a lot of movement now into climate tech and AgTech, and we are, like, what we're trying to do at WeraBots is we're building the database infrastructure that enable the next generation climate tech and agriculture technology.
+- So they can ask the questions that they might have, but you already have the machinery to answer them.
+- We have machinery to answer them, and they build their own secret sauce on top of our infrastructure, yeah.
+- Kind of a framework platform?
+- Absolutely, yeah.
+- Got it. - Yeah.
+- So Python, where's Python fit in this story?
+- That's a great question.
+So geospatial data or the geospatial aspect of data has existed for so long.
+As you said, we live in the space-time continuum.
+Everything has a space-time aspect, geospatial aspect.
+And that's why developers already have APIs to interact with geospatial data.
+And these APIs, the language varies.
+So there are some people that use SQL to interact with the data, process the data in either SQL databases or any other kind of SQL processing engine.
+But a lot of the geospatial developers or people developing with geospatial data, they use Python.
+There are so many libraries that use Python to actually, example of these libraries is a library called Geopandas.
+It's a fantastic library.
+It's an extension to Pandas to kind of frangle and crunch geospatial data.
+- Ask questions about what things are contained in here, what things are outside of here, how far away is it?
+- Absolutely, so this is what Geopandas does.
+The only problem is that Geopandas is a library, has a great functionality, but again, it's not enterprise ready for the most part.
+It doesn't scale, all that kind of stuff.
+So what we do at WorldBots is that we provide SQL API to the user to run spatial queries on the data, but we also provide a spatial Python API.
+Like if you're using Geopandas, you can use the same API, do the heavy lifting enterprise scale, kind of processing of the data using our platform, and then do the major Geopandas kind of functionality you're familiar with to, again, do the geospatial processing with it.
+So this is how it fits within Python.
+And actually, looking at our-- we have an open source software called Apache Sedona.
+It's an Apache under the Apache license.
+And it has all these APIs, SQL and Python.
+And Python is the most popular.
+So it's been-- the Python package alone on PyPI is being downloaded a million times over on a monthly basis as we're speaking today.
+So definitely Python fits very well within our--
+- Yeah, that's awesome.
+- Absolutely, yeah.
+- So it sounds like your business, Wearbots, is a little bit following the open core model, you say?
+- Yes.
+- Let's round out our conversation here with talking about the business itself.
+How'd you get to startup, Ro?
+- We follow the open core model.
+You're totally right about that.
+So we have our open source software, Apache Sedona.
+It's available for free open source, very permissive license, the Apache license 2.0.
+And it's open source.
+It's also used in operational production in so many use cases.
+There are so many contributors outside.
+I'm the original creator of it, as well as my partner, Jia.
+We're both the original creators, but it's grew beyond us now.
+So there are like dozens, like 100 contributors now, something like this.
+And we use Sedona as an open core, but we build a whole platform around it.
+So if we want to think about like what we do compared to the other data platforms in the market, there are generic data platforms like Snowflake, Databricks.
+There are more specific, specialized data platforms like MongoDB for NoSQL, there's Neo4j for Graph.
+We are, Orobots is like the data platform for geospatial.
+So this is basically, and we use Apache Sedona as an open core to enable us to do all of this, yeah.
+- Fantastic, all right, well, congratulations on being here.
+- Yeah.
+- I wish you success with the whole project and thanks for coming on the show.
+- Thank you so much, I appreciate it.
+Looking forward to it.
+- Yeah, you bet.
+- Thank you so much.
+- Yep, bye.
+- Time to talk to Neptime, who have created Python programmable spreadsheets that are super powered with Python and AI.
+I gotta tell you, this product looks super awesome.
+It looks so much better than things like Google Sheets or Excel, and I can't wait to get a chance to play with it.
+Hey, guys.
+- Hello.
+- Welcome to Talk Python.
+- Yeah.
+- It's great to have you here.
+First, introduce yourselves.
+- Thanks for having us.
+I'm Dawa.
+I've been doing Python professionally for, I don't know, 20 years or so.
+- I'm Jack.
+I'm Dawa's co-founder.
+Been doing Python a little less than that, but met Dow about five years ago, and we founded Neptine about a year ago.
+- Yeah, so let's dive into Neptine.
+What's the product, what's the problem you're solving?
+- Yeah, the proposition that we have is pretty straightforward.
+We build a spreadsheet on top of a Jupyter notebook engine, which basically gives you all the data science superpowers that the notebook gives you in a familiar spreadsheet environment, which means that you can share your work as a Python programmer, much easier with people that are not familiar with notebooks because they have the universal data canvas of a spreadsheet.
+>> How interesting, because one of the big challenges data scientists often have is they work in Jupyter, they work in Jupyter, and then some executive wants to share it at a presentation, or they want to continue working on it, but they're not developers.
+So what do you do?
+You write an Excel file, and you hand that off, and then you re-import it somewhere, maybe?
+I don't know.
+>> Yeah, yeah, the typical flow is it needs very much like you write out a CSV, you email that to the person that is gonna put it into Excel, that person then creates a graph in Excel, screenshot that graph in Excel, and sends it to the person that puts it in the presentation and then the CEO can do something with it.
+- It goes either in PowerPoint or it goes in Word.
+Yeah, one of those two, right?
+Probably the picture.
+But that's a bunch of steps that are disassociated from data.
+So that's one problem, right?
+That's the one problem.
+But since no one really sees your product in action how we're talking here.
+Maybe just a bit of an explanation.
+Like it looks very much like Google Docs or one of the online Excel, I say Docs, I mean Sheets, like one of the online spreadsheet things.
+It doesn't look like something embedded into notebooks, right?
+- Yeah, that's right.
+It is a spreadsheet first and foremost.
+It looks a lot like Google Sheets, but you can run Python in it.
+- Yes.
+- You can run Python both directly in the spreadsheet cells.
+You can also define other functionality in Python and then run that with your spreadsheet.
+I mean, to me, that's where the magic is, right?
+Like Excel or sheets, the spreadsheets more broadly are super useful.
+But it's always like, "How do I do an if statement in this dreaded thing again?
+And how do I do a max with a condition?" You know, just all the programming aspect of going beyond just having raw data is just like, "Oh boy, this is..." And you just showed me an example where like, here you just write range of a thing and boom, it just writes that out.
+Or you write up Python tertiary statement and it just runs.
+- Right, yeah, but also common things in Spreadsheet are hard, are data cleaning, right?
+You get some data from somewhere, and it's not quite right, and most of the time, people end up doing this by hand.
+And that's fine the first time you do it, the second time and the third time, it gets very annoying.
+While if you just write a little bit of Python, you can clean data like that, and then the next time you have the data, you just rerun the script, and it's clean again.
+So that's a very powerful way of doing this thing, and we have a full Python environment.
+It's not just a lightweight, you know, runs in the browser.
+You can do pip install anything you want.
+So you can connect to any API out there, use any data, export any data.
+It's a complete environment.
+- Yeah, how interesting.
+There's a little window where you can write straight Python, you know, some function that does arbitrary Python, and then you can invoke it like a function in the spreadsheet, right?
+- Exactly, exactly.
+- And you can talk to things on the internet?
+For example, I could do web scraping there?
+- We'll call an API, like a currency API?
+- Yeah, exactly.
+- Okay.
+- That's, yeah, any REST call you want to make, you just import requests and go for it.
+- Wow, so where's it run?
+Is this a PyScript, Pyodied, is this scoped, is this Docker on a server?
+- It's all running in a Docker container, server side.
+That's how it works.
+And that's kind of, we do that for maximum flexibility, maximum capability.
+So it means that anything you can install, anything you can run on a Jupyter notebook running on Linux, you can run in Neptune.
+- I see, so we get full Python 3.11 or 3.10 or whatever it is.
+- Yep, yep, and we ship with a bunch of useful packages pre-installed, but if you want to install something else, you just open up our dependency management window, install anything else you want to use.
+It's all very manageable, very configurable.
+- Well, it looks super good to me.
+What's the user model?
+Do I go and create an account on your site and it's kind of like Google Docs, or what's the story?
+- Yep, exactly.
+You can try it out.
+You can go to neptine.com in the upper right.
+Just click log in.
+You can create an account.
+It's totally free to use, the free tier.
+Yeah, give it a shot.
+- Awesome. - Yep.
+- All right, final question.
+How'd you guys get here to start up Rho?
+Everyone wants to build something amazing with open source, but how did you turn that into a business and something you can put your full time into?
+- I mean, I guess we're kind of lucky in that when we started, I pitched it to a bunch of people that due to no fault of their own got into some money.
+And they were willing to back us.
+And then later we joined YC for the winter batch.
+And in that process, we got a little bit of publicity and were picked up for the startup role.
+- Just to add to that too, based on our experience in Y Combinator, there are lots of open source tools out there that are able to get started on some commercial path just based on the community that they're building, based on the users.
+- Right, right.
+- It's a very good path.
+- I feel like this whole open core business model has really taken off in the last couple years where it used to be a PayPal donate button and now it's a legitimate offering that businesses will buy and it's good.
+I think it's very positive.
+So I'm really impressed with what you guys built.
+I think it's awesome.
+I think people really like it.
+Yeah, so good luck.
+Thanks for being here.
+- Thank you so much.
+- Now up is Nixle.
+We have Federico Garza and Christian Chula here to tell us about their time series startup, ready to make predictions based on an open source time series ecosystem.
+- Hey there. - Hello.
+- Welcome to Talk Python.
+- Hello, hello.
+- Hello, let's start with introductions.
+Who are y'all?
+- So I am Christian Chalhoun, I'm a co-founder of Nixla.
+- Yep.
+- Hello, I'm Fede, I'm CTO and co-founder of Nixla.
+- Nice to meet you both.
+Welcome, welcome to the show.
+Really great to have you here at PyCon.
+And yeah, let's start with the problem y'all are trying to solve.
+OK, yeah, so at NixLab, what we do is time series forecasting.
+So as you know, time series forecasting is a very relevant task that a lot of companies and practitioners need to solve.
+Essentially, predicting future values of something, right?
+It could be demand of a product or the weather.
+So there are many use cases for forecasting.
+It's a very common problem in industry.
+And essentially, we want to provide tools to developers, engineers, researchers to be able to do this more efficiently and with good practices.
+And yeah, that's mostly it.
+Right, OK.
+So is this like a Python API?
+Is this a database?
+What is the actual--
+That's how it looks like.
+Yeah, the product, I guess.
+The product.
+So we have an ecosystem of Python libraries.
+And we have different libraries for different use cases.
+For example, we have the stats forecast library, which specializes in statistical econometric models.
+And also, we have more complex models and libraries for deep learning and machine learning applications.
+Yeah.
+Nice.
+And have you trained some of these models yourself on certain data, things like that?
+Or where do you get the models from?
+The idea behind the libraries is that you can use whatever your data is.
+The only restriction is that it must be time series data, but you can use whatever data you have.
+Yeah.
+OK.
+Fantastic.
+And where's its data?
+Python's at the heart of so much data processing these days.
+And I guess, give a shout out to all the different Python packages that are already out there, maybe.
+You want to just give a rundown on those and what they're for, and then talk about them?
+Yeah.
+So we have like six packages right now.
+They're all libraries on GitHub that you can pip install or install it with Conda.
+And essentially, they focus on different ways of approaching forecasting.
+And they're essentially libraries build on Python.
+Depending on someone build on Numba, other methods are in Python.
+Oh, you guys are using Numba?
+Oh, OK.
+And it makes a huge difference?
+Yeah, it makes a difference.
+All right.
+Tell people really, really quickly, what is Numba?
+So Numba is this library which allows you to compile just in time your code.
+So it's a lot faster than using just plain Python.
+And how easy is it to use?
+It's really easy.
+OK.
+In fact, we wanted to make our library more efficient and more faster, and we did it in like two weeks only using Numba.
+So it was really easy to use.
+Yeah, awesome.
+Awesome.
+And some other packages uses PyTorch.
+So like our deep learning methods, neural forecasting approaches are built on PyTorch, or PyTorch Lightning.
+Yeah, fantastic.
+So would you say that your business model is something of an open core model where it's kind of built on top of these libraries and--
+- Absolutely, yeah.
+Yeah, so for now we have been focusing on building these libraries, the community.
+We have a very active community on Slack and people that use us and contribute with our code.
+And we are building services on top of these libraries, like enterprise solutions or hosting computation or even simplifying the usage further.
+So for example, APIs where you can just simply pass your data.
+I want to know what is gonna happen next on this data.
+- Do you pass it some historical data and ask it to make predictions?
+- Make predictions and then we produce the predictions.
+- Okay.
+- Yeah, this is one of types.
+So we are working on these different applications and services.
+- Awesome, it sounds really cool.
+- Thanks.
+- So final question, how'd you make your way over here to startup row at PyCon?
+Like how'd you start your company and how'd you get here?
+- Yeah, it has been a long journey.
+Like sorry, I mean, we have been like for a year working on these libraries and services.
+And right now, we are focusing on building the startup.
+We want to be able to do this full time for a long time and really build something that can help people.
+Yeah, are you looking to offer an API, like an open AI sort of model, or running people's code as a service?
+Or where are you thinking you're going?
+Yeah, yeah, that's definitely one of the options.
+But yeah, we are finishing our funding runs.
+And once we finish that--
+- Funding helps a lot on software development, right?
+- Funding helps a lot on development.
+And yeah, so we're exploring different venues.
+And there's very exciting things to come.
+- All right, well, we all wish you the best of luck on your project.
+And thanks for taking the time to talk to us.
+- No, thank you for inviting me.
+- Yeah, you bet.
+- Thanks. - Bye.
+- We'll speak with Piero Molina from Predebase.
+They empower you to rapidly build, iterate, and deploy ML models with their declarative machine learning platform.
+- Piero, welcome to Talk Python to Me.
+- Thank you very much for having me.
+- Yeah, it's fantastic to have you here.
+Quick introduction for everyone.
+- Sure, so I'm Piero and I'm the CEO of PrediBase.
+Can tell you about PrediBase in a second.
+I'm also the author of Ludwig, which is an open source Python package for training machine learning models.
+- Awesome, well, great to meet you.
+Tell us about your company.
+- Yeah, so PrediBase tries to solve the problem of the inefficiency in the development process of machine learning projects.
+Usually they take anywhere from six months to a year or even more, depending on the organizations, their degree of expertise in developing machine learning projects.
+And so with using our platform, companies can get down to, like from months to days of development, and that makes them substantially faster.
+Each machine learning project becomes cheaper and organizations and teams can do many more machine learning projects.
+- Yeah, I mean training is where the time and the money is spent.
+Yeah, at least the computation, I mean paying developers is expensive.
+- Right, right, right.
+- But in terms of, people say machine learning or AI, it takes all this energy, and it does take energy to answer questions, but it really takes energy to train the models, right?
+- Yeah, yeah, definitely.
+Training the models is a huge part.
+Managing the data and putting it in a shape and form that is useful for training the models is also another big piece of the reason why these teams take so long to develop models.
+And also, usually there's several people involved in the process.
+There are different stakeholders.
+Some of them are more machine learning oriented, some of them are more engineers, and some of them may be analysts or product developers that need to use the models downstream.
+And so the handoff of the artifacts and of the whole process between these different people is also a source of a lot of friction.
+And with the platform that we are building, we are trying also to reduce the friction as much as possible.
+- Yeah, sounds great.
+Is it about managing that workflow or is it about things like transfer learning and other more theoretical ideas?
+Like where exactly are you doing this?
+- Yeah, so to give you a little bit more of a picture, I would say where we are starting from is from Ludwig, which is his open source project.
+And what Ludwig allows people to do, it allows to define machine learning models and pipelines in terms of a configuration file.
+So you don't need to write a little level, PyTorch or TensorFlow code.
+You can just write a configuration that maps with the schema of your data.
+And that's literally all you need to get started.
+So it makes it substantially easier and faster to get started training models.
+Then if you are more experienced, you can go down and change more than 700 parameters that are there and change all the details of training, of the models themselves, the pre-processing, so you have full flexibility and control.
+And you can also go all the way down to the Python code, add your own classes, register them from the decorator, and they become available in the configuration.
+This is what we have in the open source.
+And what we're building on top of it is all the, again, you can think about this, for people who may be familiar with Terraform, for instance, what Terraform does for infrastructure, so defining your infrastructure through a configuration file, Ludwig does it for machine learning.
+That's a good analogy.
+And so, Pride Debase, what does it do?
+It uses this basic concept of models as configuration, really, and builds on top of it all sorts of infrastructure that is needed for organizations that are big enterprises to use it in the cloud.
+So we have, like, we can deploy on cloud environments.
+We abstract away the infrastructure aspect of it.
+So you can run the training of your models and inference on either one small CPU machines or a thousand large GPU machines, and you don't need to think about it, basically.
+- Oh, cool.
+So I just say train it, and if you happen to have GPUs available, you might use them?
+- Right, absolutely, yeah.
+- Okay, excellent.
+So where does Predibase fit into this?
+Like where's the business side of this product?
+- Right, right.
+I would say Predibase makes it easy for teams, really, to develop machine learning products, right?
+As if, Ludwig, you can define your own configurations, but it's like, you know, a single user experience, if you want, right?
+Predibase becomes like a multi-user experience, where again, you deploy on the cloud, and you can connect with data sources.
+In Ludwig, you provide like a CSV file, or a data frame, a Pandas data frame, With PrediBase, you can connect to Snowflake, to Databricks, to MySQL databases, to S3 buckets, and do all of those things.
+And also there's a notion of model repositories, because when you start to train a model, the first one is never the last one that you train.
+And so, in an analogy to Git, really, in Git you have commits and you have teams doing different commits and collaborating together.
+In our platform you have multiple models that are configurations, multiple people training new different models, spawning from the previous ones, so there's a lineage of models that can be compared among each other.
+And then the very last piece is that we make it easy to deploy these models with one click of a button.
+So you go from the data to the deployed model very, very quickly.
+- Fantastic, it sounds great.
+So final question, a lot of people out there working in open source, they'd love to be here on Startup Row talking about their startup based on their project.
+It sounds like what you built is based on the open core model, which seems to be really, really successful these days.
+Tell us a bit about how you got here.
+Right, so basically I think it started from the open source, really.
+I started developing Ludwig when I was working at Uber.
+And initially my own project was a way for myself for being more efficient and working on the next machine learning project without reinventing the wheel every single time.
+And I built that because I'm lazy and I don't want, when I do one thing more than twice, then I automate it for myself, really.
+- Productive laziness or something like this.
+- And so then other people in the company started using it, and that convinced me that making it open source, also because it was built on top of other open source projects, would have been a great way to both have people contribute to it and improve it, and also give back to the community, because again, I was using myself a lot of open source projects to build it.
+And then from there, I made it so that we donated the project to Linux Foundation.
+So now it's backed by the Linux Foundation and also the governance is open as opposed to what it was before when I was at Uber.
+And from there, actually, I met a bunch of people, some of my co-founders at the company, thanks to the project.
+And we decided that, so for instance, one of them is Professor Chris Sack from Stanford.
+He was developing a similar system that was closed internally at Apple.
+And so we said, "This thing worked at Uber, worked at Apple, works in the open source.
+let's make a company out of this, right?
+- Fantastic, yeah.
+Solving some problems for these big teams, right?
+Excellent, well, best of luck on your company.
+- Thank you very much, man.
+- Yeah, thanks for being here.
+- Yeah, absolutely, a pleasure.
+- Yeah, bye. - Thank you so much.
+- We'll finish up our stroll down startup lane by talking with the folks at Pinecone.
+We have Nikhil Rao to talk about the PurePython Fullstack web app platform that they've built.
+Nikhil, welcome to Talk Python.
+- Yeah, great to be here.
+Thanks for having me.
+- It's great to have you here.
+I'm loving going through all the different projects on startup row and talking about him and shedding a little light on him.
+So happy to have you here.
+Yeah, yeah, give a quick introduction on yourself.
+- Yeah, so I'm Nikhil, I'm the CEO co-founder of Pinecone and we're building a way to make web apps in pure Python.
+So we have an open source framework and anyone can install this and basically start creating their apps front end and back end using Python.
+Our company went through the recent Y Combinator batch that just ended the winter 23 batch.
+And recently we raised our seed round and starting to hire out and pretty much grow out your project and company from here.
+- Okay, well, awesome, congratulations.
+That sounds really cool.
+Give us an idea of, I guess, why do you build this, right?
+We've got Flask, we've got Django.
+- Yeah.
+- Heck, we even have Ruby if you really want it.
+- Yeah.
+- There's a lot, so previous to this, like you mentioned, there's frameworks like Flask and Django and whenever you wanted to, a Python developer wanted to make a web app, they used something like this but you always have to pair it with another front-end library.
+So you can't just make your front-end using Python.
+You still have to end up using JavaScript, HTML, React, stuff like that for your front-end.
+And so a lot of people, if you're coming from a Python background, it's a lot of work to get started with these.
+It's a different language, different tool set.
+So we really wanted something where Python developers can just use these tools they already know and be able to make these web apps without having to go learn something completely different.
+So as opposed to these tools like Flask and Django, we're very focused on unifying the front end and back end into one framework.
+So you don't need a separate front end and back end.
+And that allows us to--
+the user can just focus on the logic of their app and not these technical details on the networking and all this other stuff.
+- Yeah, it sounds interesting.
+I mean, I know many Python people who don't want to do JavaScript.
+They don't want to do multiple languages.
+- Exactly.
+- But, you know, it's traditionally, at least in the web framework world, you're speaking many, many languages.
+You're speaking HTML, CSS, JavaScript is a big one.
+And honestly, I think that there was a period where people were super invested in JavaScript and thought that was kind of the right way or the necessary way.
+And that would take away a lot of, what's important about the web framework, right?
+Like, well, it doesn't matter if it's Flask or Django.
+We're just going to return JSON anyway, because it's all Angular, so who cares, right?
+But I don't think that's where people really--
+many people, at least the people choosing Python, want to be.
+And so how is your stuff different?
+So I think exactly what you said before this.
+To make a serious web app, you always have to go to JavaScript.
+And what we're really trying to do is make everything in Python, including your front end.
+And so basically, we're trying to integrate the two together.
+So basically, you don't have to go learn these technical details you didn't want before.
+We realized for all the logic of your app, you're using Python anyway.
+Like, Python's used in so many industries, databases, ML, AI, infrastructure.
+And when these people want to make a front end, it is possible to make JavaScript, or these JavaScript front ends, but it's a lot of overhead.
+And before our framework, there are different low-code tools to make front ends without JavaScript, but they all kind of have a limit, and they all have a graduation risk, is what we found.
+So you can start making your UI - Yeah, so like-- - Can you make any website with them?
+- Right, like Streamlit and Anvil are both notable ones that kind of come to mind.
+But neither of 'em, I like them both a lot, but neither of 'em are necessarily like, I'm just gonna build a general purpose web app.
+They're focused in their particular area.
+- Yes, exactly.
+So I've used tools like Streamlit, Gradio in the past, and a lot of that was inspiration for Pinecone.
+It's really great 'cause it's super easy to get started with, you don't have to go learn these things, but they all have this kind of ceiling you hit.
+So they're mostly good for data science apps, dashboard apps, but as you try to expand your app into a full stack web app, start adding these new features, a lot of times you find these frameworks don't really scale with your ideas, and your two options are either you have to constrain your idea into what these vendors offer you, or you use that for prototyping, and when you're making a customer-facing production app, you scrap it and go to a JavaScript React world.
+So what we're really trying to do is make something like these Anvil or Streamlet easy to get started with for Python developers, but as you want to expand to these complex cases, you should be able to stay in our framework, and we should be able to handle that also.
+- Interesting.
+So how does the front end interactivity work if it's Python?
+- Yeah, and this is also where I think we're a bit different.
+We're trying to really leverage a lot of the web dev ecosystem and not recreate everything from scratch.
+So for the front end, we leverage React and Next.js.
+So our front end compiles down to a Next.js app.
+And from this--
+- Oh, you're transpiling the Python?
+- We transpile the Python to Next.js.
+And this gives you a lot of great features.
+You get single page app features from Next.js, a lot of these performance features.
+And that means from our perspective, we don't have to recreate all this stuff.
+And also, we don't have to create components one by one.
+We just leverage React.
+And what we do in Pinecone for the front end is we just wrap React components and make them accessible.
+So even if we don't offer something, and other low-code tools, sometimes if they don't offer a component you need, you may be kind of constrained in what you can build.
+We easily have a way for anyone to wrap their own third-party React libraries.
+So we're really trying to make the existing stuff out there accessible rather than recreating it.
+- Yeah, so you can sort of extend it with React if you get boxed in, that's your escape hatch?
+- Exactly.
+- Okay.
+- So that's kind of how our front end works, and for the back end, we use FastAPI to handle all the states.
+So the user state is all on the back end, on the server, and this is what allows us to pretty much keep everything in Python.
+So none of the logic is transpiled to JavaScript, only the React, and all the logic stays in Python.
+So you can use any of your existing Python libraries, any existing tools.
+You don't have to wait for us to kind of make these integrations.
+So it's kind of leveraging React, but also leveraging Python, and kind of bringing them together.
+- What's the deployment look like?
+- So we're working on a easy deployment, So you can just type PC deploy, we'll set up all your infrastructure, and you'll get a URL back with your app live.
+But also, we're an open source framework, so it's also very easy to self-host and self-deploy.
+And so what we're really trying to do is make it accessible and easy, but never kind of lock you into our framework.
+I see.
+So I could put like Nginx in front of it or something.
+Exactly.
+So right now, we're still working on our hosting deployment.
+So everyone right now who's deployed is hosting on AWS DigitalOcean or a tool like this with Nginx.
+And so it integrates just like you would deploy a Flask or React app.
+Got it.
+But we're really trying to make an optimized a service around this later.
+- Yeah, sure, it makes sense.
+All right, sounds like a great product.
+- Thanks, Seth.
+- Final question here, how'd you get here?
+How'd you start the company?
+How'd you land on Startup Pro?
+I mean, you talked about Y Combinator a little.
+- Yeah, so I talked a little bit.
+We did the Y Combinator batch, and really the idea is not only having an open source framework, but having a business model around it and being able to create these features around it.
+So we're really focused on being similar to have an open source framework, similar to how Vercell has Next.js and their hosted version, and we're trying to bring that to the Python community.
+So Python is like one of the fastest growing languages, obviously, like that's why PyCon is so big.
+And for the web dev part, there's not really a good ecosystem for that.
+So when people want to share their ideas, we're really trying to become that de facto way for Python developers to create their apps and share.
+And so, yeah, basically working on our hosting service, growing out our team now, and trying to build up all this ecosystem around it so people can easily get their ideas out to the world.
+- Awesome, well, congratulations and thanks for being here.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm/sentry and get started for free.
+And be sure to use the promo code, talkpython, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
