@@ -35,23 +35,28 @@ import chromadb.utils.embedding_functions as eb
 from chromadb.api.models import Collection
 from chromadb.api.types import EmbeddingFunction
 from chromadb.config import Settings
-from dotenv import dotenv_values
+# from dotenv import dotenv_values
+from dotenv import load_dotenv
 from prefect import flow, task
 from prefect.logging import get_logger
 from pydantic import BaseModel
+from prefect.task_runners import SequentialTaskRunner
 
-config = dotenv_values(".env")
+# config = dotenv_values(".env")
+load_dotenv()
 
 _root: Path = Path(__file__).parent.parent.resolve()
 flow_results: Path = _root / "flow_results"
 cleaned_transcripts: Path = flow_results / "cleaned_transcripts"
 chromadb_dir: Path = _root / "chroma"
 # flow_environ_local: bool = True if config.get("FLOW_ENVIRON") == "local" else False
-flow_environ_local = False
+# flow_environ_local = False
 checkpoint_path: Path = flow_results / ".embedded_files.txt"
 
 log = get_logger("embed")
 
+# Couldn't make it work with other task runners, the task should be rewritten.
+task_runner = SequentialTaskRunner()
 
 if not chromadb_dir.is_dir():
     chromadb_dir.mkdir()
@@ -63,16 +68,6 @@ if not checkpoint_path.exists():
 else:
     with open(checkpoint_path, "r") as f:
         EMBEDDED_FILES = set([name.replace("\n", "") for name in f.readlines()])
-
-
-if flow_environ_local:
-    from prefect_dask.task_runners import DaskTaskRunner
-
-    task_runner = DaskTaskRunner(adapt_kwargs={"maximum": 4})
-else:
-    from prefect.task_runners import SequentialTaskRunner
-
-    task_runner = SequentialTaskRunner()
 
 
 def read_transcript(filename: Path) -> list[str]:
@@ -143,8 +138,6 @@ def get_client(persist_directory: Path = chromadb_dir) -> "chromadb.Client":
     )
 
 
-# TODO: Move the function to a task, to allow retrying the first time
-# its called.
 @task(retries=3, retry_delay_seconds=20)
 def get_embedding_fn(
     model_name: str = "multi-qa-MiniLM-L6-cos-v1",
@@ -176,13 +169,16 @@ def get_embedding_fn(
     if type_ == "sentence_transformers":
         return eb.SentenceTransformerEmbeddingFunction(model_name=model_name)
     elif type_ == "hugging_face":
-        api_key = os.environ.get("HUGGINGFACE_APIKEY")
+        api_key = os.environ.get("HF_ACCESS_TOKEN")
         embed_fn = eb.HuggingFaceEmbeddingFunction(
             api_key, model_name=f"sentence-transformers/{model_name}"
         )
         # Force downloading the model, to have it ready once it's called
         # to embed texts
-        embed_fn(["sample text"])
+        response = embed_fn(["sample text"])
+        if "error" in response.keys():
+            # Raise error if fails loading the embedding function.
+            raise ValueError(f"Loading HuggingFaceEmbeddingFunction, response: {response}.")
         return embed_fn
 
 
@@ -198,7 +194,27 @@ class TranscriptPassage(BaseModel):
 @task
 def embed_transcript_slice(
     transcript_slice: TranscriptSlice, embedding_fn: EmbeddingFunction = None,
+    client: "chromadb.Client" = None
 ) -> list[TranscriptPassage]:
+    """Function to embed a transcript slice and adding the contents
+    to a collection.
+
+    Note:
+        This task is longer than it should, but due to different errors 
+        when running the flow (inside the DaskTaskRunner or the ConcurrentRunner),
+        it does different 'subtasks' inside: embedding the passages,
+        creating the TranscriptPassage models, grabbing the collection
+        from the client, and inserting the content. The problem actually happens
+        when the collection is passed through a function.
+
+    Args:
+        transcript_slice (TranscriptSlice): _description_
+        embedding_fn (EmbeddingFunction, optional): _description_. Defaults to None.
+        client (chromadb.Client, optional): _description_. Defaults to None.
+
+    Returns:
+        list[TranscriptPassage]: _description_
+    """
     try:
         embeddings = embedding_fn(transcript_slice["contents"])
     except Exception as e:
@@ -212,37 +228,17 @@ def embed_transcript_slice(
         )
         for emb, line in zip(embeddings, transcript_slice["lines"])
     ]
-    return transcript_passages
-
-
-# NOTE: I can't find the error, but if this function is run as a task,
-# the program crashes due to:
-# 20:58:47.103 | ERROR   | Task run 'add_to_collection-0' 
-# - Crash detected! Execution was interrupted by an unexpected exception:
-#  TypeError: Collection.__init__() missing 1 required positional argument: 'client'
-@task
-def add_to_collection(
-    passages: list[TranscriptPassage], collection: Collection = None,
-) -> int:
-    """Adds the collections to the chroma database.
-
-    Args:
-        passages (list[TranscriptPassage]):
-            List of transcript passages to register and persist on Chroma.
-        collection (Collection):
-            Chromadb colletion, obtained from the client. Defaults to None.
-
-    Returns:
-        int: Number of documents added.
-    """
-    if isinstance(passages, TranscriptPassage):
-        passages = [passages]
-    collection.add(
-        ids=[p.id for p in passages],
-        embeddings=[p.embedding for p in passages],
-        metadatas=[{"title": p.title, "line": p.line} for p in passages],
+    collection = client.get_or_create_collection(
+        name="talking_python_embeddings", embedding_function=embedding_fn
     )
-    return len(passages)
+
+    collection.add(
+        ids=[p.id for p in transcript_passages],
+        embeddings=[p.embedding for p in transcript_passages],
+        metadatas=[{"title": p.title, "line": p.line} for p in transcript_passages],
+    )
+
+    return transcript_passages
 
 
 @flow(task_runner=task_runner)
@@ -252,9 +248,6 @@ def embed_transcripts():
 
     chroma_client: "chromadb.Client" = get_client()
     embedding_fn = get_embedding_fn(model_name="multi-qa-MiniLM-L6-cos-v1")
-    collection = chroma_client.get_or_create_collection(
-        name="talking_python_embeddings", embedding_function=embedding_fn
-    )
 
     try:
         for passage in dataset:
@@ -267,23 +260,20 @@ def embed_transcripts():
 
             log.info(f"Embedding passage: ({passage['filename']}, lines: {s} to {e})")
             transcript_passages = embed_transcript_slice.submit(
-                passage, embedding_fn=embedding_fn
-            )
-            # NOTE: To properly run in the executor this should be in a 
-            # separate task, but I cannot make it work
-            collection.add(
-                ids=[p.id for p in transcript_passages.result()],
-                embeddings=[p.embedding for p in transcript_passages.result()],
-                metadatas=[{"title": p.title, "line": p.line} for p in transcript_passages.result()],
+                passage,
+                embedding_fn=embedding_fn,
+                client=chroma_client
             )
             EMBEDDED_FILES.add(filename + str(e))
-            # add_to_collection.submit(transcript_passages, collection=collection)
 
     finally:
         log.info("Persist to disk and add checkpoint")
         chroma_client.persist()
+        # NOTE: Writing to a file like this can only be done
+        # when the flow is running sequentially, otherwise it can write the names
+        # of the files before actually finishing the job.
         with open(checkpoint_path, "w") as f:
-            f.writelines("\n".join(list(EMBEDDED_FILES)))
+            f.writelines("\n".join(sorted(EMBEDDED_FILES)))
 
 
 if __name__ == "__main__":
