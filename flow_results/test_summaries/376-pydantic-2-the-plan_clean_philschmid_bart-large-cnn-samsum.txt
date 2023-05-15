@@ -1,0 +1,1 @@
+This is Talk Python to Me episode 376 recorded August 4, 2022. Samuel, the creator of Pydantic, is here to talk about his plans for version two of the Python project. Pydant has become a core building block for many Python projects.

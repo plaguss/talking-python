@@ -1,0 +1,2 @@
+*.parquet filter=lfs diff=lfs merge=lfs -text
+chroma/index/*.bin filter=lfs diff=lfs merge=lfs -text

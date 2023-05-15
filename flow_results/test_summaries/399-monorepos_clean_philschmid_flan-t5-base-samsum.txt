@@ -1,0 +1,1 @@
+David Vujic and Python. They talk about mono repos and how to create one or a couple of repositories for your entire company.

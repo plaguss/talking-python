@@ -1,0 +1,1 @@
+This episode of Talk Python is about the Pyramid Web Framework. Chris McDonough is the primary author of the framework and a supervisor process manager. He came to Python through Zoup.    The show has a Facebook page, SoundCloud account and a T-shirt giveaway. 

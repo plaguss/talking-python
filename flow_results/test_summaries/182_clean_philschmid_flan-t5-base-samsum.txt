@@ -1,0 +1,1 @@
+Doug Farrell is a developer at Shutterfly. He's using the Python stack to work with physical devices on a production line for creating all sorts of picturesqueue items. He's also talking about his career and what he's up to at Shutterfly. Michael Kennedy is hosting a weekly podcast on Python, the language, the libraries, the ecosystem and the personalities.
