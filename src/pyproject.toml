@@ -1,6 +1,6 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "talking-python"
@@ -12,7 +12,8 @@ dependencies = [
     "prefect~=2.10.5",
     "prefect-dask~=0.2.3",
     "spacy~=3.5.2",
-    "python-dotenv~=1.0.0"
+    "python-dotenv~=1.0.0",
+    "chromadb~=0.3.21"
 ]
 license = {file = "LICENSE"}
 classifiers = [
@@ -53,11 +54,11 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/talking_python"]
+packages = ["talking_python"]
 
 [tool.pytest]
 addopts = [
-    "--cov=src/talking_python",
+    "--cov=stalking_python",
     "--cov-report=term-missing",
     "--cov-report=xml",
 ]
