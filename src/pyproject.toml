@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "talking-python"
-description = "Exploration of talk python to me podcast transcripts"
+description = "Internal package for the exploration of talk python to me podcast transcripts"
 authors = [
     {name = "Agustín Piqueres", email = "agustin.piqueres@gmail.com"}
 ]
