@@ -1,0 +1,45 @@
+name: Embed the transcripts and add to chroma
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Let 5 minutes after download_transcripts.yml
+    - cron: "46 23 * * 6"  # “At 23:41 on Saturday.”
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v3
+      # with:
+      #   submodules: recursive
+
+    # - name: Update submodule
+    #   run: git submodule update --remote
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        cache: 'pip' # caching pip dependencies
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements/requirements_embed.txt
+
+    # - name: Add spaCy model language
+    #   run: python -m spacy download en_core_web_sm
+
+    - name: Run flow
+      run: python flows/embed.py hugging_face
+
+    - name: Commit and push if it changed
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "embed transcript: ${timestamp}" || exit 0
+        git push

@@ -1,13 +1,6 @@
 """Prefect flow to embed the passages of the podcasts. 
 
-There are problems when running in a local DaskTaskRunner in the
-ephemeral mode:
-https://github.com/PrefectHQ/prefect/issues/7277
-Prior to running the flow, `prefect orion start`, set
-the PREFECT_API_URL as informed.
-At least locally, its better to limit the maximum number of concurrent processes,
-or the computer may crash.
-
+To run the flow locally:
 ```console
 prefect server start
 ```
@@ -18,9 +11,9 @@ Run the command that's shown in the console.
 python flows/embed.py
 ```
 
-To see the evolution of the flow:
-http://127.0.0.1:8787/status
-
+Note:
+    The flow is run sequentially. Different errors appear trying with
+    DaskTaskExectuor, for the moment it wasn't worth the effort.
 """
 
 import os
@@ -32,17 +25,15 @@ from typing import Iterator, Literal, TypedDict
 
 import chromadb
 import chromadb.utils.embedding_functions as eb
-from chromadb.api.models import Collection
 from chromadb.api.types import EmbeddingFunction
 from chromadb.config import Settings
-# from dotenv import dotenv_values
+
 from dotenv import load_dotenv
 from prefect import flow, task
 from prefect.logging import get_logger
 from pydantic import BaseModel
 from prefect.task_runners import SequentialTaskRunner
 
-# config = dotenv_values(".env")
 load_dotenv()
 
 _root: Path = Path(__file__).parent.parent.resolve()
@@ -52,6 +43,8 @@ chromadb_dir: Path = _root / "chroma"
 # flow_environ_local: bool = True if config.get("FLOW_ENVIRON") == "local" else False
 # flow_environ_local = False
 checkpoint_path: Path = flow_results / ".embedded_files.txt"
+
+COLLECTION_NAME = "talking_python_embeddings"
 
 log = get_logger("embed")
 
@@ -178,7 +171,9 @@ def get_embedding_fn(
         response = embed_fn(["sample text"])
         if "error" in response.keys():
             # Raise error if fails loading the embedding function.
-            raise ValueError(f"Loading HuggingFaceEmbeddingFunction, response: {response}.")
+            raise ValueError(
+                f"Loading HuggingFaceEmbeddingFunction, response: {response}."
+            )
         return embed_fn
 
 
@@ -193,14 +188,15 @@ class TranscriptPassage(BaseModel):
 
 @task
 def embed_transcript_slice(
-    transcript_slice: TranscriptSlice, embedding_fn: EmbeddingFunction = None,
-    client: "chromadb.Client" = None
+    transcript_slice: TranscriptSlice,
+    embedding_fn: EmbeddingFunction = None,
+    client: "chromadb.Client" = None,
 ) -> list[TranscriptPassage]:
     """Function to embed a transcript slice and adding the contents
     to a collection.
 
     Note:
-        This task is longer than it should, but due to different errors 
+        This task is longer than it should, but due to different errors
         when running the flow (inside the DaskTaskRunner or the ConcurrentRunner),
         it does different 'subtasks' inside: embedding the passages,
         creating the TranscriptPassage models, grabbing the collection
@@ -208,8 +204,10 @@ def embed_transcript_slice(
         when the collection is passed through a function.
 
     Args:
-        transcript_slice (TranscriptSlice): _description_
-        embedding_fn (EmbeddingFunction, optional): _description_. Defaults to None.
+        transcript_slice (TranscriptSlice):
+            Piece of the dataset to embed.
+        embedding_fn (EmbeddingFunction, optional):
+            Function to use to embed the text. Defaults to None.
         client (chromadb.Client, optional): _description_. Defaults to None.
 
     Returns:
@@ -219,7 +217,9 @@ def embed_transcript_slice(
         embeddings = embedding_fn(transcript_slice["contents"])
     except Exception as e:
         # Yet to decide what to do here.
-        log.warning(f"ERROR: {e}")
+        log.warning(f"There was an error running: {e}, try again with the default")
+        embedding_fn = get_embedding_fn()
+        embeddings = embedding_fn(transcript_slice["contents"])
 
     title = transcript_slice["filename"]
     transcript_passages = [
@@ -229,7 +229,7 @@ def embed_transcript_slice(
         for emb, line in zip(embeddings, transcript_slice["lines"])
     ]
     collection = client.get_or_create_collection(
-        name="talking_python_embeddings", embedding_function=embedding_fn
+        name=COLLECTION_NAME, embedding_function=embedding_fn
     )
 
     collection.add(
@@ -242,12 +242,20 @@ def embed_transcript_slice(
 
 
 @flow(task_runner=task_runner)
-def embed_transcripts():
-    """_summary_"""
+def embed_transcripts(
+    model_name: str = "multi-qa-MiniLM-L6-cos-v1",
+    embedding_function: str = "sentence_transformers"
+):
+    """_summary_
+
+    Args:
+        model_name (str, optional): _description_. Defaults to "multi-qa-MiniLM-L6-cos-v1".
+        embedding_function (str, optional): _description_. Defaults to "sentence_transformers".
+    """
     dataset: Iterator[TranscriptSlice] = get_dataset(directory=cleaned_transcripts)
 
     chroma_client: "chromadb.Client" = get_client()
-    embedding_fn = get_embedding_fn(model_name="multi-qa-MiniLM-L6-cos-v1")
+    embedding_fn = get_embedding_fn(model_name=model_name, type_=embedding_function)
 
     try:
         for passage in dataset:
@@ -259,10 +267,8 @@ def embed_transcripts():
                 continue
 
             log.info(f"Embedding passage: ({passage['filename']}, lines: {s} to {e})")
-            transcript_passages = embed_transcript_slice.submit(
-                passage,
-                embedding_fn=embedding_fn,
-                client=chroma_client
+            embed_transcript_slice.submit(
+                passage, embedding_fn=embedding_fn, client=chroma_client
             )
             EMBEDDED_FILES.add(filename + str(e))
 
@@ -277,4 +283,12 @@ def embed_transcripts():
 
 
 if __name__ == "__main__":
-    embed_transcripts()
+    # A single argument can be passed to run with a different
+    # embedding function:
+    # python flows/embed.py hugging_face
+    import sys
+    if len(sys.argv) > 1:
+        embedding_function = sys.argv[1]
+    else:
+        embedding_function = "sentence_transformers"
+    embed_transcripts(embedding_function=embedding_function)

@@ -37,16 +37,11 @@ charset-normalizer==3.1.0
 click==8.1.3
     # via
     #   apprise
-    #   dask
-    #   distributed
     #   prefect
     #   typer
     #   uvicorn
 cloudpickle==2.2.1
-    # via
-    #   dask
-    #   distributed
-    #   prefect
+    # via prefect
 colorama==0.4.6
     # via griffe
 coolname==2.2.0
@@ -55,20 +50,14 @@ croniter==1.3.14
     # via prefect
 cryptography==40.0.2
     # via prefect
-dask==2023.3.1
-    # via distributed
 dateparser==1.1.8
     # via prefect
-distributed==2023.3.1
-    # via prefect-dask
 docker==6.1.1
     # via prefect
 fastapi==0.95.1
     # via prefect
 fsspec==2023.5.0
-    # via
-    #   dask
-    #   prefect
+    # via prefect
 google-auth==2.17.3
     # via kubernetes
 greenlet==2.0.2
@@ -95,9 +84,7 @@ idna==3.4
     #   httpx
     #   requests
 jinja2==3.1.2
-    # via
-    #   distributed
-    #   prefect
+    # via prefect
 jsonpatch==1.32
     # via prefect
 jsonpointer==2.3
@@ -106,10 +93,6 @@ jsonschema==4.17.3
     # via prefect
 kubernetes==26.1.0
     # via prefect
-locket==1.0.0
-    # via
-    #   distributed
-    #   partd
 mako==1.2.4
     # via alembic
 markdown==3.4.3
@@ -122,32 +105,20 @@ markupsafe==2.1.2
     #   mako
 mdurl==0.1.2
     # via markdown-it-py
-msgpack==1.0.5
-    # via distributed
 oauthlib==3.2.2
     # via requests-oauthlib
 orjson==3.8.12
     # via prefect
 packaging==23.1
     # via
-    #   dask
-    #   distributed
     #   docker
     #   prefect
-partd==1.4.0
-    # via dask
 pathspec==0.11.1
     # via prefect
 pendulum==2.1.2
     # via prefect
 prefect==2.10.8
-    # via
-    #   -r requirements/base_flow.in
-    #   prefect-dask
-prefect-dask==0.2.4
     # via -r requirements/base_flow.in
-psutil==5.9.5
-    # via distributed
 pyasn1==0.5.0
     # via
     #   pyasn1-modules
@@ -185,8 +156,6 @@ pytzdata==2020.1
 pyyaml==6.0
     # via
     #   apprise
-    #   dask
-    #   distributed
     #   kubernetes
     #   prefect
 readchar==4.0.5
@@ -218,27 +187,16 @@ sniffio==1.3.0
     #   asgi-lifespan
     #   httpcore
     #   httpx
-sortedcontainers==2.4.0
-    # via distributed
 sqlalchemy[asyncio]==1.4.48
     # via
     #   alembic
     #   prefect
 starlette==0.26.1
     # via fastapi
-tblib==1.7.0
-    # via distributed
 text-unidecode==1.3
     # via python-slugify
 toml==0.10.2
     # via prefect
-toolz==0.12.0
-    # via
-    #   dask
-    #   distributed
-    #   partd
-tornado==6.3.1
-    # via distributed
 typer==0.9.0
     # via prefect
 typing-extensions==4.5.0
@@ -253,7 +211,6 @@ tzlocal==4.3
     # via dateparser
 urllib3==2.0.2
     # via
-    #   distributed
     #   docker
     #   kubernetes
     #   requests
@@ -265,8 +222,6 @@ websocket-client==1.5.1
     #   kubernetes
 websockets==11.0.3
     # via prefect
-zict==3.0.0
-    # via distributed
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

@@ -9,9 +9,6 @@ authors = [
     {name = "Agustín Piqueres", email = "agustin.piqueres@gmail.com"}
 ]
 dependencies = [
-    "prefect~=2.10.5",
-    "prefect-dask~=0.2.3",
-    "spacy~=3.5.2",
     "python-dotenv~=1.0.0",
     "chromadb~=0.3.21"
 ]
@@ -29,38 +26,11 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "pytest>=7.2.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
-    "coverage>=7.1.0",
     "nox>=2022.11.21",
 ]
 dev = [
     "black",
-    "mypy",
     "ruff"
-]
-
-[project.urls]
-Source = "https://github.com/plaguss/talking-python"
-
-[tool.hatch.version]
-path = "src/talking_python/__init__.py"
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-  "/.github",
-  "/docs",
-]
-
-[tool.hatch.build.targets.wheel]
-packages = ["talking_python"]
-
-[tool.pytest]
-addopts = [
-    "--cov=stalking_python",
-    "--cov-report=term-missing",
-    "--cov-report=xml",
 ]
 
 [tool.ruff]
