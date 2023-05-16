@@ -1,3 +1,4 @@
 -c base_flow.txt
 sentence-transformers
 chromadb
+prefect

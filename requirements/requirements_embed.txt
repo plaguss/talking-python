@@ -4,18 +4,56 @@
 #
 #    pip-compile requirements/requirements_embed.in
 #
+aiosqlite==0.19.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+alembic==1.10.4
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 anyio==3.6.2
     # via
     #   -c requirements/base_flow.txt
+    #   httpcore
+    #   prefect
     #   starlette
     #   watchfiles
+apprise==1.3.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+asgi-lifespan==2.1.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+asyncpg==0.27.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+attrs==23.1.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   jsonschema
 backoff==2.2.1
     # via posthog
+cachetools==5.3.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   google-auth
 certifi==2023.5.7
     # via
     #   -c requirements/base_flow.txt
+    #   apprise
     #   clickhouse-connect
+    #   httpcore
+    #   httpx
+    #   kubernetes
     #   requests
+cffi==1.15.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   cryptography
 charset-normalizer==3.1.0
     # via
     #   -c requirements/base_flow.txt
@@ -25,18 +63,50 @@ chromadb==0.3.23
 click==8.1.3
     # via
     #   -c requirements/base_flow.txt
+    #   apprise
     #   nltk
+    #   prefect
+    #   typer
     #   uvicorn
 clickhouse-connect==0.5.24
     # via chromadb
+cloudpickle==2.2.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 cmake==3.26.3
     # via triton
+colorama==0.4.6
+    # via
+    #   -c requirements/base_flow.txt
+    #   griffe
+coolname==2.2.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+croniter==1.3.14
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+cryptography==40.0.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+dateparser==1.1.8
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+docker==6.1.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 duckdb==0.7.1
     # via chromadb
 fastapi==0.95.1
     # via
     #   -c requirements/base_flow.txt
     #   chromadb
+    #   prefect
 filelock==3.12.0
     # via
     #   huggingface-hub
@@ -47,39 +117,108 @@ fsspec==2023.5.0
     # via
     #   -c requirements/base_flow.txt
     #   huggingface-hub
+    #   prefect
+google-auth==2.17.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   kubernetes
+greenlet==2.0.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   sqlalchemy
+griffe==0.27.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 h11==0.14.0
     # via
     #   -c requirements/base_flow.txt
+    #   httpcore
     #   uvicorn
+h2==4.1.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   httpx
 hnswlib==0.7.0
     # via chromadb
+hpack==4.0.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   h2
+httpcore==0.17.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   httpx
 httptools==0.5.0
     # via uvicorn
+httpx[http2]==0.24.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 huggingface-hub==0.14.1
     # via
     #   sentence-transformers
     #   transformers
+hyperframe==6.0.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   h2
 idna==3.4
     # via
     #   -c requirements/base_flow.txt
     #   anyio
+    #   httpx
     #   requests
 jinja2==3.1.2
     # via
     #   -c requirements/base_flow.txt
+    #   prefect
     #   torch
 joblib==1.2.0
     # via
     #   nltk
     #   scikit-learn
+jsonpatch==1.32
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+jsonpointer==2.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   jsonpatch
+jsonschema==4.17.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+kubernetes==26.1.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 lit==16.0.3
     # via triton
 lz4==4.3.2
     # via clickhouse-connect
+mako==1.2.4
+    # via
+    #   -c requirements/base_flow.txt
+    #   alembic
+markdown==3.4.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   apprise
+markdown-it-py==2.2.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   rich
 markupsafe==2.1.2
     # via
     #   -c requirements/base_flow.txt
     #   jinja2
+    #   mako
+mdurl==0.1.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   markdown-it-py
 monotonic==1.6
     # via posthog
 mpmath==1.3.0
@@ -123,55 +262,142 @@ nvidia-nccl-cu11==2.14.3
     # via torch
 nvidia-nvtx-cu11==11.7.91
     # via torch
+oauthlib==3.2.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   requests-oauthlib
+orjson==3.8.12
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 packaging==23.1
     # via
     #   -c requirements/base_flow.txt
+    #   docker
     #   huggingface-hub
+    #   prefect
     #   transformers
 pandas==2.0.1
     # via chromadb
+pathspec==0.11.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+pendulum==2.1.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 pillow==9.5.0
     # via torchvision
 posthog==3.0.1
     # via chromadb
+prefect==2.10.8
+    # via
+    #   -c requirements/base_flow.txt
+    #   -r requirements/requirements_embed.in
+pyasn1==0.5.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.3.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   google-auth
+pycparser==2.21
+    # via
+    #   -c requirements/base_flow.txt
+    #   cffi
 pydantic==1.10.7
     # via
     #   -c requirements/base_flow.txt
     #   chromadb
     #   fastapi
+    #   prefect
+pygments==2.15.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   rich
+pyrsistent==0.19.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   jsonschema
 python-dateutil==2.8.2
     # via
     #   -c requirements/base_flow.txt
+    #   croniter
+    #   dateparser
+    #   kubernetes
     #   pandas
+    #   pendulum
     #   posthog
 python-dotenv==1.0.0
     # via
     #   -c requirements/base_flow.txt
     #   uvicorn
+python-slugify==8.0.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 pytz==2023.3
     # via
     #   -c requirements/base_flow.txt
     #   clickhouse-connect
+    #   dateparser
     #   pandas
+    #   prefect
+pytz-deprecation-shim==0.1.0.post0
+    # via
+    #   -c requirements/base_flow.txt
+    #   tzlocal
+pytzdata==2020.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   pendulum
 pyyaml==6.0
     # via
     #   -c requirements/base_flow.txt
+    #   apprise
     #   huggingface-hub
+    #   kubernetes
+    #   prefect
     #   transformers
     #   uvicorn
+readchar==4.0.5
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 regex==2023.5.5
     # via
     #   -c requirements/base_flow.txt
+    #   dateparser
     #   nltk
     #   transformers
 requests==2.30.0
     # via
     #   -c requirements/base_flow.txt
+    #   apprise
     #   chromadb
+    #   docker
     #   huggingface-hub
+    #   kubernetes
     #   posthog
+    #   requests-oauthlib
     #   torchvision
     #   transformers
+requests-oauthlib==1.3.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   apprise
+    #   kubernetes
+rich==13.3.5
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
+rsa==4.9
+    # via
+    #   -c requirements/base_flow.txt
+    #   google-auth
 scikit-learn==1.2.2
     # via sentence-transformers
 scipy==1.10.1
@@ -187,22 +413,40 @@ sentencepiece==0.1.99
 six==1.16.0
     # via
     #   -c requirements/base_flow.txt
+    #   google-auth
+    #   kubernetes
     #   posthog
     #   python-dateutil
 sniffio==1.3.0
     # via
     #   -c requirements/base_flow.txt
     #   anyio
+    #   asgi-lifespan
+    #   httpcore
+    #   httpx
+sqlalchemy[asyncio]==1.4.48
+    # via
+    #   -c requirements/base_flow.txt
+    #   alembic
+    #   prefect
 starlette==0.26.1
     # via
     #   -c requirements/base_flow.txt
     #   fastapi
 sympy==1.12
     # via torch
+text-unidecode==1.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   python-slugify
 threadpoolctl==3.1.0
     # via scikit-learn
 tokenizers==0.13.3
     # via transformers
+toml==0.10.2
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 torch==2.0.1
     # via
     #   sentence-transformers
@@ -220,33 +464,54 @@ transformers==4.29.2
     # via sentence-transformers
 triton==2.0.0
     # via torch
+typer==0.9.0
+    # via
+    #   -c requirements/base_flow.txt
+    #   prefect
 typing-extensions==4.5.0
     # via
     #   -c requirements/base_flow.txt
+    #   alembic
     #   chromadb
     #   huggingface-hub
+    #   prefect
     #   pydantic
     #   torch
+    #   typer
 tzdata==2023.3
     # via
     #   -c requirements/base_flow.txt
     #   pandas
+    #   pytz-deprecation-shim
+tzlocal==4.3
+    # via
+    #   -c requirements/base_flow.txt
+    #   dateparser
 urllib3==2.0.2
     # via
     #   -c requirements/base_flow.txt
     #   clickhouse-connect
+    #   docker
+    #   kubernetes
     #   requests
 uvicorn[standard]==0.22.0
     # via
     #   -c requirements/base_flow.txt
     #   chromadb
+    #   prefect
 uvloop==0.17.0
     # via uvicorn
 watchfiles==0.19.0
     # via uvicorn
+websocket-client==1.5.1
+    # via
+    #   -c requirements/base_flow.txt
+    #   docker
+    #   kubernetes
 websockets==11.0.3
     # via
     #   -c requirements/base_flow.txt
+    #   prefect
     #   uvicorn
 wheel==0.40.0
     # via
