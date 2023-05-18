@@ -123,6 +123,11 @@ def get_dataset(
 
 @lru_cache
 def get_client(persist_directory: Path = chromadb_dir) -> "chromadb.Client":
+    if persist_directory.is_dir():
+        # Warning just to know if the chroma directory was found
+        # when running with github actions
+        if not (persist_directory / "chroma-embeddings.parquet").is_file():
+            log.warning(f"There is no previous chroma data collected at: {persist_directory / 'chroma-embeddings.parquet'}")
     return chromadb.Client(
         Settings(
             chroma_db_impl="duckdb+parquet",
