@@ -260,7 +260,15 @@ def embed_transcripts(
     dataset: Iterator[TranscriptSlice] = get_dataset(directory=cleaned_transcripts)
 
     chroma_client: "chromadb.Client" = get_client()
-    embedding_fn = get_embedding_fn(model_name=model_name, type_=embedding_function)
+    # embedding_fn = get_embedding_fn(model_name=model_name, type_=embedding_function)
+    state = get_embedding_fn(model_name=model_name, type_=embedding_function, return_state=True)
+    # Check the state, in case there was some error with the api key
+    # for Hugging face
+    if state.is_failed():
+        log.info("Getting the original embedding function failed, retrying with 'sentence_transformers")
+        embedding_fn = get_embedding_fn(model_name=model_name, type_="sentence_transformers")
+    else:
+        embedding_fn = state.result()
 
     try:
         for passage in dataset:
