@@ -34,12 +34,15 @@ from prefect.logging import get_logger
 from pydantic import BaseModel
 from prefect.task_runners import SequentialTaskRunner
 
+import talking_python.release as rel
+
 load_dotenv()
 
 _root: Path = Path(__file__).parent.parent.resolve()
 flow_results: Path = _root / "flow_results"
 cleaned_transcripts: Path = flow_results / "cleaned_transcripts"
-chromadb_dir: Path = _root / "chroma"
+# chromadb_dir: Path = _root / "chroma"
+chromadb_dir: Path = rel.get_chroma_dir()
 # flow_environ_local: bool = True if config.get("FLOW_ENVIRON") == "local" else False
 # flow_environ_local = False
 checkpoint_path: Path = flow_results / ".embedded_files.txt"
@@ -85,14 +88,22 @@ class TranscriptSlice(TypedDict):
 def get_dataset(
     directory: Path = cleaned_transcripts, batch_size: int = 64
 ) -> Iterator[TranscriptSlice]:
-    """_summary_
+    """Function to load the cleaned transcripts as slices.
 
     Args:
-        directory (Path, optional): _description_. Defaults to cleaned_transcripts.
-        batch_size (int, optional): _description_. Defaults to 32.
+        directory (Path, optional):
+            Path where the transcripts are stored.
+            Defaults to `cleaned_transcripts` variable.
+        batch_size (int, optional):
+            Number of lines/rows to extract per transcript.
+            This value has a direct impact in how many transcripts
+            will be embedded at once. The bigger this value, the
+            faster the process will go, but the more memory it
+            will need. Defaults to 64.
 
     Yields:
-        _type_: _description_
+        Iterator[TranscriptSlice]:
+            Each step of the iterator returns a TranscriptSlice.
 
     Example:
         >>> dataset = get_dataset()
@@ -123,6 +134,16 @@ def get_dataset(
 
 @lru_cache
 def get_client(persist_directory: Path = chromadb_dir) -> "chromadb.Client":
+    """Get the chroma client with the directory for data persistance.
+
+    Args:
+        persist_directory (Path, optional):
+            Directory where the chroma data will be stored.
+            Defaults to `chromadb_dir` variable.
+
+    Returns:
+        chromadb.Client
+    """
     if persist_directory.is_dir():
         # Warning just to know if the chroma directory was found
         # when running with github actions
@@ -246,16 +267,28 @@ def embed_transcript_slice(
     return transcript_passages
 
 
+@task
+def release_chroma():
+    pass
+
+
 @flow(task_runner=task_runner)
 def embed_transcripts(
     model_name: str = "multi-qa-MiniLM-L6-cos-v1",
     embedding_function: str = "sentence_transformers"
 ):
-    """_summary_
+    """Grabs the cleaned transcripts and generates a dataset from it.
+    Generates the embeddings from the passages, and stores the
+    content using chromadb. The chroma vectors are stored using duckdb+parquet,
+    and the content is stored as a GitHub release asset.
 
     Args:
-        model_name (str, optional): _description_. Defaults to "multi-qa-MiniLM-L6-cos-v1".
-        embedding_function (str, optional): _description_. Defaults to "sentence_transformers".
+        model_name (str, optional):
+            Model from sentence transformers to generate the emebddings.
+            Defaults to "multi-qa-MiniLM-L6-cos-v1".
+        embedding_function (str, optional):
+            Embedding function to use. See 'get_embedding_fn'.
+            Defaults to "sentence_transformers".
     """
     dataset: Iterator[TranscriptSlice] = get_dataset(directory=cleaned_transcripts)
 
