@@ -30,6 +30,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements/requirements_embed.txt
+        pip install ./src
 
     - name: Run flow
       run: python flows/embed.py hugging_face
