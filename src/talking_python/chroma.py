@@ -104,7 +104,7 @@ class Chroma:
             client (chromadb.Client):
                 Chroma client instance.
             chroma_dir (Path):
-                If client is not given, the path to a chroma directory must be 
+                If client is not given, the path to a chroma directory must be
                 informed
             collection_name (str, optional):
                 Name of the collection.

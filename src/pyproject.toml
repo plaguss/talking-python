@@ -10,7 +10,8 @@ authors = [
 ]
 dependencies = [
     "python-dotenv~=1.0.0",
-    "chromadb~=0.3.21"
+    "chromadb~=0.3.21",
+    "ghapi~=1.0.3"
 ]
 license = {file = "LICENSE"}
 classifiers = [
