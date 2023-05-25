@@ -4,15 +4,15 @@ database.
 """
 
 import datetime as dt
+import json
 import os
+import shutil
 import tarfile
 from pathlib import Path
-import shutil
-import requests
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
-import json
 
+import requests
 
 RELEASES_URL = r"https://github.com/plaguss/talking-python/releases"
 RELEASES_ENDPOINT = r"https://api.github.com/repos/plaguss/talking-python/releases"
@@ -87,15 +87,44 @@ def untar_file(source: Path) -> Path:
 
 
 class Release:
+    """Class to interact with GitHub's releases via its GhApi.
+    Its just intended for internal use, to upload automatically the 
+    content from chroma folder as a release.
+    """
+
+    _body_template = """INSERT MARKDOWN CONTENT FOR THE RELEASE, TO BE USED AS DEFAULT.
+    INFORM AT LEAST OF HOW TO WORK WITH THE CONTENT THERE RELEASED, AND IF POSSIBLE
+    MAKE A RESUME OF THE CONTENT"""
+
     def __init__(
-        self, owner: str = "plaguss", repo: str = "talking-python", token: str = None
+        self,
+        owner: str = "plaguss",
+        repo: str = "talking-python",
+        token: str = None,
+        check_token: bool = True,
     ) -> None:
+        """
+        Args:
+            owner (str, optional):
+                Owner of the repo. Defaults to "plaguss".
+            repo (str, optional):
+                Repository name. Defaults to "talking-python".
+            token (str, optional):
+                Token to access GitHub's functionalities.. Defaults to None.
+            check_token (bool):
+                Whether to check if the token grabbed automatically is different 
+                from None. Defaults to True.
+        """
         from ghapi.all import GhApi
+
+        token = get_repo_access_token() if token is None else token
+        if check_token and token == "":
+            raise ValueError("The token is not properly set as an environment variable.")
 
         self.gh: GhApi = GhApi(
             owner=owner,
             repo=repo,
-            token=get_repo_access_token() if token is None else token,
+            token=token,
         )
 
     def create_release(
@@ -105,7 +134,7 @@ class Release:
         branch: str = "main",
         body: str = "",
         draft: bool = False,
-        prerelease: bool = False
+        prerelease: bool = False,
     ):
         """Creates a release using the tag name
 
@@ -131,7 +160,9 @@ class Release:
         """
         if not isinstance(files, list):
             files = [files]
-        assert all([f.exists() for f in files]), "All the files must exist to be released."
+        assert all(
+            [f.exists() for f in files]
+        ), "All the files must exist to be released."
         self.gh.create_release(
             tag_name,
             branch=branch,
@@ -139,7 +170,7 @@ class Release:
             body=body,
             files=files,
             draft=draft,
-            prerelease=prerelease
+            prerelease=prerelease,
         )
 
 
@@ -175,7 +206,7 @@ def _extract_release_url(response) -> str:
 
     last_release = dates.index(max(dates))
     assets = response[last_release]["assets"]
-    # Extract from the assets (there should be only one, 
+    # Extract from the assets (there should be only one,
     # just the chroma folder is uploaded)
     chroma_tar_gz = assets[0]["browser_download_url"]
     return chroma_tar_gz
@@ -207,7 +238,7 @@ def download_release_file(url: str, dest: Path | None = None) -> Path:
         dest = Path.cwd()
     local_filename = dest / Path(url).name
     with requests.get(url, stream=True) as r:
-        with open(local_filename, 'wb') as f:
+        with open(local_filename, "wb") as f:
             shutil.copyfileobj(r.raw, f)
     print(f"File generated at: {local_filename}")
     return local_filename
