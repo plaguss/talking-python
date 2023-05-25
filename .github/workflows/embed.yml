@@ -12,9 +12,9 @@ jobs:
     steps:
     - name: Check out this repo
       uses: actions/checkout@v3
-      with:
+      # with:
         # Needed to locate the chroma content
-        lfs: true
+        # lfs: true
       #   submodules: recursive
 
     # - name: Update submodule
