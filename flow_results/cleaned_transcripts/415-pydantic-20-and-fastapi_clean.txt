@@ -1,0 +1,656 @@
+The release of Pydantic 2.0, its partial rewrite in Rust, and its refactoring into Pydantic Core and top-level Pydantic in Python is big news.
+In fact, the alpha of Pydantic 2 was just released.
+Of course, these changes will have potentially wide-ranging and positive effects on the libraries that are built upon Pydantic, such as FastAPI, Beanie, and others.
+That's why this chance I had to catch up with Samuel Colvin from Pydantic and Sebastian Ramirez from FastAPI together live from PyCon 2023 was really timely. It's a super fun and wide ranging interview I'm sure you'll enjoy. Plus, there's a bit of an Easter egg in the middle. This is Talk Python to Me episode 415 recorded on location at PyCon in Salt Lake City on April 23rd, 2023.
+Follow me on Mastodon, where I'm @mkennedy and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Sentry.
+Don't let those errors go unnoticed.
+Use Sentry.
+get started today at talkpython.fm/sentry.
+And it's brought to you by InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try it for free at talkpython.fm/influxdb.
+Samuel, Sebastian, super nice to see you here at PyCon.
+Welcome to the show.
+- Thank you very much for having us.
+It's strange and exciting to do this live and to see you in person. - It is, yes, I know.
+- Normally it's remote over screen share over half the world or something like that.
+- Yeah, I've been able to talk with you, like also with Samuel here, like it's super cool, super cool to be here.
+- Yeah, thank you very much, yes.
+It's great to be here.
+It's really fun being at PyCon and then doing this is like, yeah, even more fun.
+I've done my talk, so I'm much more relaxed than I would have been if it had been this time yesterday.
+- I was just thinking, talking to someone else, like one of the best parts about giving a talk is that when it's over, you can really relax.
+You know what I mean?
+You're like, okay, now I can enjoy the conference.
+- Absolutely, yeah.
+- And the parties, 'cause you can't go too big on the parties if you gotta talk.
+- I feel like all the best ones were last night.
+I feel like--
+- I'm afraid, we were at a pretty good one last night.
+(laughing)
+Yeah.
+- Yeah.
+- But that was excellent.
+All right, well, really good to have you both at the show.
+I guess you hardly need introductions.
+You both are doing such cool work.
+We've had you on the show several times each.
+So maybe just, let's start with a catch up.
+Like, you both have lots of big news.
+Don't wanna necessarily spoil too much, but you know, what have you been up to?
+Yeah, so I raised money earlier this year.
+Well, it was all sorted last year.
+Money came in in January this year.
+Started a company around Pydantic.
+So I've been busy hiring.
+Got a team of seven now.
+One more going to join in June.
+And yeah, currently we're working full-time on Pydantic version two, getting that released.
+And then after that, we're gonna move on to the commercial plans, which I'm not talking about too much, mostly because they're up in the air a bit.
+Also because if you start talking about them, you have to finish talking about them, and then that's like, I'll just take over the whole podcast.
+So I'll say that, yeah, working on Pydantic V2 for now and then moving on soon.
+Well, first from the whole community, congratulations.
+You must be really thrilled.
+Yeah, it's amazing.
+It's a very surreal, right?
+Because I was going to say, did you see this coming?
+No, I didn't.
+My plan had been to start a different company once Pydantic V2 was done.
+And then in November, Bogumil from Sequoia, who Sebastian knew, Sebastian recommended he chatted to me.
+We had a call.
+We had another call two weeks later.
+And then he said, let's have the final meeting with a few more partners to decide whether to invest in two weeks time.
+So I thought, oh, I should probably go and speak to some other VCs.
+So Sebastian very kindly got me lots of intros.
+My girlfriend also got me some intros.
+I had like five meetings lined up.
+And then the floodgates opened and I got another 20 or so VCs emailing me being like, please can I call?
+Starting to hear about, oh, why are we not part of this?
+Right.
+And then I got COVID.
+So I spent a week locked in the bedroom upstairs doing VC calls, most of them with the camera are feeling absolutely horrific.
+And yeah, and then came back full circle, back and had the big call with Sequoia and took their money.
+And they've been amazing.
+- So it was Sequoia that invested?
+- Yeah.
+- Wow, awesome.
+That's a big name to have behind you.
+- So it's Sequoia and Patek, who are the smaller VC, who are like French American, and then Irregular Expression, which is this really cool CTO network based kind of again like New York and Paris, and then a bunch of angels.
+- Yeah, last time we spoke it was about Pydantic V2 and then all of this broke and yeah.
+I feel like I'm just back up to, as in, problem was, although I was doing it to speed up, that was within two months of basically doing meetings and doing legals.
+So I think I've now got a team sufficiently that I'm like caught up to where I would have been if I had just sat there and written code all along.
+- Yeah.
+That's how it goes, right?
+You gotta put a little more sand in the gears to grow, I guess.
+And Sebastian, how about you?
+What have you been up to?
+How have you been?
+- Oh, I've been good.
+Very excited about what they are doing at Pydantic.
+like the team they are assembling is like just amazing.
+And like, yeah, just like recently working a bunch in FastAPI and like Dyper and actually like in also some of the low level things of FastAPI and also not just FastAPI, but like the things that go underneath. Right now, like one of the things that I am pushing for is having documentation of the API reference of the reference of the each one of the parameters for what it is for each one of the methods, like all the stuff.
+Yeah, and I want to do it in a better way that is more maintainable and that I can test the actual documentation for those parameters and consistency between like, there's a bunch of things that I'm trying to do and like it also goes to the low levels of like typing and interacting with the people that is handling typing and like all the stuff that is super cool, super exciting, but like, I think it can work and it can make these things have like, you know, like the API reference for the tools is something that a lot of people have been requesting and like being able to have that in a way that is easy to maintain, that can work well and that I can handle, like, I think that's super exciting on that side.
+And on the other side, of course, like the integration with PyDantic V2 is super exciting now that they have like the first alpha available.
+- It is, I mean, here you are going along, working on FastAPI.
+everyone I talked to was just universally impressed with it.
+Honestly, I've never heard a bad thing about FastAPI, and people are really enjoying it.
+And then here comes Samuel just changing the foundation, changing up Pydantic.
+- Taking FastAPI.
+- No, no, no, I'm just teasing.
+So how much work is that actually going to be to kind of make this change? Is it kind of nothing or is it some work?
+- No, there will be some work in FastAPI.
+The thing is, for final users, it will be like almost transparent.
+They will probably, like if they are doing like weird stuff, complex things like that touches the corner cases or things like that, like they will probably have to update some things.
+But for most of the use cases, it will be pretty much transparent for people.
+And they will just like get like the, like I don't know, like 10, 20X performance from Python TV2.
+And also like the--
+- I was gonna suggest on the performance, I'm sorry to interrupt you.
+One of the big things that we will be able to, you'll be able to drop from FastAPI is the, I'm gonna call it hack, but it's not your fault, it's my fault.
+of like don't ask the type problem of serialization.
+So I think that the speed up on serialization in FastAPI could exceed, like it could be even bigger than that.
+I don't know that yet, but I'm really hopeful for some massive improvements because of fixes in Pydantic that make FastAPI simpler and more elegant.
+- Yeah, and since they're turning off the lights, we'll see how long we last here.
+(laughing)
+We'll stay as long as we can.
+If you hear any noise in the background, that's 'cause they're trying to tear down PyCon, but we're gonna work for it.
+- We're wearing down PyCon around us, it seems.
+- We will not let it be torn down, it will live on.
+- It's not because of PyDantic, we do.
+(laughing)
+- So, yeah, we may have to pause a minute, but we'll find out.
+Anyway, from a user for PyDantic, Samuel, if you haven't gone, like, deeply gone into, like, root object validation and all that kind of stuff, it's probably, you won't even know, right?
+- So I think the hardest thing, yeah, you're right, the vast majority of your code will either continue to work or we'll have a, >> We'll have-- >> We're going to crush it.
+>> If you get run over by a forklift, it's going to really slow down the development of Pydantic, by the way.
+>> We're going to have a mod tool to change the name of methods.
+So, with luck, the vast majority of the changes should be automated.
+I suspect that, and I was saying this earlier in the open space, the hardest thing is probably going to be where your API subtly changes in its restrictions because of effectively edge cases that Pydantic has fixed.
+Like, so for example, in Pylantic V1, we would coerce a int to a string.
+If you ever passed a string to an int to a string field, we would coerce it.
+I think that that's wrong and we shouldn't have done it, and so now we don't.
+But I was saying in the example, if for some reason you stored your IDs as strings, and therefore your API had the ID field as a string, but your user was just like pumping them into your API as integers 'cause that seemed to make sense to them, that's going to break.
+And you probably haven't gotten a unit test that tests that because you know your ID field is a string.
+So I feel sorry for those people.
+And my biggest request would be if you're a user, try Pydantic v2 as soon as possible.
+I know if you use it via FastAPI, you can't yet, but like all the other libraries.
+But the sooner you can try it, the sooner you can tell us, and the more easily we can fix things.
+And we are prepared to add compatibility shims.
+- Okay, well, I mean, in Python, we have sort of a from futures import, well, there'd be from history import type of reverse thing, to slow that down or is it going to be a deprecation or is it just...
+So we're doing deprecation warnings everywhere we can or deprecation errors saying this has gone away you probably want to replace it with this thing.
+We're working really hard on that.
+We haven't got a like from future import or a compact layer yet for actual like validation logic but if we have to we will.
+Yeah okay you'll see right?
+See how much screaming...
+What we didn't want to do was try and guess at what the problems were and build a compatibility layer that people didn't need.
+Yeah, of course.
+So that's why we're doing it this way.
+Yeah, that makes a lot of sense.
+You want to go as minimal, backwards, trying to fill those gaps as possible, right?
+And if I'm brutal about it, if, in certain name of big bank that use Pydantic locks and never engage with the open source community, get stung by this, they never paid me a penny and they've never engaged, then I'm sorry for them, but I'm not as sorry as I would be if they had come and reported an issue and tried to help along the way.
+Yeah, yeah.
+Can we work with you to smooth this over?
+you know, worst case, init, be, you know, equal, equal, Pydantic equal, equal, 1.10.
+- I think we'll carry on supporting critical security fixes for a year.
+- Okay, so there's something of an LTS type of thing you're thinking?
+- Yeah, for a while we have to, right?
+For a while, and yeah, we'll see, look at the download numbers and play it by ear.
+- Yeah, all right, cool.
+While we're talking about compatibility, if people are like doing a lot of the overriding functions and stuff in their Pydantic models, like what do they, what should they expect?
+Too many changes or pretty similar?
+One of the biggest changes is that the init method of a model is now no longer called unless you literally call init.
+So if you call model validate or if your model is nested inside another model, init is no longer called.
+The solution for that is to use a wrap validator or a model validator, but that's going to be one of the pain points for people.
+But it turns out with the Rust API, it's literally impossible without a massive performance hit to do that.
+This portion of Talk Python to Me is brought to you by Sentry.
+You know that Sentry captures the errors that would otherwise go unnoticed.
+Of course, they have incredible support for basically any Python framework.
+They have direct integrations with Flask, Django, FastAPI, and even things like AWS Lambda and Celery. But did you know they also have native integrations with mobile app frameworks?
+Whether you're building an Android or iOS app or both, you can gain complete visibility into your application's correctness both on the mobile side and server side.
+We just completely rewrote Talk Python's mobile apps for taking our courses, and we massively benefited from having Sentry integration right from the start.
+We used Flutter for our native mobile framework, and with Sentry, it was literally just two lines of code to start capturing errors as soon as they happen.
+Of course, we don't love errors, but we do love making our users happy.
+problems as soon as possible with Sentry on the mobile Flutter code and the Python server side code together made understanding error reports a breeze. So whether you're building Python server side apps, or mobile apps, or both, give Sentry a try to get a complete view of your apps correctness. Thank you to Sentry for sponsoring the show and helping us ship more reliable mobile apps to all of you.
+Do you already have a roadmap?
+Have you already tried the alpha on fast API?
+Like what's the story for you guys?
+- So like, - Pydantic wise.
+- Yeah, yeah.
+So like, we have actually been interacting a lot, like with what are the changes that are needed?
+Like what is it gonna be?
+And like, as someone was saying, like I have a lot of code that is quite hacky.
+I was actually surprised it didn't break much.
+It just like really worked.
+And like, it's for this particular use case where you can have like, they are so loud, they really want to tear us down.
+- I know, we might have to be really silent, but let's go ahead and finish this up, yeah.
+- So--
+- Wait, what are those like concentration challenges?
+(laughing)
+- Validation error, can it concentrate?
+So imagine this use case where you have user model, and then this, you want to return this user model, but then you have an authenticated user model, as you were showing in the talk, in the PyCon talk.
+And then this authenticated user model has a field that is a password.
+If you return that use, the authenticated user directly, FastAPI does a lot of tricks to make sure that what you receive in the client side is the actual user without the password.
+That is the thing that you declared that we were going to return.
+But by default, if you don't do it through FastAPI, but you do it with just plain Pydantic, it will just check like, hey, is this an instance of the other?
+And then it will include the field.
+Because like, you know, because in thinking about types, it makes sense, like, oh, this is a subclass of that, so it makes sense that it's valid.
+But when you think about data in an API, it doesn't make sense that it will include more data than what it should.
+- Right, right, right, 'cause you don't wanna either have a mass injection attack on the inbound data or an over-exposure on the way out, right?
+- You know, give away the password from users.
+- Is that bad?
+- I think it's pretty bad.
+- Okay, yeah, all right.
+- You know, for example, some months ago or years or something like I remember that the Kaggle API was returning some of the hashes of the experiments.
+So like, you know, it's a mistake, but it's sad that it could end up just like filtering more data than what it should be returning.
+And it's something that can happen very easily.
+It can happen very easily to FastAPI applications if people don't specify what is the response model, the thing that they want to return, and they just return a bunch of data directly.
+So FastAPI does a lot of things to make sure that when you declare a response model that should filter this data, the data is filtered.
+But that's a lot of code in FastAPI to make it compatible.
+With the new Pydantic V2, that's going to be pretty much transparent.
+So that's amazing.
+That is amazing.
+There's going to be a bunch of things that require some refactoring and also making sure that the Pydantic V1 and V2 are compatible at the same time in some way so that people can have a migration path.
+But yeah, we have been making sure that all the things that need to be changed or that need to be updated, or all the things that need to be exposed from the Pydantic side are actually available.
+Yeah, it's awesome that you guys are working so closely together.
+I mean, it's going to make it--
+Yeah, absolutely.
+So--
+In my mind, these two projects are pretty closely tied.
+I know that they're not, but that's a big use case.
+Yeah, I think that's true.
+And we know that FastAPI is by far our biggest dependent.
+But also, Django Ninja, which is, I think, now second or third, maybe third after SQL model by stars, is like Vitaly who maintains that, has been engaging a lot with us on V2.
+So yeah, lots of other projects are interested in it.
+And I think, yeah, lots of people will be able to remove messy code because of that problem.
+Because yeah, like the invariance of the response interface problem.
+- That's fantastic.
+- Coming back to your previous question about--
+- Before you go to that, I think we should probably find out what do you think?
+- Yeah, I think you might be right.
+- Yeah, not even necessarily, I think the audio may be okay, but just for a concentration, it's very loud with the trucks around us.
+I feel like I'm on the deck of the aircraft carrier, so I throw things off the side.
+- Yeah, okay, let's pause this for a moment.
+We'll be back, hold on.
+So we have survived the disassembly.
+We have returned to continue.
+We were talking about the integration of FastAPI and Pydantic, and that was really cool.
+I think something I'd like to kind of move to real quick is this big announcement, alpha of version two.
+Samuel, last time you were on the show, we spoke about the plan for version two, and now you're at least in an alpha stage.
+tell people where we are with this.
+- Yeah, so we're, yeah, we've had two alphas, maybe three alphas now out.
+We're basically pretty close to a feature freeze, and the plan is to release the package, release the beta, and effectively, we hope that we can then release the full release, say two weeks after that, but there'll be bugs, and we'll fix them, and we'll have more betas, but like, effectively, once we get to beta, the plan is that like, active development is stopping bar fixing bugs.
+- Now it's performance and bugs, right?
+- Yeah, and obviously one of the big things be once that's out, there'll be a lot more work on say, fast API, Django Ninja, etc, etc.
+And that might come back with, we really need this thing.
+Either this is broken or we really need that to make it, you know, to reduce the overhead of upgrading.
+One of the things I did for Pydantic 1.10, which was super valuable in beta, was to go through packages that use Pydantic, initially sorting by star, but then looking at what they actually do and trying to upgrade them.
+And that found me a bunch of bugs in either libraries or in Pydantic.
+So we're not promising we're going to go and upgrade the whole of GitHub to Pydantic v2, but we'll do a bit of that mostly to try and find bugs.
+One of the things that would be really useful is if anyone has an application that uses Pydantic, preferably without FastAPI or another library, that they would like help upgrading, we would love to come and help.
+And it might be a really powerful way of us, again, seeing the real pain points and identifying bugs before we get to v2.
+Yeah, and I guess another thing to mention that is a real headline and I also want to get your thoughts on this, Sebastian, is the performance numbers, right?
+I mean, you put out some pretty impressive performance numbers and Sebastian gets to piggyback on that, right?
+Yeah, I mean, yeah, I'm really proud of it, right?
+Yeah, you should be.
+To go in a change of release, in a bump of release, to be in the ballpark of 22 times faster, not 22%, but 22 times faster, I don't know of another package that's made an upgrade of that kind of order of magnitude.
+What's crazy is it's not numerical computing, right? It's general purpose. If you look at the example I gave in my talk earlier, it's a completely standard Pydantic model with four fields. And that's where we're seeing that kind of like 22 times speed up. So I think it's going to be massive. I have my own cynicism about people who hype about performance as being the most important thing. I don't think most applications, it's actually the thing that matters most.
+But I think it matters, A, it matters to everyone and everyone wants it to go in the same direction.
+And two, it matters to the whole world and to the whole community that we effectively reduce the energy that we consume, like doing compute, basically.
+Right. That's absolutely true. And also, even if people don't actually need it, there's a group of people who are like, "Well, I'm going to leave for Go because it's not fast enough or I can't do enough concurrency or whatever." And if they don't have that feeling, even if they didn't actually need that percentage increase, that's still really good for the Python community.
+Even me, I was saying I had a gigabyte of data from web analytics that I was, I needed to load into a Polar's data frame.
+And for that, I needed to A, extract some attributes from nested fields and B, parse dates and things like that.
+And I use Pydantic v2.
+And like, it was vastly faster with v2.
+It went from like, toodling, tiddling, what's the word I'm looking for?
+Twiddling your thumbs to like, it happens virtually instantly, right?
+And that's fantastic.
+And that'll be even more true when you have an order of magnitude to order the magnitude more data.
+- Yeah, for sure.
+Sebastian, how about you?
+What's the knock-on effect for FastAPI?
+- So I think one of the coolest things is that people won't have to change the code to get that performance benefit.
+It's just gonna be like a bump suddenly.
+And because of the new ways that Pydantic can handle the data, we're gonna be able to, there's something that needs to be done in FastAPI, but we're gonna be able to let the parsing of the data, let Pydantic handle that in the Rust side.
+So Pydantic will be able to just read the JSON bytes instead of reading them in the Python side and let Pydantic do that, and then Pydantic give the models back to the rest of the code of FastAPI.
+That alone will boost performance a lot, but the fact that it's being done in Rust, in the Rust side, it's just gonna be amazing.
+Like, one of the other things that I want to do that is on the plans is to let users define how they want to serialize data and not have like, this is just like by default, it's just like Pydantic models and it converts automatically to JSON.
+But I want to allow users to decide how to serialize the objects and the data so that they can--
+- Wait, like data classes or something like that?
+- Yeah, for example, they can say, oh, I don't want to serialize with the standard JSON serializer.
+I want to serialize with our JSON, which is like the Rust-based implementation to serialize JSON. - Ah, got it.
+- Or they can say, I want Pydantic to be the one that serializes this because I know that this is just a model that can handle that.
+They can also, and this is one of the things that I think is super cool, they can also create, they will be able to create a way to say, "I want to serialize this response to XML," or something like that, or to YAML, and to let Python decouple the validation, but then do the serialization in a way that they can customize the whole thing without having to do it directly in the code.
+>> Maybe even some of these crazy stream buffer protocols.
+>> Yeah, like protocol buffers with crazy stream buffer or even message pack or a bunch of these things that There's no obvious way and there's no native way to have support for that, for reading the data and for exporting the data.
+And that's one of the things that I have in plans.
+I'm probably saying too much and then I'm going to account for all the things I'm recording.
+And now they're like, you know what, you promised this.
+You did promise it.
+Well, can I just come back on serialization for a minute?
+Yeah, please.
+Yeah, so I've worked from October, putting to one side the whole funding round in the middle of it, was working solidly on serialization.
+So we have, there's almost as much code in Pydantic Core now for serialization as there is for validation.
+Yeah.
+Wow.
+We can serialize directly to, to JSON using the same underlying library that, or JSON uses using Serdy.
+But one, and also we can, you can customize how your serialization goes on a per field basis rather than on a per type basis, which is like incredibly powerful, but we also allow you to effectively serialize to Python.
+So not just what used to be the dict method, but basically do JSONable Python.
+So you effectively set the mode when serializing to Python to JSON, and you will only get the like, whatever it is, seven primitive JSON types in Python, which is super valuable if you want your output to be XML, because then, you know, your XML encoder only needs to bother, needs to take in dictionaries, lists, ints, floats, none, bool, rather than whatever complex data you have.
+So there's an, yeah, I'm like super proud of lots of the advantages of serialization.
+My 45 minute talk earlier, I was able to touch about half of the big new features, which kind of talks about quite how much has changed.
+- Yeah, that's really exciting.
+- I think we definitely, I was saying earlier, if I had known how long it was gonna take, I would never have set out on this journey.
+So the best thing about it is I didn't think about how long it was gonna take because we didn't try and do a bit more.
+We tried to do everything, or I tried to do everything.
+And that's how it's disadvantaged.
+It's taken longer than we had hoped, but here we are.
+- But here you are, you're pretty much here.
+That's really good, that's really good.
+And so when you think about performance, right, obviously the 22 times faster is awesome.
+The fast API speed up is awesome.
+But if you do something like SQL model and fast API or beanie and fast API, you're getting on both ends, you're getting that beanie or the.
+I'd ended up with the beanie integration and the fast.
+So you, you're kind of putting.
+Pydantic in both those layers.
+And so those speed ups are like twice as good or something like that.
+Yeah.
+Right.
+I think you, well, they're probably, yeah, they're like, they're the same relatively, but more in absolute terms.
+Yeah.
+Yeah.
+Yeah, absolutely.
+So yeah, I think it's, you know, the fact that so many things have been built upon Pydantic means you've just sped up a bunch of projects without them doing too much.
+Yeah.
+We get the, like the win.
+It's like CPython itself getting faster, helps everyone.
+This is like the next layer down, but we, you know, as a dependency of lots of packages, we get to speed up lots of the community with one package, like one person devoting a year to it.
+Does this surprise you to see all these projects coming out?
+Like here's another project based on Pydantic plus, you know, name your other thing that it's integrated with.
+It's been crazy.
+particularly in the machine learning space where, you know, Langchain, who are one of the big names right now in these big language models, large language models, all based on Pydantic, right?
+Yeah.
+You were saying, I think, on Twitter that OpenAPI use a bunch of FastAPI, right?
+OpenAI?
+Sorry, OpenAI, not OpenAPI. Marvin, I think, from Prefect, is built on Pydantic again. So the wave of machine learning stuff seems to have leveraged Pydantic, a whole lot, DockerA being another big example.
+some for Elastic and some other things as well.
+This portion of Talk Python to Me is brought to you by Influx Data, the makers of InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Developers can ingest, store, and analyze all types of time series data, metrics, events, and traces in a single platform.
+So, dear listener, let me ask you a question.
+how would boundless cardinality and lightning fast SQL queries impact the way that you develop real-time applications? InfluxDB processes large time series data sets and provides low latency SQL queries, making it the go-to choice for developers building real-time applications and seeking crucial insights. For developer efficiency, InfluxDB helps you create IoT, analytics, and cloud applications using time-stamped data rapidly and at scale. It's designed to ingest billions of data points in real time with unlimited cardinality.
+InfluxDB streamlines building once and deploying across various products and environments from the edge on premise and to the cloud.
+Try it for free at talkpython.fm/influxdb.
+The link is in your podcast player show notes.
+Thanks to InfluxData for supporting the show.
+I'm sure one of the big things you're thinking going forward with fast API is like how do you guys work together and make this a seamless change.
+What else you got?
+What else you working on?
+What else do you see in the future?
+- I have a bunch of things.
+- Are they secret or can you tell us?
+- No, no, I can tell.
+Most of it I can tell.
+I just feel the accountability.
+But I can tell.
+So I have a bunch of projects.
+The funny thing is that in some way it's kind of a dependency graph of things that I should work on.
+So for example, I have this project generator for FastAPI to generate a project with a SQL database.
+I haven't updated it in a long time, and it uses SQLAlchemy.
+I built SQL model for that project to use it there, but I haven't updated it there, because first, I want to upgrade more things in SQL model.
+I want to finish the documentation, finish the story about migration.
+But then for the story about migration, I need Typer for SQL model.
+So I need to update things in Typer.
+And then for Typer, I want to add support for annotated, which is actually one of the big things, one of the recent big things in FastAPI is that now there's support for annotated.
+So annotated is this feature from Python.
+It's like standard Python typings.
+You import from typings, import annotated, and then you can use that to emit information to the types that you define for parameters.
+- Like what? I haven't used this.
+I love typing, I use it all the time, and here I'm learning more about typing.
+- The thing is, it exists there in the standard library, but it doesn't have like a canonical use in Python itself.
+it's there mainly for FastAPI and Pydantic to use it.
+You know, like, it's just that, like, I hadn't pushed for that before.
+But the thing is, you import from typings, import annotated, and then you create a function that takes like a username, and then this function will normally be of type string.
+So it will be, the parameter of the function will be username colon str.
+Now you can say username colon annotated, and then open square brackets, as if it was like a list or like a dict or something, open square brackets, and then the first thing that you put there, that's the actual type.
+So you will say, annotated string, and then you can pass additional metadata afterwards.
+And the additional metadata is the thing that you will use to tell FastAPI, this should be extracted from the query parameters or from the cookies or from headers.
+Before, and I kept to recently in FastAPI, the only way to do that was using the default value of the parameter.
+- Right, you would set the default to like a depends or--
+- Yeah, to depends or equals a cookie or equals header or something like that.
+And then FastAPI can take the information from that to give you the data in your function.
+But the thing is, if you call that function manually somewhere else, the editor and Python won't complain that you are not passing some parameter that is required.
+And then you're gonna end up with some strange value internally that is just for FastAPI.
+- Right, or the type checker complains, "You're not passing a depends." Like, "No, I'm passing a string.
+"That's what it's supposed to be." But that's-- - Yeah, exactly.
+- Something weird thing like that.
+- Exactly. - Yeah, okay.
+- So for those cases, having annotated, like all the type is exactly what it is.
+And if it has a default value, it's the actual default value, instead of some strange internal concept in FastAPI.
+And having support for that allows having much better support for typings, for editors, auto-completion, inline errors, all these things, reusing the same functions in other places.
+And it will also, having support for that in Typer will allow users to have the same function being used for FastAPI and Typer, having the custom metadata necessary for each one of the parameters for FastAPI and for a typer, and things like that.
+So it's something that is super powerful and super interesting.
+- I'm gonna come in on annotated 'cause I'm excited about it too.
+So, in Pydantic V2, we use annotated for all of our custom types.
+So for example, positive int type is just annotated of int, and then we use the annotated types package, which is some reusable metadata for annotated.
+So we would use, like, positive int is annotated of int, and then greater than zero.
+And what's even cooler is that will be used by Pydantic, of course.
+Hypothesis is going to get support for that really soon.
+So it will only pass a positive value in if it sees greater than zero there.
+And then Typer, I guess, could--
+even if it's still based on click, it can go and take that greater than and infer it as it must be greater than zero.
+So I think it was one of the things that typing guys, when they first created Annotated, hoped was going to build a rich network of libraries that interchanged metadata.
+It's taken a bit longer than they expected, but we're getting there.
+- I hear the two of you are kind of doing that a little bit, right?
+That's cool.
+That's really cool.
+One of the areas where I feel like typing is a little janky is on ORMs and ODMs.
+When you define a class, you say, for example, it's like a SQL alchemy column or it's a Beanie column or something like that.
+And the type is it's a string column, but really it's a string.
+It's not a string column.
+And so there's this weirdness of using types to kind of drive behavior.
+- That's a perfect case for using annotated.
+- That's what I was thinking, yeah.
+- What it doesn't do is the other case where there is a context where you'd want to get the column object of some sort rather than the integer in a row.
+So it does mean two different things, the kind of dot objects in the Django context, but yeah, absolutely.
+- Yeah.
+- It's there precisely to solve this kind of problem.
+- And it's also because like, currently as far as I remember, there's no way, so the thing is that this is all based on something called descriptors, and is that when you call, like, I don't know, class user.name is actually the attribute in the class.
+But when you create an instance of that user and then say user.name, that is the attribute on the actual instance.
+And the way that this ODMs or ORMs or these things work is that they have a special way to say like, when someone calls the actual class, this is a different thing than when someone calls an instance attribute.
+- Right.
+- And there's-- - It's sort of two behaviors - Yeah, yeah. - in the context, right?
+- And it's super powerful.
+That's how SQLAlchemy works.
+And it's super powerful because then all the queries and all the stuff is actually consistent with how Python works.
+And you can say greater than or equals to using Python syntax, which is great.
+But then currently, as far as I know, there's no way to define that with type annotations in a standard way.
+I think it's something that will probably be improvable, but I think there's currently no way.
+There will probably be a way at some point, but to be able to say, hey, this SQLalchemy column is a column when it's accessed at the class level, but this is gonna be a string when it's accessed at the instance level.
+- A scope level in the annotated, you know.
+- Yeah, yeah, yeah, something like that.
+- The class is this and this, and the instance is that and that.
+That's really interesting.
+While we're talking types, and I know you both are really big fans 'cause it's such a central part, both your libraries, what do you wanna see coming?
+It feels like this is an area of Python changing fast, but is there something like, if they could just...
+And I have another question on types otherwise after that, if I remember.
+- So I gave a talk at the Typing Summit asking for certain things.
+So now we're going to test my can I remember pep numbers challenge, which I'm going to fail in, but pep 472 is that keyword args to... so one option would be to allow keyword arguments to get item, which would make annotated even more powerful because then you could use keyword arguments to describe the meaning of your metadata, rather than having to have these kind of identifier types like greater than. One of the big things that I hope we're going to persuade, so I think one of the things that's happened recently is that everyone gets that runtime use of type ints is a legitimate thing.
+They might not want to do it themselves, but they get that it's a legitimate thing to do.
+- How much pushback was there when you first came out with Pydantic there?
+- I think we were like the black sheep of Python.
+I was a black sheep of Python.
+- This is supposed to have no meaning.
+What are you doing?
+You're doing it wrong.
+- And I think nowadays that's changed and everyone gets it's a real thing.
+So for example, the hash of a union is independent of the order of the members of the union.
+That makes sense in the context of static typing where the union of int float is exactly the same as a union of float int.
+It turns out in static typing, particularly when you're doing coercion, there are some cases where that is not the case.
+And so it's really difficult right now that effectively when you, unions are fine on their own, but if you have a union say within a string, the capital string square brackets, it will, the order will be, match the order that the first time you called that, not what you actually call, unless you use lowercase string when it is the right order, except there's a PR open right now to break it on string too.
+So, string as well.
+So anyway, we are on lowercase list as well.
+Anyway, so things like that, where I do think that like, we'll see what happens on that particular case, but I feel like the voice of people doing runtime use of types, we're not the only people, are being heard better.
+And like, yeah, I think things are going to continue to improve.
+Yeah, there was a pep that proposed an optimization for typing that kind of broke the runtime behaviors of it a little bit for both of y'all.
+Yeah, did in some edge cases, and that's going to be fixed soon by the successor, Pep.
+Absolutely. So that's really good.
+Generic alias is another thing that kills us internally in Pydantic.
+I won't go into all of the details of it, but yeah, we would...
+The high-level takeaway is that the typing community seemed happy with the idea that they might make a change to typhint to make it easier for us.
+And I think that's also for the Pydantic team to engage better.
+And instead of spending ages...
+Problem is, right, like you have a problem, you see a solution in typing, you submit the PR, even if it gets accepted in a week, which it won't, you wait five years before we can remove the code that deals with the other case.
+So it's very tempting not to engage with typing, but just go and write the work around where we should be better Python citizens and go and submit the PR to CPython to try and fix it properly.
+Yeah, what's your wish list for typing?
+So, well, the first thing is like this thing that I have been trying to work on and like trying to do to have better ways to do the documentation of the APIs.
+That's also related to typing and to the annotations.
+Like, let's see if I can pull it off.
+The other thing is, it's actually not that necessarily related to the things that we have been talking about, but it's quite relevant for the data science and machine learning community.
+That is that there are many APIs for many libraries that decorate in some way some function, and then the function is expected to give some types of values to the body of the function internally, but to be able to receive different types of values.
+That sounds a bit abstract, but that's the core idea that is replicated across several libraries.
+And this will apply, for example, to Ray, the distributed machine learning or computing system, to Dask, to I think Daxter also uses something like that, Monad, this system for deploying workloads and machine learning, and a thing like that also uses these types of ideas.
+So there are many of these libraries that like, the way that they are designed is that you create some function, and then you're going to tell something to call this function. And then in the function, you say, I want to expect this value. And instead of you calling all the functions that will generate that value, you tell it like, hey, distributed system, blah, blah, blah, give me this value, execute this for me. But that means that you will have or no type annotations, or invalid type annotations, or red squiggly lines in some places, or no to completion or or auto-completion for the wrong things, just because there's currently no way to define this specific thing of saying, hey, this function after being decorated is gonna be able to receive a different type than what it's gonna give to internal.
+So I think that's something that, and it's probably quite challenging and a big thing to tackle, but it's something that is replicated across several libraries, in particular for these things that do distributed processing of data.
+I think that's something that will be great to improve.
+Does param spec fix some of that?
+Very close, but the param spec only does it for being able to sort of copy the params that come from one function to another.
+And actually I use all that for, for example, for asynchronous and for other things to be able to get like auto completion for the decorated function or for the generated function or things like that.
+And it will probably like the change will probably be somewhere around param spec to be able to say like, not just the param spec, but like this function will not only have the param spec, but will receive a modification like this of the parameters.
+Almost making param spec generic.
+All right.
+One more typing question.
+Do you all think typing is going too far with like the generic stuff?
+And is it going too much like C++ and C# and Java?
+Or is it still good?
+I think the way Python is growing is super interesting because we all have to agree that Python 3.12 is not the same Python 2.7.
+It's quite different.
+And I think it's different in a good way.
+- The users are different and the focus of the runtime is different, yeah.
+- And the things that we can do with types now, and the fact that in Python we can access these types at runtime, which means, I don't know, I was always confused with the term runtime.
+It's like, what does that mean?
+I did like, when you execute Python, the same Python code can inspect and like see what are those types.
+That's what FastAPI and Python do.
+It's just like seeing like, what are those types?
+We can do that in Python.
+You cannot do that in things like TypeScript or you cannot do it in Java.
+You cannot do it in many other languages.
+You get access to this typing information to be able to do additional things with that, like validation, data serialization, documentation, all that stuff.
+So I think that's, to start, that's super powerful in Python.
+The language in Python for typings is not as powerful as, for example, TypeScript.
+There is just like so much stuff that you can do with that.
+Nevertheless, I feel that in Python it's just like, it's growing and it's growing organically.
+And like, we have growing pains, you know?
+Like, there are some things that are like, "Oh, this little thing here is slightly incorrectly named." But like, now there's a better way to do that in Python 3.10, so we don't care much about that slightly incorrect name, things like that.
+Yeah, I feel like there's some tensions of people who are on the mypy side and they want perfect validation of, I want to prove my code hangs together like a static compiler.
+And folks like you all who are like, we want to leverage typing to make it behave in interesting ways.
+And maybe that behavior expression doesn't exactly match what it looks statically like, but it is, everybody wants it, but it's, it might trip up mypy.
+I feel like there's this tension between those two things.
+That's kind of what I was thinking when I asked that question.
+I think there's a little bit of that, but at the same time, there's, it's much less than you could imagine.
+There are so many people that are so close to, you know, core mypy and these things that are actually very excited about the things that we are doing.
+So, you know, like, it's actually quite friendly, all the communication.
+It's just that there is some people that just don't really care about runtime types, and that's fine.
+But I feel like it's much more closer together and much more stronger, the relationship, I think.
+Yeah, yeah, it's great.
+Yeah, I think actually we've gone in the...
+Typing's got better for someone who's not...
+Like, it's actually got less verbose, cleaner, easier to understand.
+You don't have to import union, you can do pipe operator.
+You don't have to import list from typing, you can use list, which makes complete sense.
+Any is an unfortunate one, but I also understand why the any function would not make sense.
+I give up, I just I can't deal with this part.
+So yeah.
+No, in general, I think it's got much better.
+I do think that the interchange between runtime, there's a pep open now to add to data class transforms a converter function.
+I forget exactly how it works.
+But I think that is awareness in the static typing space that the data gets converted when you construct something that looks like a data class.
+So no, I think I think it's really positive.
+I think we're incredibly lucky that we're, like I say, TypeScript is the other, is in some ways the best untyped language typing system.
+But the fact that they're not available at runtime means we're killing it, I think.
+I spoke to someone who maintains a library that does type analysis at runtime in TypeScript, and all his types are strings.
+And they're valid TypeScript, but they're strings.
+And that's, you know, he was saying that doesn't matter, and it's all fine.
+I tend to feel like it probably does a bit.
+We're really lucky to have them at runtime.
+Then you go to the other end, where I've been writing a lot of Rust.
+I am like, Rust's great, it has many advantages, but if you want to just get something done and not have to think too hard about what the types are, it's really nice.
+I write a lot of Python that's untyped when I'm just trying to get something to work.
+I'm not a like, everything must have a type on it kind of person.
+So no, I think we're in a really great place, and I think most of the advantages are actually cleaning it up.
+So the new six something, 649, the new generics syntax, to me, 695.
+(laughing)
+There are two types of people in the world.
+There are people who know the numbers of their peps and there's everyone saying.
+That for me cleans up generics, right?
+Yes, it's a fundamental change to the language.
+Yes, it makes the syntax or function look a bit more like Rust or something, but if you look at it independently of our experience, it's a heck of a lot more elegant than importing Typefor.
+- Yeah, yeah.
+And let me ask you one that's purely theoretical, because I don't think it'll get adopted, but we have int pipe none, we have optional of int.
+A lot of languages have question mark for nullable types.
+Like it could be int.
+You could even say like int.
+I'm not sure.
+Is it an int?
+It could be an int.
+It might be nullable.
+I don't know, right?
+Or use int.
+It's an int.
+You just know.
+There's no question mark.
+And those types, what are your thoughts about like null coalescine, you don't care?
+I'm really happy with the new situation and not having the optional that isn't optional.
+that's been a problem for a long time, so not needing to use optional is being able to use pipe none is great.
+I actually think one of the things that's gonna happen, particularly with the advent of the match syntax and with increased use of type dict, we're gonna need a new union type that operates much more like an enum in Rust.
+So basically a union that keeps track of which member of the enum you have an instance of.
+I keep meaning to build a package to demonstrate what I mean, and I haven't got around to it, Like, if you have a union of type dicts, which is a legitimate thing to do, it's effectively impossible without starting to do effectively validation to work out which member you're on.
+So I think we need, and it would be really neat if you could use a match expression to process each branch of your union.
+- Sebastian?
+- You already said everything.
+(laughing)
+- No, but like, you know, like, I feel that way.
+I was saying that, like, I feel Python is just, like, growing and, like, the typing system is growing.
+I feel it's growing in a very healthy way because it's not like just some academics hidden in some corner somewhere saying, like, this is how it should be done.
+- I did my thesis on this type system and here we are.
+- And then like everyone should just use it.
+It's just like a lot of hearing everyone and just receiving the feedback from everyone and just like growing in the ways that it should grow.
+I think that's amazing.
+I think like we are, you know, it's like a kind of renaissance of like typing in Python and like how we can build all these things.
+I think that's amazing.
+- I think it absolutely is.
+It absolutely is.
+All right, I think we're pretty much out of time.
+We've used up all the various places we've escaped to at a shutting down conference here.
+Final question for you both.
+Just, you know, what's your big takeaway?
+What's the experience like here at PyCon?
+Like, how's it been 2023?
+- For me, it's been amazing.
+It's my first PyCon in the US.
+- Oh, it is?
+- Yeah, like I have never been in a PyCon in the US.
+I have been in PyCons in like many other places, but not in the US.
+And like, I got to see, I got to put faces to so many handles in Twitter and GitHub.
+I got to meet you in person.
+- Yeah, you as well, it's great.
+- And like a bunch of other people that I only knew, you know, just like on the internet.
+A bunch of core developers and like, that's so cool, they are so cool.
+Like I knew they were super cool, but just like, you know, talking on Twitter and like then seeing in person, that's amazing.
+- I really, that's my favorite part of the whole conference.
+It's just the people and the getting together.
+- Definitely, I think I attended like two talks.
+So I was just on the hallways talking to everyone.
+- You feel the hallway traffic.
+- Yeah, yeah, I was all the way on the hallway traffic.
+- Awesome, well that's great.
+- Yeah, I absolutely love it.
+I remember Sebastian and I joined the language summit remotely two years ago, the year when there was no PyCon.
+And the most interesting bit of the like four hour Zoom call was the five minutes between talks when people just chatted.
+And I remember then thinking how cool PyCon must be to have that same group of people like in a room rather than on a Zoom call.
+So, no, I love it.
+I think it's, I've really enjoyed it.
+Last year was my first year.
+This year is even more fun.
+Yeah, I really enjoy it.
+- Awesome, yeah, it's been great to meet you both in person.
+- Of course, meeting you has been the best bit of all.
+- Thank you very much.
+No, no, it's been really great to spend some time with you all here and thanks for coming on the podcast.
+Part two now here to wrap things up.
+So it's, thanks for taking the time and congrats both on the success of your projects.
+They're amazing.
+- Thanks so much.
+- Thank you very much.
+Thanks for having us and thanks for seeing us.
+- Yeah, bye guys.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm/sentry and get started for free.
+And be sure to use the promo code, talkpython, all one word.
+InfluxData encourages you to try InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try it for free at talkpython.fm/influxdb.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
