@@ -22,6 +22,7 @@ from functools import lru_cache
 from itertools import islice
 from pathlib import Path
 from typing import Iterator, Literal, TypedDict
+import datetime as dt
 
 import chromadb
 import chromadb.utils.embedding_functions as eb
@@ -42,7 +43,7 @@ _root: Path = Path(__file__).parent.parent.resolve()
 flow_results: Path = _root / "flow_results"
 cleaned_transcripts: Path = flow_results / "cleaned_transcripts"
 # chromadb_dir: Path = _root / "chroma"
-chromadb_dir: Path = rel.get_chroma_dir()
+CHROMADB_DIR: Path = rel.get_chroma_dir()
 # flow_environ_local: bool = True if config.get("FLOW_ENVIRON") == "local" else False
 # flow_environ_local = False
 checkpoint_path: Path = flow_results / ".embedded_files.txt"
@@ -54,8 +55,8 @@ log = get_logger("embed")
 # Couldn't make it work with other task runners, the task should be rewritten.
 task_runner = SequentialTaskRunner()
 
-if not chromadb_dir.is_dir():
-    chromadb_dir.mkdir()
+if not CHROMADB_DIR.is_dir():
+    CHROMADB_DIR.mkdir()
 
 # NOTE: The following checkpoint file only works if the batch size
 # for the dataset generator is 64
@@ -133,7 +134,7 @@ def get_dataset(
 
 
 @lru_cache
-def get_client(persist_directory: Path = chromadb_dir) -> "chromadb.Client":
+def get_client(persist_directory: Path = CHROMADB_DIR) -> "chromadb.Client":
     """Get the chroma client with the directory for data persistance.
 
     Args:
@@ -148,7 +149,9 @@ def get_client(persist_directory: Path = chromadb_dir) -> "chromadb.Client":
         # Warning just to know if the chroma directory was found
         # when running with github actions
         if not (persist_directory / "chroma-embeddings.parquet").is_file():
-            log.warning(f"There is no previous chroma data collected at: {persist_directory / 'chroma-embeddings.parquet'}")
+            log.warning(
+                f"There is no previous chroma data collected at: {persist_directory / 'chroma-embeddings.parquet'}"
+            )
     return chromadb.Client(
         Settings(
             chroma_db_impl="duckdb+parquet",
@@ -268,14 +271,48 @@ def embed_transcript_slice(
 
 
 @task
-def release_chroma():
-    pass
+def download_chroma(max_days_old: int = 7):
+    """Downloads the must current version of chromadb from github releases.
+
+    Only downloads chroma if the version is 'max_days_old days old or more,
+    otherwise its assumed it didn't change.
+    """
+    # Get the url of the current chroma contents.
+    current_chroma = rel.get_release_url()
+    # To decide whether to download the model or not:
+    # Extract the version from the url: v2020-01-01
+    version = Path(current_chroma).parent.name
+    # Check the model is at least 7 days old
+    if (
+        dt.datetime.today() - dt.datetime.fromisoformat(version[1:])
+    ).days > max_days_old:
+        log.info("Downloading chroma data.")
+        chroma_local = rel.download_release_file(
+            current_chroma, dest=CHROMADB_DIR.parent
+        )
+        # Uncompress and untar the file
+        log.info("Uncompress file.")
+        rel.untar_file(chroma_local)
+    else:
+        log.info("The model won't be downloaded, its not old enough.")
+
+
+@task
+def release_chroma(chroma_directory: Path = CHROMADB_DIR):
+    """Upload chromadb content to github releases. """
+    release_version = rel.generate_release_name()
+    log.info("Compressing choma")
+    chroma_compressed = rel.make_tarfile(chroma_directory)
+    releaser = rel.Release()
+    log.info(f"Release name: {release_version}")
+    releaser.create_release(release_version, files=[str(chroma_compressed)])
 
 
 @flow(task_runner=task_runner)
 def embed_transcripts(
     model_name: str = "multi-qa-MiniLM-L6-cos-v1",
-    embedding_function: str = "sentence_transformers"
+    embedding_function: str = "sentence_transformers",
+    release: bool = False
 ):
     """Grabs the cleaned transcripts and generates a dataset from it.
     Generates the embeddings from the passages, and stores the
@@ -290,16 +327,26 @@ def embed_transcripts(
             Embedding function to use. See 'get_embedding_fn'.
             Defaults to "sentence_transformers".
     """
+    # TODO: download the embeddings initially.
+    download_chroma(max_days_old=7)
+
     dataset: Iterator[TranscriptSlice] = get_dataset(directory=cleaned_transcripts)
 
-    chroma_client: "chromadb.Client" = get_client()
+    chroma_client: "chromadb.Client" = get_client(persist_directory=CHROMADB_DIR)
     # Check the state, in case there was some error with the api key
-    # for Hugging face
-    try:
-        embedding_fn = get_embedding_fn(model_name=model_name, type_=embedding_function)
-    except ValueError as e:
-        log.warning("Getting the original embedding function failed, retrying with 'sentence_transformers'")
-        embedding_fn = get_embedding_fn(model_name=model_name, type_="sentence_transformers")
+    # for Hugging face, avoid failure and grab the sentence_transformers
+    # type.
+    embedding_fn = get_embedding_fn.submit(model_name=model_name, type_=embedding_function)
+    embedding_fn.wait()
+    if embedding_fn.get_state().is_failed():
+        log.warning(
+            "Getting the original embedding function failed, retrying with 'sentence_transformers'"
+        )
+        embedding_fn = get_embedding_fn(
+            model_name=model_name, type_="sentence_transformers"
+        )
+    else:
+        embedding_fn = embedding_fn.result()
 
     try:
         for passage in dataset:
@@ -319,6 +366,12 @@ def embed_transcripts(
     finally:
         log.info("Persist to disk and add checkpoint")
         chroma_client.persist()
+        # Upload the persisted data to GitHub release assets.
+        # TODO
+        if release:
+            log.info("Upload chroma content to GitHub Releases.")
+            release_chroma(chroma_directory=CHROMADB_DIR)
+
         # NOTE: Writing to a file like this can only be done
         # when the flow is running sequentially, otherwise it can write the names
         # of the files before actually finishing the job.
@@ -331,8 +384,17 @@ if __name__ == "__main__":
     # embedding function:
     # python flows/embed.py hugging_face
     import sys
+
     if len(sys.argv) > 1:
         embedding_function = sys.argv[1]
     else:
         embedding_function = "sentence_transformers"
-    embed_transcripts(embedding_function=embedding_function)
+
+    if len(sys.argv) > 2:
+        if sys.argv[2] == "release":
+            release = True
+    else:
+        release = False
+
+    # Use an argument to decide whether to upload to GitHub releases or not
+    embed_transcripts(embedding_function=embedding_function, release=release)
