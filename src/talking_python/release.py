@@ -6,11 +6,12 @@ database.
 import datetime as dt
 import json
 import os
-import shutil
 import tarfile
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
+import tqdm
+import inspect
 
 import requests
 
@@ -50,12 +51,15 @@ def generate_release_name() -> str:
     return f"v{dt.date.today().isoformat()}"
 
 
-def make_tarfile(source: Path) -> None:
+def make_tarfile(source: Path) -> Path:
     """Creates a tar file from a directory and compresses it
     using gzip.
 
     Args:
         source (Path): Path to a directory.
+
+    Returns:
+        path (Path): Path of the new generated file.
 
     Raises:
         FileNotFoundError: If the directory doesn't exists.
@@ -67,6 +71,7 @@ def make_tarfile(source: Path) -> None:
     with tarfile.open(str(source) + ".tar.gz", "w:gz") as tar:
         tar.add(str(source), arcname=source.name)
     print(f"File generated at: {str(source) + '.tar.gz'}")
+    return Path(str(source) + '.tar.gz')
 
 
 def untar_file(source: Path) -> Path:
@@ -92,9 +97,24 @@ class Release:
     content from chroma folder as a release.
     """
 
-    _body_template = """INSERT MARKDOWN CONTENT FOR THE RELEASE, TO BE USED AS DEFAULT.
-    INFORM AT LEAST OF HOW TO WORK WITH THE CONTENT THERE RELEASED, AND IF POSSIBLE
-    MAKE A RESUME OF THE CONTENT"""
+    _body_template = inspect.cleandoc(
+        """This release contains the chromadb contents in the asset 'chroma.tar.gz'.
+        The file is a folder that contains the indices and parquet files for the
+        embedding vectors.
+
+        ### Download the asset
+
+        *The following function will download the most updated release,
+        in case you want a different release just change the URL.*
+
+        Using the functions in the module `talking_python` from this same repo:
+
+        ```python
+        url = get_release_url()
+        download_release_file(url, dest=get_chroma_dir.parent)
+        ```
+        """
+    )
 
     def __init__(
         self,
@@ -167,7 +187,7 @@ class Release:
             tag_name,
             branch=branch,
             name=tag_name,
-            body=body,
+            body=self._body_template if body == "" else body,
             files=files,
             draft=draft,
             prerelease=prerelease,
@@ -232,13 +252,29 @@ def download_release_file(url: str, dest: Path | None = None) -> Path:
         >>> download_release_file(url, Path.cwd())
         ```
     """
+    # The following version is suposed to be faster, but with the version chosen
+    # we know if there is advance at all.
     # https://stackoverflow.com/questions/16694907/download-large-file-in-python-with-requests
     # Extract the filename using the url as a Path object
     if dest is None:
         dest = Path.cwd()
     local_filename = dest / Path(url).name
-    with requests.get(url, stream=True) as r:
-        with open(local_filename, "wb") as f:
-            shutil.copyfileobj(r.raw, f)
+
+    r = requests.get(url, stream=True)
+    content_length = int(r.headers.get("Content-length"))
+    progress = tqdm.tqdm(
+        unit="B",
+        unit_scale=True,
+        total=content_length,
+        desc=f"Downloading {url}",
+    )
+    with open(local_filename, "wb") as f:
+        for chunk in r.iter_content(chunk_size=10 * 1024 * 1024):
+            if chunk:
+                progress.update(len(chunk))
+                f.write(chunk)
+
+    progress.close()
+
     print(f"File generated at: {local_filename}")
     return local_filename
