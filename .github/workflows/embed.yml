@@ -33,7 +33,7 @@ jobs:
         pip install ./src
 
     - name: Run flow
-      run: python flows/embed.py hugging_face
+      run: python flows/embed.py hugging_face release
 
     - name: Commit and push if it changed
       run: |-
