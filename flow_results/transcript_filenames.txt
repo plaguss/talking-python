@@ -413,3 +413,5 @@
 413-live-from-pycon.txt
 414-startup-row.txt
 415-pydantic-20-and-fastapi.txt
+416-sports-analytics.txt
+417-tdd-prompt-engineering.txt
