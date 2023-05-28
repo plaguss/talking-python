@@ -198,11 +198,13 @@ def get_embedding_fn(
         # Force downloading the model, to have it ready once it's called
         # to embed texts
         response = embed_fn(["sample text"])
-        if "error" in response.keys():
-            # Raise error if fails loading the embedding function.
-            raise ValueError(
-                f"Loading HuggingFaceEmbeddingFunction, response: {response}."
-            )
+        # By default returns a list if it works
+        if isinstance(response, dict):
+            if "error" in response.keys():
+                # Raise error if fails loading the embedding function.
+                raise ValueError(
+                    f"Loading HuggingFaceEmbeddingFunction, response: {response}."
+                )
         return embed_fn
 
 

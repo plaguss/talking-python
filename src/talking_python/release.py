@@ -43,12 +43,14 @@ def get_repo_access_token() -> str:
 def generate_release_name() -> str:
     """Generates the name for a release.
     It contains the date in isoformat to help with
-    versioning.
+    versioning, up to the minutes. An example:
+    '2023-05-28_23:00'
 
     Returns:
         str: release name.
     """
-    return f"v{dt.date.today().isoformat()}"
+    # return f"v{dt.date.today().isoformat()}"
+    return f'v{dt.datetime.now().isoformat(sep="_", timespec="minutes")}'
 
 
 def make_tarfile(source: Path) -> Path:
@@ -71,7 +73,7 @@ def make_tarfile(source: Path) -> Path:
     with tarfile.open(str(source) + ".tar.gz", "w:gz") as tar:
         tar.add(str(source), arcname=source.name)
     print(f"File generated at: {str(source) + '.tar.gz'}")
-    return Path(str(source) + '.tar.gz')
+    return Path(str(source) + ".tar.gz")
 
 
 def untar_file(source: Path) -> Path:
@@ -93,7 +95,7 @@ def untar_file(source: Path) -> Path:
 
 class Release:
     """Class to interact with GitHub's releases via its GhApi.
-    Its just intended for internal use, to upload automatically the 
+    Its just intended for internal use, to upload automatically the
     content from chroma folder as a release.
     """
 
@@ -132,14 +134,16 @@ class Release:
             token (str, optional):
                 Token to access GitHub's functionalities.. Defaults to None.
             check_token (bool):
-                Whether to check if the token grabbed automatically is different 
+                Whether to check if the token grabbed automatically is different
                 from None. Defaults to True.
         """
         from ghapi.all import GhApi
 
         token = get_repo_access_token() if token is None else token
         if check_token and token == "":
-            raise ValueError("The token is not properly set as an environment variable.")
+            raise ValueError(
+                "The token is not properly set as an environment variable."
+            )
 
         self.gh: GhApi = GhApi(
             owner=owner,
