@@ -1460,3 +1460,14 @@
 414-startup-row.txt703
 414-startup-row.txt767
 414-startup-row.txt794
+415-pydantic-20-and-fastapi.txt127
+415-pydantic-20-and-fastapi.txt191
+415-pydantic-20-and-fastapi.txt255
+415-pydantic-20-and-fastapi.txt319
+415-pydantic-20-and-fastapi.txt383
+415-pydantic-20-and-fastapi.txt447
+415-pydantic-20-and-fastapi.txt511
+415-pydantic-20-and-fastapi.txt575
+415-pydantic-20-and-fastapi.txt63
+415-pydantic-20-and-fastapi.txt639
+415-pydantic-20-and-fastapi.txt655
