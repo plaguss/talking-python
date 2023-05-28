@@ -181,7 +181,7 @@ class Release:
         if not isinstance(files, list):
             files = [files]
         assert all(
-            [f.exists() for f in files]
+            [Path(f).exists() for f in files]
         ), "All the files must exist to be released."
         self.gh.create_release(
             tag_name,
