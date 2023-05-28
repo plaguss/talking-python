@@ -56,7 +56,7 @@ log = get_logger("embed")
 task_runner = SequentialTaskRunner()
 
 if not CHROMADB_DIR.is_dir():
-    CHROMADB_DIR.mkdir()
+    CHROMADB_DIR.mkdir(parents=True, exist_ok=False)
 
 # NOTE: The following checkpoint file only works if the batch size
 # for the dataset generator is 64
