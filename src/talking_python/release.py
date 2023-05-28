@@ -19,6 +19,9 @@ RELEASES_URL = r"https://github.com/plaguss/talking-python/releases"
 RELEASES_ENDPOINT = r"https://api.github.com/repos/plaguss/talking-python/releases"
 
 
+DATE_FORMAT = "%Y%m%d-%H%M"
+
+
 def get_chroma_dir() -> Path:
     """Returns the path to the chroma content where the
     vectors are stored.
@@ -42,15 +45,13 @@ def get_repo_access_token() -> str:
 
 def generate_release_name() -> str:
     """Generates the name for a release.
-    It contains the date in isoformat to help with
-    versioning, up to the minutes. An example:
-    '2023-05-28_23:00'
+    Example date:
+    '20230528-2300'
 
     Returns:
         str: release name.
     """
-    # return f"v{dt.date.today().isoformat()}"
-    return f'v{dt.datetime.now().isoformat(sep="_", timespec="minutes")}'
+    return f"v{dt.datetime.now().strftime(DATE_FORMAT)}"
 
 
 def make_tarfile(source: Path) -> Path:
@@ -223,11 +224,22 @@ def get_release_url() -> str:
 
 
 def _extract_release_url(response) -> str:
-    # The releases are versioned according to calver,
-    # using a `v` followed by the date in isoformat.
+    # The releases are versioned
+    # using a `v` followed by the date in DATE_FORMAT.
     # To find the most recent, we check only for the date.
-    dates = [dt.datetime.fromisoformat(r["name"][1:]) for r in response]
-
+    to_date = lambda x: dt.datetime.strptime(x, DATE_FORMAT)
+    # FIXME: Currently 2 formats coexist for the versions so
+    # both must be checked. REMOVE ISOFORMAT WHEN NEW VERSIONS ARE
+    # READY, the following line will replace the loop:
+    # dates = [to_date(r["name"][1:]) for r in response]
+    dates = []
+    for r in response:
+        date_version = r["name"][1:]
+        if len(date_version) == 10:  # isoformat yyyy-mm-dd
+            dates.append(dt.datetime.fromisoformat(date_version))
+        else:
+            dates.append(to_date(date_version))
+            
     last_release = dates.index(max(dates))
     assets = response[last_release]["assets"]
     # Extract from the assets (there should be only one,
