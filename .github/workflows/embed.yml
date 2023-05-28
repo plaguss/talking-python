@@ -6,19 +6,16 @@ on:
     # Let 5 minutes after download_transcripts.yml
     - cron: "46 23 * * 6"  # “At 23:46 on Saturday.”
 
+env:
+  HF_ACCESS_TOKEN: ${{ secrets.HF_ACCESS_TOKEN }}
+  TALKING_PYTHON_ACCESS_TOKEN: ${{ secrets.TALKING_PYTHON_ACCESS_TOKEN }}
+
 jobs:
   scheduled:
     runs-on: ubuntu-latest
     steps:
     - name: Check out this repo
       uses: actions/checkout@v3
-      # with:
-        # Needed to locate the chroma content
-        # lfs: true
-      #   submodules: recursive
-
-    # - name: Update submodule
-    #   run: git submodule update --remote
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -33,7 +30,7 @@ jobs:
         pip install ./src
 
     - name: Run flow
-      run: python flows/embed.py hugging_face release
+      run: python flows/embed.py hugging_face release download
 
     - name: Commit and push if it changed
       run: |-

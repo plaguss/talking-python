@@ -271,7 +271,7 @@ def embed_transcript_slice(
 
 
 @task
-def download_chroma(max_days_old: int = 7):
+def download_chroma(max_days_old: int = 7, force_download: bool = False):
     """Downloads the must current version of chromadb from github releases.
 
     Only downloads chroma if the version is 'max_days_old days old or more,
@@ -283,18 +283,26 @@ def download_chroma(max_days_old: int = 7):
     # Extract the version from the url: v2020-01-01
     version = Path(current_chroma).parent.name
     # Check the model is at least 7 days old
-    if (
-        dt.datetime.today() - dt.datetime.fromisoformat(version[1:])
-    ).days > max_days_old:
+    def get_release(current_chroma_path, dest):
         log.info("Downloading chroma data.")
         chroma_local = rel.download_release_file(
-            current_chroma, dest=CHROMADB_DIR.parent
+            current_chroma_path, dest=dest
         )
         # Uncompress and untar the file
         log.info("Uncompress file.")
         rel.untar_file(chroma_local)
+        
+    if force_download is False:
+        if (
+            dt.datetime.today() - dt.datetime.fromisoformat(version[1:])
+        ).days > max_days_old:
+            get_release(current_chroma, CHROMADB_DIR.parent)
+
+        else:
+            log.info("The model won't be downloaded, its not old enough.")
     else:
-        log.info("The model won't be downloaded, its not old enough.")
+        log.info("Force download of chroma assets.")
+        get_release(current_chroma, CHROMADB_DIR.parent)
 
 
 @task
@@ -312,7 +320,8 @@ def release_chroma(chroma_directory: Path = CHROMADB_DIR):
 def embed_transcripts(
     model_name: str = "multi-qa-MiniLM-L6-cos-v1",
     embedding_function: str = "sentence_transformers",
-    release: bool = False
+    release: bool = False,
+    force_download: bool = False
 ):
     """Grabs the cleaned transcripts and generates a dataset from it.
     Generates the embeddings from the passages, and stores the
@@ -328,7 +337,7 @@ def embed_transcripts(
             Defaults to "sentence_transformers".
     """
     # TODO: download the embeddings initially.
-    download_chroma(max_days_old=7)
+    download_chroma(max_days_old=7, force_download=force_download)
 
     dataset: Iterator[TranscriptSlice] = get_dataset(directory=cleaned_transcripts)
 
@@ -383,6 +392,10 @@ if __name__ == "__main__":
     # A single argument can be passed to run with a different
     # embedding function:
     # python flows/embed.py hugging_face
+
+    # Very simplistic way of dealing with arguments, they are only intended
+    # for local checking
+
     import sys
 
     if len(sys.argv) > 1:
@@ -396,5 +409,11 @@ if __name__ == "__main__":
     else:
         release = False
 
+    if len(sys.argv) > 3:
+        if sys.argv[3] == "download":
+            force_download = True
+    else:
+        force_download = False
+
     # Use an argument to decide whether to upload to GitHub releases or not
-    embed_transcripts(embedding_function=embedding_function, release=release)
+    embed_transcripts(embedding_function=embedding_function, release=release, force_download=force_download)
