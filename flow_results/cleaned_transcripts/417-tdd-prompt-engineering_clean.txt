@@ -1,0 +1,783 @@
+Large language models and chat-based AIs are kind of mind-blowing at the moment.
+Many of us are playing with them for working on code or just as a fun alternative to search, but others of us are building applications with AI at the core.
+And when doing that, the slight unpredictable nature and probabilistic style of LLMs makes writing and testing Python code very tricky.
+Interpromptimize, from Maxine Bocheman, and Preset.
+It's a framework for non-deterministic testing of LLMs inside of our applications.
+Let's dive inside the AIs with Max. This is Talk Python To Me, episode 417, recorded May 22nd, 2023.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org. Be careful with impersonating accounts on other instances, there are many. Keep up with the show and listen to over seven years of past episodes at talkpython.fm. We've started streaming most of our episodes live on YouTube. Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+Download your free trial of PyCharm Professional at talkpython.fm/done-with-pycharm.
+And it's brought to you by The Compiler Podcast from Red Hat.
+to an episode of their podcast to demystify the tech industry over at talkbython.fm/compiler.
+Max welcome to Talk Python to Me.
+>> Well it's good to be back on the show and now I know it's live too so no mistakes.
+I'm going to try to not say anything outrageous.
+>> People get the unfiltered version so absolutely.
+I love it when people come check out the live show.
+Welcome back.
+It's been a little while since you were on the show.
+About since September.
+We talked about supersets.
+We also talked a little bit about Airflow, some of the stuff that you've been working on.
+And now we're kind of circling back through this data side of things, but trying to bring AI into the whole story.
+So pretty cool project I'm looking forward to talking to you about.
+- Awesome, excited to talk about it too.
+And these things are related in many ways.
+Like one common foundation is Python.
+Like a lot of these projects are in Python.
+They're data related.
+And here, Proptimize and Propt Engineering and integrating AI is related in a way that we're building some AI features into Superset right now and into Preset, so it ties things together in some way.
+- Yeah, I can certainly see a lot of synergy here.
+Before we dive into it, it hasn't been that long since you were on the show, but give us a quick update, just a bit about your background for people who don't know you.
+- Yeah, so my career is a career of maybe 20 or so years years in data building, doing data engineering, doing, trying to make useful, data useful for organizations.
+Over the past decade or so, I've been very involved in open source.
+I started Apache Airflow in 2014.
+So for those not familiar with Airflow, though, it's pretty well known now.
+It's used at, I heard, like, I think it's like tens of thousands, I think above 100,000 companies are using Apache Airflow, which is kind of insane to think about.
+It's like you started a little project.
+So for me, I started this project at Airbnb and it really took off.
+And I think it's just like great project community fit.
+Like people really needed that.
+It was the right abstraction for people at the time and still today.
+And it just really took off.
+So I was working on orchestration and then I was like, I just love things that are visual and interactive.
+So there was no great open source BI tool out there, business intelligence.
+So this whole data dashboarding, exploration, SQL IDE.
+So it's a playground for people trying to understand and visualize and explore data.
+So I started working on Apache SuperSend in 2000, I think it was like 15 or 16 at Airbnb too.
+And we also brought that to the Apache Software Foundation.
+So again, like a very, very popular open source project that's used in like tens of thousands, a hundred thousand organizations or so.
+And today, it has become a super great open source or alternative to Tableau, Looker, all those business intelligence tool is very viable for organizations.
+And then quick plugs, I pre-set I/O a company I started.
+I'm also an entrepreneur, I started a company a little bit more than four years ago around Apache Superset, and the idea is to bring Superset to the masses.
+So it's really like hosted, managed, state of the art Apache Super Set for everyone with some bells and whistles.
+So the best Super Set you can run, there's a free version too.
+So you can go and play and try it, today gets started in five minutes.
+So it's a little bit of a commercial pointer, but also very relevant to what I've been doing, personally over the past like three or four years.
+- Some of the inspiration for some of the things we're gonna talk about as well and trying to bring some of the AI craziness back to products, right?
+From an engineering perspective, not just a, "Hey, look, I asked what basketball team was gonna, "you know, win this year and it gave me this answer, right?" - It's like, and caveats, I don't know anything that happened since 2021.
+So AI, or AI specifically, Bart is a little bit better at that, but it's like, you know, the last thing I read off of the internet was in fall 2021.
+Makes some things a little bit challenging.
+But yeah, so we're building, you know, AI features into preset, you know, as a commercial open source company, We need to build some differentiators too from supersets.
+We contribute a huge amount, like maybe 50, 80% of the work we do at Preset is contributed back to Superset, but we're looking to build differentiators.
+And we feel like AI is a great kind of commercial differentiator too on top of Superset that makes people even more interested to come and run Preset too.
+- Yeah, excellent.
+And people, you say they were popular projects, Like Airflow has 30,000 stars.
+Apache SuperSet has 50,000 stars, which puts it on par with Django and Flask for people sort of mental models out there, which is, I would say it's pretty well known.
+So awesome.
+- Yeah, stars is kind of vanity metric in some ways, right?
+So it's not necessarily usefulness or value delivered, but it's a proxy for popularity and hype, you know?
+So it gives a good sense.
+And I think like at 50,000 stars, if you look at, it's probably in the top 100 of GitHub projects.
+If you remove the, in the top 100, there's a lot of documentations and guides and things that are not really open source projects.
+So it's probably like top 100 open source project-ish, in both cases, which is--
+- Right, I'm so cool.
+Like, it's like you start a project and you don't know whether it's gonna take off and how, and it's like, wow, it's just nice to see that.
+- Yeah, absolutely.
+I mean, on one hand, it's nice, but it doesn't necessarily make it better.
+But it does mean there's a lot of people using it.
+There's a lot of polish.
+There's a lot of PRs and stuff that have been submitted to make it work.
+A lot of things that you can plug into, right?
+So there's certainly a value for having a project popular versus unpopular.
+- Oh my God, yes.
+And I would say one thing is, all the dark, call it like secondary assets outside of the core projects documentation.
+And there will be a lot of like use cases and testimonials and reviews and people bending the framework in various ways and forks and plugins.
+Another thing too, that people I think don't really understand the value of in software and open source is, or I'm sure people understand the value but it's not talked about, it's just a whole battle tested thing.
+Like when something is run at thousands of organizations in production for a long time, there's a lot of things that happen in a software that are very, very valuable for the criminal organization adopting it.
+- Well, let's talk large language models for a second.
+So AI means different things to different people, right?
+They kind of get carved off as they find some kind of productive productized use, right?
+AI is this general term and like, oh, machine learning is now a thing that we've done, or computer vision is a thing we've done.
+And the large language models are starting to find their own special space.
+So maybe we could talk a bit about a couple of examples, just so people get a sense.
+To me, ChatGPT seems like the most well-known.
+What do you think?
+- Yeah, I mean, well, I'll say if you think about what is a large language model, what are some of the leaps there?
+And I'm not an expert, so I'm gonna try to not put my foot in my mouth, but some things that I think are interesting.
+A large language model is a big neural network that is trained on a big corpus of text.
+I think one of the big leaps we've seen is unsupervised learning.
+So like really often like in machine learning in the past or pre-LLMs, we would have very specific like training set and outcomes we were looking for.
+And then the training data would have to be really structure.
+Here what we're doing with large language models is feeding a lot of huge corpus of text and what the large language model is trying to do or resolve is to chain words, right?
+So he's trying to predict the next word, which seems like you would be able to put words together that kind of makes sense, but like you wouldn't think that consciousness, not just like consciousness, but intelligence would come out of that, but somehow it does, right?
+Like if you chain, it's like, if you say, you know, Hupty Dutty sits on A, it's really clear it's gonna be wall, you know, the next word, but if you push this idea much further with a very large corpus of human knowledge, somehow there's some really amazing stuff that does happen on these large language models.
+And I think that realization happened around, Chad, at GPT-3, 3.5 getting pretty good, and then at 4, we're like, oh my god, this stuff can really, seems like it can think or be smart or be very helpful.
+- Yeah, the thing that I think impresses me the most about these is they seem, People can tell me it's statistics and I'll believe them, but it seems like they have an understanding of the context of what they're talking about more than just predicting like, Humpty Dumpty sat on the what?
+It sat on the wall, right?
+Obviously that's what was likely to come next when you see that set of words.
+But there's an example that I like to play with, which I copied out.
+I'll give it a little thing.
+I'll say, "Hey, here's a program, Python program.
+"I'm gonna ask you questions about it.
+"Let's call it Arrow." and it's like this is a highly nested program that function that tests whether something's a platypus.
+I saw this example somewhere and I thought, okay, this is pretty cool, but it has this.
+If it's a mammal, then if it has fur, then if it has a beak, then if it has a tail, and you can just do stuff that's really interesting.
+Like I'll ask it to--
+- Is bird or something like that or--
+- Yeah, yeah, yeah, rewrite it, write it using guardian clauses to be not nested, right?
+- Oh yeah.
+- Right?
+And it'll say, sure, here we go.
+And instead of being, if this, then nest, if this, then if this, it'll do, if not, if not return false, right?
+Which is really cool.
+And that's kind of a pretty interesting one.
+But like, this is the one, this is the example that I think is crazy.
+It's rewrite arrow to test for crocodiles.
+- Yeah, using the, it's like what people would call a one shot, a few shot example of like, hey, here's an example of the kind of stuff I might want.
+There's some different ways to do that, but it's a pattern in prompt engineering where you'll say you have a zero shot, one shot, few shot examples we can get into.
+But it does feel like it understands the code, right?
+Like what you're trying to do.
+- Right, just for people listening, it said, okay, here's a function isCrocodile.
+If not self.isReptile, if not self.hasScales, these are false examples, right?
+And if it has four legs and a long snout, it can swim, right?
+Like it rewrote the little tests and stuff, right?
+In a way that seems really unlikely that it's just predicting likelihood 'cause it's never seen anything like this really, which is really, it's pretty mind blowing I think.
+- Or it had, like it read the entire internet and all of GitHub and that kind of stuff.
+So say it has seen some other things.
+I think that's mind boggling.
+It's just like, when you think about what it did there is it read the entire conversation so far, your input prompt and it has like a system prompt ahead of time that says, you know, your ChatGPT, try to be helpful to people and here's a bunch of things you should or should not say and non-biased, you try to be concise and good and virtuous.
+And people have found all sorts of jailbreaks out of that.
+But like, all it does from that point on is like try to predict the next word, which is kind of insane that it gets to, you know, the amount of structure that we see.
+- Right, right.
+That's a lot of structure there, right?
+So pretty impressive.
+And ChatGPT is starting to grow.
+You know, if you've got version four and you can start using some of the plugins, it's gonna keep going crazy there.
+Other examples are simply AI just released Lemur, which is a large language model, but really focused on transcribing speech, which I think is kind of cool.
+Microsoft reduced Microsoft security, released Microsoft security copilot, which is a large language model to talk about things like Nginx misconfiguration and stuff like that.
+There's just a lot of stuff out there that's coming along here, right?
+A lot of thousands of models coming in type of thing.
+- On the open source front too, there's this whole ethical thing, like should everyone and anyone have access to open source models doing that?
+Well, we don't really understand.
+We probably shouldn't get into the ethics part of the debate here, 'cause that's a whole series of episodes we probably won't wanna get into.
+But what's interesting is Databricks came up a model for what's called Facebook, came up with one called Lama, and they open sourced and/or leaked the weights, so you have the model topology with the pre-trained weights.
+In some cases, there's open source corpus of training that are also coming out and are also open sourced.
+I mean, it's like, and these open source models are somewhat competitive or increasingly competitive with GPT-4, yeah, which is kind of crazy.
+And some of them I don't, or where GPT-4 has limitations, they break through these limitations.
+So one thing that's really important as a current limitation of the GPT models and LLMs is the prompt window, the token prompt window.
+So basically when you ask a question, you know, it's been trained and has machine learned with data up to, I think in the case of GPT-3, 5, or 4, it's the corpus of training goes all the way to fall 2021.
+So if you ask like, who is the current president of the United States, it just doesn't know, or it will tell you as of 2021, it is this person.
+But so if you're trying to do tasks, like what I've been working on, we'll probably get into later in the conversation is trying to generate SQL.
+It doesn't know your table.
+So you have to say like, hey, here's all the tables in my database.
+Now, can you generate SQL that does X on top of it?
+And that context window is limited and increasing, but some of these open source models have different types of limitations.
+- This portion of Talk Python to Me is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+PyCharm Professional is the complete IDE that supports all major Python workflows, including full stack development.
+That's front-end JavaScript, Python backend, and data support, as well as data science workflows with Jupyter.
+PyCharm just works out of the box.
+Some editors provide their functionality through piecemeal add-ins that you put together from a variety of sources.
+PyCharm is ready to go from minute one.
+And PyCharm thrives on complexity.
+The biggest selling point for me personally is that PyCharm understands the code structure of my entire project, even across languages such as Python and SQL and HTML.
+If you see your editor completing statements just because the word appears elsewhere in the file, but it's not actually relevant to that code block, that should make you really nervous.
+I've been a happy paying customer of PyCharm for years. Hardly a workday passes that I'm not deep inside PyCharm working on projects here at Talk Python. What tool is more important to your productivity than your code editor? You deserve one that works the best. So download your free trial of PyCharm professional today at talkpython.fm/donewithpycharm and get work done. That link is in your podcast player show notes. Thank you to PyCharm from JetBrains for sponsoring the show and keeping Talk Python going strong.
+Right. It's interesting to ask questions, right? But it's more interesting from a software developer perspective of can I teach it a little bit more about what my app needs to know or what my app structure is, right?
+In your case, I want to use SuperSet to ask the database questions.
+But if I'm going to bring in AI, it needs to understand the database structure so that when I say, "Help me do a query to do this thing," it needs to know what the heck to do, right?
+>> The table, so there's this stuff it knows and the stuff it can't know.
+Some of it goes is really to the fact that whether this information is going to public on the Internet, whether it has happened to be trained against it.
+And then if it's in private, there's just no hope that it would know about, you know, your own internal documents or your database structure.
+So in our case, it speaks SQLs very, very well.
+So as we get into this example, like how to get GPT to generate good SQL in the context of a tool like SuperSET or SQL lab, which is our SQL IDE.
+So it knows how to speak SQL super well.
+It knows the different dialects of SQL very, very well.
+It knows its functions, its dates functions, which a lot of the SQL, and like the engineers only call it like, yeah, I can never remember like what Postgres date diff function is, but at GPT or GPT models, just it knows SQL and knows the dialects and knows the mechanical SQL.
+It understands data modeling, foreign keys, joins, primary, all this stuff it understands.
+It knows nothing about your specific database, the schema names and the table names, in the column names that I might be able to use.
+So that's where we need to start providing some context and this context window is limited.
+So it's like, how do you use that context well or as well as possible?
+And that's the field and some of the ideas behind it is prompt crafting and prompt engineering, which we can get into once we get there, maybe we're there already.
+- Yeah, yeah, well, yeah, I think where I see this stuff going is from this general purpose knowledge starting to bring in more private or personal or internal type of information, right?
+Like our data about our customers is like structured like this in a table and here's what we know about them.
+Now let us ask questions about our company and our thing, right?
+And it's like starting to make inroads in that direction, I think.
+- Yeah, and one thing to know about is that there's different approaches to teach or provide that context.
+So one would be to build your own model from scratch, right?
+And that's pretty prohibitive.
+So you'd have to find the right corpus.
+And instead of starting with a model that knows SQL and needs to know your table and context, you have to start from zero and very prohibitive.
+Another one is you start from a base model at some point of some kind.
+There's a topology, so there's different layers and number of neurons and it knows some things.
+And then you load up some weights that are open source.
+And then you say, I'm gonna tune this model to teach it my database schemas and basically my own corpus of data.
+So it could be your data dictionaries, could be your internal documents, it could be your GitHub code, your dbt projects.
+If you have one of your Airflow DAGs, be like, I'm gonna dump all this stuff in the model and that will get baked into the neural network itself.
+That's doable, pretty primitive in this era.
+If you have the challenge that we have at Preset, which is we have multiple customers with different schemas.
+We can't have spillover.
+So you have to train a model for each one of our customers and serve a model for each one of our customers.
+So still pretty prohibitive.
+And a lot of people fall back on this third or fourth method that I would call prompt engineering, which is I'm gonna use the base model, the open AI API, or just an API on LLM.
+And then I will, if no SQL already, I'll just say, hey, here's a bunch of tables that you might wanna use.
+can you generate SQL on top of it?
+So then that's just a big request with a lot of context.
+Then we have to start thinking about maximizing the use of that context window to pass the information that's most relevant within the limits allowed by the specific model.
+- Right, and that starts to get into reproducibility, accuracy, and just those limitations, which is kind of an engineering type of thing, right?
+- Yeah, and then, you know, maybe a topic too, And this conversation is based on a recent blog post and the flow, just going back to the flow of that blog post.
+So we started by establishing the premise that everyone is trying to bring AI into their product today.
+Thousands of product builders are currently exploring ways to harness the power of AI in the products and experiences they create.
+That's the premise for us with text to SQL and SQL lab as part of superset and preset.
+But I don't know, like if you think of any product, any startup, any SaaS product you use.
+You work at HubSpot today, you're trying to figure out how to leverage AI to build sales chatbots or SDR chatbots, so everyone everywhere is trying to figure that out.
+The challenge is, I guess, very probabilistic in a different interface to anything we know.
+Engineers would be like, oh, let's look at an API and leverage it, and APIs are very, very deterministic in general, AI is kind of wild beast to tame.
+You ask, first the interface is language not code, and then what comes back is like semi-probabilistic in nature.
+- And it could change underneath you.
+It's a little bit like web scraping in that regard.
+That like, it does the same, it does the same, and then something out there changed, not your code, and then a potentially different behavior comes back, right?
+'Cause they may have trained another couple of years, refine the model, switch the model, change the default temperature, all these things.
+- Yeah, there's a lot that can happen there.
+One thing I noticed, like starting to work with what I would call prompt crafting, which is, you know, you work with ChatGPT and you craft different prompt with putting emphasis in a place or another or changing the order of things or just changing a word, right?
+Just say like important exclamation point, capitalize the words, you know, the reserve words in SQL, And then just the fact that you put important exclamation point will make it do it or not do it, changing from a model to another.
+So one thing that's great is the model, at least at OpenAI, they are immutable as far as I know.
+But like if you use GPT-3.5 Turbo, for instance, that's just one train model.
+I believe that that is immutable.
+The chatbot on top of it might get fine tuned and change over time, but the model is supposed to be static.
+You mentioned temperature, it'd be kind of interesting to just mention for those who are not familiar with that.
+So when you interact with AI, one of the core parameters is temperature, and I think it's a value from zero to one, or I'm not sure how exactly you pass it, but it basically defines how creative you want, you want to let the AI be.
+Like if you put it to zero, you're gonna have something more deterministic.
+So asking the same question should lead to a similar or the same answer, though not in my experience.
+It feels like it should, but it doesn't.
+But then if you put a higher, it will get more creative.
+Talk more about like how that actually seemed to work behind the scenes.
+- Yeah, well, that variability seems to show up more in the image-based ones.
+So for example, this article, this blog post that you wrote, you have this image here and you said, oh, and I made this image from mid-journey.
+I've also got some examples of a couple that I did.
+Where did I stick them?
+Somewhere, here we go.
+Where I asked, just for YouTube thumbnails, I asked Midjourney for a radio astronomy example that I can use, 'cause here's one that's not encumbered by some sort of licensing, but still looks kinda cool and is representative, right?
+And there, it's like massive difference.
+I'm not sure how much difference I've seen.
+I know it will make some, but I haven't seen as dramatic of a difference on ChatGPT.
+- Oh, ChatGPT, yeah.
+Yeah, I'm not sure exactly how they introduced the variability on the generative images AI.
+I know it's like this multi-dimensional space with a lot of words and a lot of images in there.
+And then it's probably like where the location point of that, they randomized that point in that multi-dimensional space.
+For ChatGPT, it's pretty easy to reason about, and I might be wrong on this, again, I'm not an expert, But you know how the way it works is it writes, it takes the prompt and then it comes up with the next word sequentially.
+So for each word for the next word, so Humpty Dumpty sat on A, it might be wall at 99%, but like there might be 1% of fence or something like that.
+And if you up the temperature, it's more likely to pick the non-first word and that probably less, so they probably do in a weighted way, like it's possible that I take a second or the third word randomly, and then of course it's gonna get a tree or decision tree once it picks the words, the next word is also changes.
+So as you up that, it goes down path that sends it into more creative or different.
+- Right, right.
+Yeah, a little butterfly effect, it makes a different choice here, and then it sends it, you know, sends it down through the graph.
+Interesting.
+So one thing that you really pointed out here, and I think it's maybe worth touching on a bit, is this idea of prompt engineering.
+There's even places like learnprompting.org that try to teach you how to talk to these things.
+And you make a strong distinction between prompt crafting or just talking to the AI versus really trying to put an engineering focus on it.
+Do you wanna talk about the differentiation?
+- Yeah, I think it's a super important differentiation, but one that I'm proposing, right?
+So I don't think that people have settled as to what is one or what is the other.
+I think I saw a Reddit post recently that was like, prompt engineering is just a load of crap.
+Like, you know, anyone can go, 'cause they thought their understanding of prompt engineering was like, oh, you know, you fine tune or you craft your prompt and you say like, you are an expert AI working on, you know, creating molecules.
+Now can you do this?
+And then, you know, by doing that, you might get a better outcome.
+Or one really interesting thing that people have been doing in prompt crafting that seem to have huge impact on, there's been paper written on this specific just hint or craft tweak is let's proceed step by step.
+So basically whatever the question is that you are asking, specifically around more mathematicals or things that require more systematic step by step thinking, the whole just like let's think, let's expose this or let's go about it step by step makes it much better.
+So here you might be able to, well, so, you know, if you had an example where ChatGPT-3 failed or ChatGPT-4 failed, you could just say, colon, let's go step by step, and it might succeed that time around.
+- Maybe you can get it to help you understand instead of just get the answer, right?
+Like, factor this polynomial into its primary, you know, solutions or roots or whatever, and you're like, okay, show me, don't just show me the answer, show me step by step so I could understand and try to learn from what you've done, right?
+- Yeah, I mean, if you think about how the way that it's trying to come up with a new word, if all it does is a language-based answer to a mathematical question, like how many days are there between this date and that date?
+There's no, that specific example might not exist or it's kind of complicated for it to go about it, but if you say, let's think step by step, okay, there's this many months, this month's duration is this long, there's this many days since the beginning of that month, and might get it right that time around.
+- Right, or if it fails, you could pick up part way along where it has some more--
+- Yeah, you know, and then you can trace, I mean, just you too, I think one thing is you should be extremely careful as taking for granted that it's right all the time, you know?
+So that means it also helps you review its process and where it might be wrong.
+But back to crafting versus engineering.
+So crafting would be the process that I think is more attached to a use ChatGPT every day, the same way that we've been trained at Googling over the past two decades.
+You use quotes, you use plus and minus, and you know which keywords to use intuitively, where it's gonna get confused or not.
+So I think prompt crafting is a different version of that that's just more worthy.
+And if you're working with the AI to try to assist you, write your blog post, or to try to assist you in any task really, just to be smart about how you bring the context, how you tell it to proceed, goes a very, very long way.
+So that's what I call prompt crafting, call it like one-off cases.
+- Kind of what people do when they're interacting with the large language model.
+- I think so, right?
+Like it's not evident for a lot of people who are exploring the edge of where it fails, and they love to see it fail.
+And then they don't think about like, oh, what could I have told it to get the answer I was actually looking for?
+Like, ah, I got you wrong.
+You know, it's as if I had that actor in a conversation of like, ah, you're wrong and I told you so.
+You know, so I think there's a lot of that online.
+But I think for all these examples that I've seen, I'm really tempted to take the prompt that they had and then give it an instruction or two or more and then figure out how to get it to come up with the right thing.
+super important skill.
+You know, you could probably get a boost of for most knowledge information workers, you'll get a boost of 50% to 10x for a lot of the tasks you do every day if you use AI well. So it's great personal skill to have go and develop that skill if you don't.
+This portion of Talk Python to Me is sponsored by the Compiler Podcast from Red Hat. Just like you, I'm a big fan of podcasts and I'm happy to share a new one from a highly respected open source company. Compiler, an original podcast from Red Hat.
+Do you want to stay on top of tech without dedicating tons of time to it?
+Compiler presents perspectives, topics, and insights from the tech industry, free from jargon and judgment.
+They want to discover where technology is headed beyond the headlines and create a place for new IT professionals to learn, grow, and thrive.
+Compiler helps people break through the barriers and challenges turning code into community at all levels of the enterprise.
+One recent and interesting episode is their "The Great Stack Debate." I love love love talking to people about how they architect their code, the trade-offs and conventions they chose, and the costs, challenges, and smiles that result.
+This Great Stack Debate episode is like that.
+Check it out and see if software is more like an onion, or more like lasagna, or maybe even more complicated than that.
+It's the first episode in Compiler's series on software stacks.
+Learn more about Compiler at talkpython.fm/compiler.
+The link is in your podcast player show notes.
+And yes, you could just go search for a compiler and subscribe to it.
+But follow that link and click on your players icon to add it that way they know you came from us.
+Our thanks to the compiler podcast for keeping this podcast going strong.
+From engineering, in my case, I'm like, you're building something, you're using an AI as an API behind the scene, you want to pass it a bunch of relevant contexts, really specify what you want to get out of it.
+Maybe you even want to get a structured output, right?
+You might want to get a JSON blob out of it.
+You say, "Return a JSON blob with the following format," so it's more structured.
+So then to give all these instructions, there's this idea of providing few shots too.
+You might be storing context in a vector database.
+I don't know if we're getting ahead to that today, but there are ways to kind of structure and organize your potential embeddings or the things you want to pass as context.
+So there's a lot here.
+I think somewhere to I talked about prompt engineering if we'd scroll in the blog post like what is And prompt engineering it will list the kind of things it might be higher in the post. I was scrolling for people When I introduce what is what is prompt engineering? Yeah Above this section about Mickey you scroll at the big end like what is prompt engineering?
+>> Yeah, here.
+>> Yeah, right here.
+The definition of this is Chad's GPT's version of it.
+When you do prompt engineering, you can add context, which that means that you're going to have to retrieve context maybe from a database, from a user session, from your Redux store if you're in the front end.
+You're going to go and fetch the context that's relevant in the context of the application, at least while building products.
+Specify an answer format.
+You could just say, yes, I just want a yes or no, a Boolean, I want a JSON blob with not only the answer, but your confidence on that answer or something like that.
+Limiting scope, asking for pros and cons, incorporating verification or sourcing.
+So that's more, you know, if you iterate on a prompt, you're gonna be rigorous about, is this prompt better than the previous prompt I had?
+Like if I pass five rows of sample data while doing text to SQL, does it do better than if I, or does it do more poorly than if I pass 10 rows of sample data or provide a certain amount of column level statistics.
+So, prompt engineering is not just prompt crafting.
+It is like bringing maybe the scientific method to it, bring some engineering of like fetching the right context and organizing it well and then measuring the outcome.
+- Right, exactly.
+Something that comes out, you can measure and say, this is 10% better by my metric than it was before with this additional data, right?
+That's a big difference.
+- Right, and then there's so many things moving, right?
+Like, and everything is changing so fast in the space So you're like, oh, well, ChatGPT5 is out, or GPT4 Turbo is half the price and then just came out.
+Now I'm just gonna move to that.
+They're like, wait, is that performing better?
+Or what are the trade-off?
+Or even I'm gonna add, I'm gonna move this section, asking for a certain JSON format above this other section.
+I'm gonna write important exclamation point, do X.
+Does that improve my results?
+as I mess it up and which one of my test case perhaps that succeeded before fails now and which one failed before succeeds now.
+So it can be like, is that a better or worse iteration towards my goal?
+- Right, right.
+Kind of bringing this unit testing TDD mindset.
+- Yes, yeah.
+So that's what we're getting deeper into the blog post.
+Right, so the blog post is talking about bringing this TDD, the test-driven development mindset to prompt engineering.
+Right, and there's a lot of things that are in common.
+You can take and apply and kind of transfer just over.
+There are some things to that breakdown that are fundamentally different between testing a prompt or working with AI and working with just a bit more deterministic code testing type framework.
+- Yeah, yeah, for sure.
+So you called out a couple of reasons of why TDD is important for prompt engineering.
+Maybe we could run through those.
+- Yeah, so the first thing is the AI model is not a deterministic things, or you use a modern API or a GraphQL REST API.
+The format of what you ask is extremely clear, and then the format of what you get back is usually defined by a schema.
+It's very deterministic.
+Pretty guaranteed that you do the same request to get the same output-ish or at least format.
+With AI, that's not the case, right?
+So it's much more unpredictable and probabilistic by nature.
+Second one is handling complexity.
+So AI systems are complex, black boxy, kind of unpredictable too.
+So embrace that and assume that you might get something really creative coming out of there for better or for worse.
+And then reducing risk, like you're shipping product.
+If you're shipping product, writing product, you don't want necessarily any sort of like bias or weird thing like the AI could go crazy.
+- Yeah, there are examples of AIs going crazy before like Tay, do you remember Microsoft Tay?
+- I don't know that one, but I know of other examples.
+- Yeah, I mean, it came out and it was like this sort of just, I'm here to learn from you internet and people just turned it into a racist and made it do all sorts of horrible things.
+And they had to shut it down a couple of days later because it just, it's like, whoa, it met the internet and the internet is mean.
+So that's not great.
+- Yeah, train it on 4chan or let it, you know, go crawl 4chan and read it.
+It's not always gonna be nice.
+- So bad, right?
+I mean, you don't entirely control what's gonna come out of those things.
+And so, you're a little more predictable, right?
+- And it's not even like you don't entirely control.
+Like I think, yeah, like basically, you know, control might be a complete illusion.
+Like even the people working at OpenAI don't fully understand what's happening in there.
+(laughs)
+Well, it read a bunch of stuff and it's predicting the next word and it gets most things right.
+By the way, they do a lot around this idea of like not necessarily TDD, but there's a whole eval framework so you can submit your evaluation functions to OpenAI.
+And as they train the next version of things, they include that in what their evaluation system for the new thing.
+Say, if I wanted to go and contribute back a bunch of like text to SQL type use cases as they call evals, then they would take that into consideration when they train their next models.
+All right, so going down the list, reducing risk, right?
+So you're integrating a beast that's not fully tamed into your product.
+You probably wanna make sure it's tamed enough to live inside your product.
+Continuous improvements, that should have been maybe the first one in the list is you're iterating on your prompts, you're trying to figure out a past context, you're trying different model versions, maybe you're trying some open source models or the latest GPT cheaper, greater thing.
+So you wanna make sure that as you iterate, you're getting to the actual outcomes that you want systematically.
+And performance measurement too, of like how long does it take?
+How much does it cost?
+You kind of need to have a handle on that.
+The new model might be 3% better on your corpus of tests, but it might be six times the price.
+Like, do you want, are you okay with that?
+- Right, right, or just from a user perspective, yeah.
+- Time to interaction, you know, that's one thing with AI we're realizing now is a lot of the prompts on four will be like, you know, two to, one to seven seconds, which in the Google era, you know, there's been some really great papers out of Google early on that prove that, you know, it's like 100 milliseconds as an impact on user behaviors and how long they stay.
+- Right.
+Yeah, people give up on checkout flows or whatever going to the next part of your site on a, measurably on 100 millisecond blocks, right?
+When you're talking, well, here's 7,000, here's 70 of those.
+That's gonna have an effect, potentially.
+- Oh, it has, it has been proven and very intricate in usage patterns, session duration, session outcomes, right, and a second is a mountain.
+If today, like we were to AB test Google between like whatever millisecond it's at now, for like just one second or half a second, that the results coming out of that AB test would show very, very different behaviors.
+- Wow.
+- I think there's some, don't quote me on it, there's some really great papers, you know, written on TTI and just time to interaction and the way it influences user behavior.
+So we're still, you know, in the AI world, it has to, if you're gonna wait two to seven seconds for your prompt to come back, it's got to add some real important value to what's happening.
+- Yeah, it does.
+I think it's interesting that it's presented as a chat.
+I think that gives people a little bit of a pause.
+Like, oh, it's talking to me.
+So let's let it think for a second, rather than it's a website that's supposed to give me an answer.
+- Yeah, compared to then, I guess, your basis for comparison is a human, not a website or comparing against Google.
+So that's great.
+- Yeah, I ask it a really hard question.
+Give it some time, right?
+Like that's not normally how we think about these things.
+Okay, so you have a kind of a workflow from this engineering, building a product, testing, like an AI inside of your product.
+You wanna walk us through your workflow here?
+- Yeah, and you know, if you, I think I looked at TDD, you know, and originally, what is the normal TDD type workflow?
+And I just adapted this little diagram to prompt engineering, right?
+'Cause the whole idea of the blog post is to bring prompt engine, like TDD mindset to prompt engineering.
+So this is where I went, but yeah, the workflow is like, okay, define the use case and desired AI behavior.
+What are you trying to solve with AI?
+In my case, the example that I'll use and try to reuse throughout this presentation is, throughout this conversation is, you know, text to SQL.
+So like we're trying to, what a user prompt, what a database schema, get the AI to generate good, useful SQL, find the right tables and columns to use, that kind of stuff.
+I create test cases.
+So it's like, okay, if I have this database and I have this prompt, give me my top five salary per department on this HR dataset, there's a fairly deterministic output to that.
+You could say the SQL is not necessarily deterministic.
+There's different ways to write that SQL.
+There's a deterministic data frame or results set that might come up.
+- There is a right answer of the top five salaries.
+- That's right.
+- You're not getting, ultimately get that.
+And it's great if it is deterministic 'cause you can test it.
+If you're trying to use AI to say write an essay about Napoleon Bonaparte's second conquest, in less than 500 words, it's not as deterministic and it's hard to test whether the AI is doing good or not.
+So you might need human evaluators.
+But I would say in most AI product, or people are trying to bring AI into their product, in many cases more deterministic.
+So another example of like more deterministic would say like, oh, getting, if you say getting AI to write Python functions, it's like, oh, write a function that, you know, returns if a number is prime, yes or no, like that you can get the function and test it in a deterministic kind of way.
+So anyways, just pointing out, it's better, you're only gonna be able to have a TDD mindset if you have a somewhat deterministic outcome to the one I use the AI for.
+Then create a PROM generator.
+So that would be your first version or in the text to SQL example, it's given the 20 tables in this database and this columns and table names and data types and sample data, generate SQL that answers the following user prompt.
+And then the user prompt would say something like department by top five salary per department.
+And then we're getting for people that are not on the visual stream, not YouTube, but on just audio, we're getting into the loop here where it's like run the test, evaluate the results, refine the test, refine the prompts, and then start over.
+Right, and probably compile the results, keep track of the results so that you can compare, not just like are you 3% better on your test cases, but also did you, which tests that used to fail succeed now, which tests that used to fail now succeed, fail now.
+And then once you're happy with the level of success you have, you can integrate the prompt into the product or maybe upgrade.
+- Ship it.
+- Yeah, ship it.
+- Ship it.
+So I think it's probably a good time to jump over to your framework for this because PyTest and other testing frameworks in Python are great, but they're pretty low level compared to these types of questions you're trying to answer, right?
+Like how has this improved over time for, I was doing 83% right, right?
+PyTest asserts a true or a false.
+It doesn't assert that 83% is--
+- Yeah, and it's a part of CI.
+Like, if any of your PyTest fail, you're probably gonna not CI, not allow CI, not even merge the PR, right?
+So one thing that's different between test-driven development and unit testing and prompt engineering is that the outcome is probabilistic.
+It's not true or false.
+It might just be like zero or one, right?
+where our spectrum fails for a specific test.
+You're like, oh, if it gets this column, but not this other column, you succeed at 50%.
+So it's non-binary.
+It's also, you don't need perfection to ship.
+You just need better than the previous version or good enough to start with.
+So the mindset is, so there's a bunch of differences.
+And for those interested, we won't get into the blog post.
+I think I list out the things that are different between the two, I think it's a little bit above this.
+But, you know, the first thing I want to say is like the level of ambition of this project versus say an Airflow is super set is like very low, right?
+So it's maybe more similar to a test, a unit test library and no discredit to the great, awesome like unit test libraries out there, but you would think those are fairly simple and straightforward, which is the information architecture of a PyTest is probably simpler than the information architecture of a Django for instance, right?
+It's just like a different thing.
+And here, the level of ambition is much low, and much, you know, for this is fairly simple.
+So Promptimize is something that I created, which is a toolkit to help people write, to evaluate and score and understand while they iterate on their, while doing prompt engineering.
+But so in this case, I think I talk about the use case I preset, which is we have a big corpus that luckily was contributed by, I forgot which university, but a bunch of PhD people did a text-to-SQL contest.
+- I think it was Yale.
+- Yale, yeah.
+- I think it was Yale, yeah.
+- So great people at Yale were like, hey, we're gonna generate 3,000 prompts on 200 databases with the SQL that should be the outcome of that.
+It's a big test set so that different researchers working on Text to SQL and compare their results.
+So for us, we're able to take that test set and some of our own test sets and run it at scale against OpenAI or against LLAMA or against different models.
+And by doing that, we're able to evaluate this particular combo of this prompt engineering methodology with this model generates 73% accuracy.
+And we have these reports we can compare fairly easily which prompts that, as I said before, were failing before are succeeding now and vice versa.
+So you're like, am I actually making progress here or going backwards?
+And if you try to do that on your own, like if you're crafting your prompt just anecdotally and try it on five or six things, like you quickly realize like, oh shit, I'm gonna need to really test out of a much broader range of tests and then some rigor and methodology around that.
+- So right, and try, how do you remember and go back and go, this actually made it better, right?
+'cause it's hard to keep all that in your mind, yeah.
+- Yeah, and something interesting that I'm realizing to work on this stuff is like, everything is changing so fast, right?
+The models are changing fast, the prompting windows are changing fast, the vector databases, which is a way that organize and structure a context for your prompts, evolving extremely fast.
+It feels like you're working on unsettled ground in a lot of ways, like a lot of stuff you're doing might be challenged by, you know, the BART API came out last week Maybe it's better at SQL generation, and then I got to throw everything that I did on OpenAI.
+But here's something you don't throw away, your test library and your use cases.
+>> Right.
+>> Maybe is the real asset here.
+The rest of the stuff is like, I was moving so fast that all the mechanics of the prompt engineering itself and the interface with whatever model is the best at the time, you're probably going to have to throw away as this evolves quickly.
+but your test library is something really, really solid that you can perpetuate or keep improving and bringing along with you along the way.
+It's an interesting thought around that.
+>> Let's talk through this example you have on Promptimize's GitHub read me here.
+To make it a little concrete for people, how do you actually write one of these tests?
+>> Yeah. There's different types of prompts.
+But what I wanted to get to was just like, what is the prompt and how do you evaluate it, right?
+And then behind the scene, we're going to be, you know, discovering all your prompts and running them and compiling results and reports, right, and doing analytics and making it easy to do analytics on it.
+The examples that we have here, and I'll try to be conscious of both the people who can read the code and people who don't, like the people who are just on audio.
+But here, from Proptimize.prompt, we import a simple prompt, And then we bring some evals that are just like utility functions around evaluating the output of what comes back from the AI.
+And here the first prompt case in the model, here I just create an array or a list of prompt cases.
+And it's a prompt case like a test case.
+And with this prompt case, this very simple one, I say, "Hello there!" And then I evaluate that as says, you know, either "Hi" or "Hello" in the output, right?
+So if any of the words exist and what comes back, I give it a one or a zero.
+Framework allows you to, you could say, oh, it has to have both these words or give the percentage of success based on the number of words from this list that it has.
+But that's the first case.
+The second one is a little bit more complicated, but name the top 50 guitar players of all time, I guess.
+And I make sure that Frank Zappa is in the list 'cause I'm a Frank Zappa fan here.
+But you could say, I want to make sure that at least three out of five of these are in the list.
+Those are very more like natural language, very simple tests too.
+That's the Hello World essentially.
+Then we're showing some examples of what's happening behind the scene.
+Well, it will actually call the underlying API, get the results, run your eval function and compile a report.
+What was the prompt?
+What was oh a bird just flew into my room?
+That's gonna make that's gonna make the podcast interesting. Oh my goodness. Okay, that might be that might be a first here That is nuts. Oh, well, it's out of my room. Guess what? There's other people in that house. I'm just gonna close the door to my room And deal with it later. All right. Well, that's that's a first - I've had a bat fly into my house once, but never a bird, so both are crazy.
+How interesting, this is the first on the podcast out of eight years we've never had a bird, wild animal enter the studio of the guests.
+- Yes, well, welcome to my room.
+I live in Tahoe, so I guess that's something, it's better than a bear, you know?
+It could have been better.
+- It is better than a bear.
+- All right, but yeah, so just keep enumerating kind of what we're seeing visually here.
+We'll keep a YAML file as the report output.
+In Promptimize, you have your test case or your prompt cases, like test cases, you have an output report that says, for this prompt case, here's the key, here's what the prompt that was actually, the user input that came in, here's what the prompt look like, what was the response, the raw response from the API, what are all the tasks, how long did it run?
+So a bunch of metadata and relevant information that we can use later to create these reports.
+So you're like, was the score zero or one?
+So you get the whole output report.
+- Yeah, okay.
+And then you also have a way to get like a report.
+I'm not sure, maybe I scrolled past it.
+- Yeah, I think it's--
+- Where it shows you how it did, right?
+I think that was in your--
+- I think at the blog post, do you see a much more--
+- Oh, there it is.
+- So this one, we're running the spider dataset that I just, that I talked about.
+Remember, it's like the Yale generated text to SQL competition corpus.
+So here we looked at my percentage of success is 70%.
+So here you say weight and score.
+So there's a way to say, "Oh, this particular prompt case is 10 times more important than another one." Right? So you can do a relative importance of weight of your different text cases.
+Now, one thing we didn't mention too is like all these tests are generated programmatically too.
+So that it's the same philosophy behind, you know, Airflow of like, you know, it's almost like a little DSL to write your test case.
+So you could, you know, it could read from a YAML file for instance, in the case of what we do with spider SQL, there's a big Jason file of all the prompts and all the databases.
+And then we dynamically generate, you know, a thousand tests based on that.
+So you can do programmatic test definition, so more and more dynamic if you want it to be, or you could do more static if you prefer that.
+So in this case, we're doing, We introduced this idea of a category too.
+So I mentioned like there's some features in Promptomize like categorizing your tests or weights, you know, and things like that.
+So here we'll do some reporting on per category.
+What is the score per category?
+You can see which database is performing well or poorly again.
+So I could have another category that is large database, small databases and see how that, what the score is and compare reports.
+It's pretty cool that it saves the test run to a file that then you can ask questions about and write and generate this report on and rather than just running it and passing or failing, right?
+- Yeah, or like giving the output and then having to run it again.
+Yeah, there's some other features around if, so you can memoize the test.
+So because it has a reports, if you like, you know, exit off of it or restart it later, it won't rerun the same tests if it's the same hash input, Even though with AI, you might get a different answer with the same input.
+But at least in this case, it will say like, hey, I'm rerunning the same prompt instead of like waiting five seconds for open AI and then paying the tokens and paying the piper.
+You know, I'm just gonna skip that.
+So there's some logic around skipping what's been done already.
+- It's not just a couple of milliseconds to run it.
+It could be a while to get the answers.
+- Yeah, also like early libraries, I haven't written the sub, the threading for it where you can say like, oh, run it on eight threads.
+So with Promptimize, I think, and the blog post is probably more impactful than the Python project itself.
+If the Python project takes off and a bunch of people are using it to test prompts and contribute to it, it's great.
+But I think it's more like, okay, this is uncharted territory, working with an AI type interface.
+And then it's more like, how do we best do that as practitioners or as people building products.
+I think that's the big idea there.
+Then the test library, you could probably write your own.
+I think for me that was a one or two week project.
+The one I would like to say is normally, if it wasn't for getting all the help from ChatGPT on, it's like, "I'm creating a project.
+"I'm setting up my setup.py." Setup tools is always a little bit of pain in the ass.
+Then I'm like, "Can you help me create my setup.py?" and then generate some code.
+And I'm like, "Oh, I wanna make sure that PyPI is gonna get my readme from GitHub.
+I forgot how to read the markdown and pass the stuff.
+Can you do that for me?" And then Chedjabint generates this stuff very nicely.
+Or, "I wanna make sure I use my request that requirements of TXT inside my dynamically building my setup tools integration.
+Can you do that for me?" And it's just like, bam, bam, bam.
+Like all the repetitive stuff.
+I need a function.
+- This is incredible, right?
+- Go ahead.
+- Yeah, I kind of want to close out the conversation with that.
+I do agree that the blog post is super powerful in how it kind of teaches you to think about how might you go about testing, integrating with an AI and these types of products, right?
+Much like TDD brought a way to think about how do we actually apply the concept of just, well, I have things and I can test them with this assert thing.
+How should I actually go about building software, right?
+So this is kind of that for AI integrated software.
+So it's certainly worth people watching.
+Let's just close it out with, you kind of touched on some of those things there.
+Like, how do you recommend that people leverage things like ChatGPT to help them build their apps or how to use AI, this kind of - Oh my God, yeah.
+- To like amp up your software development?
+- 100%.
+I mean, it's been a lot of people report on Twitter, people used to like Google, all the problems that they had while writing code and using a lot of Stack Overflow.
+I don't know what the stats on Stack Overflow traffic, but once you try working with Chat GPT to do coding, you probably don't go back to those other flows of, I don't know, it's like putting your error message or stack trace into Google and then going to a bunch of Stack Overflow link and try to make sense of what comes out.
+To me, it's been so much better to go just with ChatGPT and there's a conversation there too.
+So say for instance, if I'm in pro optimize, I needed a function to say, can you write, I wrote that function before, you know, but it's a, can you crawl a certain given folder and look for modules that contain objects of a certain class and then bring that back and you know, you have to use the import lib and she's a little bit of pain in the ass to write this. So it writes, you know, a function that works pretty well.
+and I'm like, "Oh, I forgot to ask you "to look into lists and dictionaries.
+"Can you do that too?" Then it does that in a second.
+It's like, "Oh, you didn't add type hints "and duck string and duck test.
+"Can you write that too?" And it's a bang, bang, bang, and just like copy paste in your utils file and it works and you save like two hours.
+- I think it would be really good at those things that are kind of algorithmic.
+Now, it might be the kind of thing that you would do on a whiteboard job interview test, right?
+it's just gonna know that really, really solid.
+It actually, but it knows quite a bit about the other libraries and stuff that are out there.
+- It's insane, yeah.
+So one thing that I came across is, I leverage something called LinkChain, which pointed to people getting interested in prompt engineering.
+There's a really good, well, the library LinkChain is really interesting.
+That's not perfect, it's new, it's moving fast, but push people to check it out.
+Also like 41,000 stars, so very--
+I know that's nice, right?
+It's written in Python.
+- Yes, you can do like, yeah, it's in Python too.
+You should talk to whoever is writing this or started this.
+But yeah, you can change some prompt to say like, the output of a prompt will generate the next one.
+There's this idea of agents.
+There's this idea of estimating tokens before doing the request.
+There's a bunch of really cool things that it does.
+To me, the docs are not that comprehensive.
+There's someone else that created, if you Google "Lang chain cookbook," you'll find someone else that wrote what I thought was more comprehensive way to start.
+This one has a YouTube video and an IP1B file and introduces you to the concept in an interactive way.
+I thought that was really good.
+But yeah, so we were trying to, I was trying to use this, and I was like, "Oh, Chad, can you generate "a bunch of like, Lang chain related stuff?" I was like, I don't know of a project called LinkChain.
+It was created after 2021.
+So I was like, I wish I could just say, just go read the GitHub, just read it all, read the docs, and then I'll ask you questions.
+And then Chajupiti's not that great at that currently, at learning things it doesn't know, for reasons we talked about.
+BART is much more up to date, so you can always, for those projects, Chajupiti might be better at Django, 'cause it's old and settled, and it's better at writing code overall, but Bard might be decent and pretty good for--
+- Right, if you ask advice on how to do promptimize stuff, it's like, I don't know what that is.
+- Yeah, it's like, I've never heard of, it might elucidate too, I think if you go and make shit up, like I've seen it, like promptimize sounds like it would be this and it just makes up stuff, so, so not that great.
+But yeah, absolutely, I encourage people to try, you know, for any subtasks that you're trying to do to see if it can help you at it and maybe try a variation on the prompt.
+And then, you know, if it's not good at it, do it the old way.
+But yeah, it might be better too for those familiar with the idea of functional programming, where each function is more deterministic and can be reasoned about and unit test in an isolation.
+Chai GPT is gonna be better at that 'cause it doesn't know about all your other packages and modules.
+So really great for the utils functions are very deterministic, functional, super great at that.
+Another thing is, and you tell me when we run out of time, but another thing that was really interesting too, of bringing some of the concept and promptimize and writing the blog post itself.
+- Right.
+- And things like, hey, I'm thinking about the difference of the properties of test-driven development as it applies for prompt engineering.
+Here's my blog post, but can you think of other differences between the two that are very core?
+And can you talk about the similarities and the differences and I would come up with just really, really great ideas, brainstorming and just very smart at mixing concepts.
+- I do think one thing that's not a great idea is just say, "Write this for me." But if you've got something in mind and you're gonna say, "Give me some ideas," or, "Where should I go deeper into this?" And then you use your own creativity to create that, that's a totally valid use.
+I wouldn't feel like, "Oh, I'm reading this AI crap." It brought out some insights that you had forgot to think about and now you are, right?
+- Or when it fails, instead of saying, like, I got it to fail, AI is wrong, I'm smarter than it, you're like, wait, is there something, can I try to, you know, here's what it didn't get right, and why, like, what did I need to tell it?
+So you can go and edit your prompt, or ask a follow-up, and generally it will do better and well.
+- Yeah, I think also you can ask it to find bugs, or security vulnerabilities.
+- Yeah.
+- Right, you're like, here's my 30-line function, do you see any bugs?
+Do you-- - Yeah.
+- Do you see any security vulnerabilities?
+Like yeah, you're passing this straight to, you're concatenating the string in the SQL or something like that.
+- Yeah, the rigor stuff too, or like, you know, I would say writing a good doc string, writing doc tests, writing unit tests, reviewing the logic, that kind of stuff.
+It does, type hints, right?
+If you're like me, like I don't really like to write type hints up front, but I'm like, can you just like sprinkle some type in on top of that?
+- Retrofit this thing for me.
+- Yeah, that's it.
+Just make it that production grade.
+You know, one thing that's interesting too, of like, you know, you would think I'm a big TDD guy.
+Like I don't do tests.
+(laughs)
+It's just not my thing.
+I like to write code.
+I don't think of like what I'm gonna use the function for and before I write it, but like generating, it's good at generating unit tests for a function too.
+And then I think what's interesting with Promptimize too is you might, you want deterministic, what I call prompt cases or test cases, but you can say, I've written five or six of these, can you write variations on that theme too?
+So you can use it to generate test cases in the case of like TDD, but also the opposite, like for Promptimize, you can get it to generate stuff dynamically too.
+- Yeah. - By itself.
+- Yeah, it's pretty amazing.
+It is pretty neat.
+Let's maybe close this out, Well, I'll ask you one more question.
+- Okay, can I do one more?
+Can I show one more thing?
+Since it's a Python podcast, if you go on that repo for Promptomize under examples, there's one called Python example.
+- Here we go, something like this.
+- Yeah, something like this.
+So this stuff right here.
+So say here it says, so here I wrote a prompt that asks the bot to generate Python function.
+Then I sandbox it and bring the function I wrote into the interpreter, and then I test it.
+So I say, write a function that tests if a number is a prime number and returns a Boolean.
+And then I test, I have six state test cases for it.
+So write a function that finds the greatest common denominator of two numbers, right?
+Then behind the scene, we won't get into the class above.
+The class above basically interacts with it, gets the input, then runs the test, then compiles the results, right?
+So we could test how well 3.5 compares to four.
+but I thought it was relevant for the Python folks on the line.
+So we're testing out what it is that writing Python function.
+- Write a function that generates the Fibonacci sequence.
+Yeah.
+- Up to a certain number of terms, right?
+So it's easy to test.
+So it's cool stuff.
+What was your last question?
+- Oh, I was gonna say something like, see how far we can push it.
+Write a Python function to use requests and beautiful soup to scrape the titles of the request.
+of episodes of Talk Python to me.
+- Oh yeah, and then, yeah, it is.
+And if you don't have a, you know, one thing that's a pain in the butt for podcast people is to write the, like, what all we talk about.
+So you use another AI to get the transcripts.
+It's like, can you write something that's gonna leverage this library to transcript the library, summarize it and publish it back on the, with SEO in mind.
+- Yeah, it's really quite amazing.
+It went through and said, okay, here's a function, and it knows talkbython.evm/episodes/all.
+Use h, get the title, and let's just finish this out, Max.
+I'll throw this into--
+- An interpreter, see if it runs.
+- Interpreter, and I'll see if I can get it to run.
+- Hey, you know what's really interesting too, is you can give it a random function, like you can write a function, and say, write a certain function that does certain things, and you say, if I give this input to this function, what is it gonna come out of?
+And it doesn't have an interpreter, but it can interpret code like you and I do, right?
+Like an interview question of like, hey, here's a function if I input a three as a value, what's gonna come, what's gonna return?
+So it's able to do the follow the loops, you know, follow the if statements and basically just do a logical.
+- Yeah, another thing I think would be really good is to say, here's a function, explain to me what it does.
+- Oh yeah, it's super great at that.
+It's great at that for SQL too.
+Here's a stupid long SQL query, can you explain to me?
+No, it's like, the explanation is on, can you just summarize that in a hundred words?
+- Yeah, let's go step by step.
+Let's go step by step.
+What's this do?
+- Well, yeah, I mean, maybe a closing statement is like this stuff is changing our world.
+Like for me, I'm interested in how it's changing, how we're building products, you know?
+But the core things as a data practitioner, as a Python expert, as a programmer, it's really changing the way people work day after day faster than we all think.
+And across a broad, you might understand pretty well, it's changing your daily workflow as a software engineer, but it's changing people's workflow to chemistry or like in every field, there's a lot we can leverage here if you use it well.
+- Right, take this idea and apply it to whatever vertical you wanna think of, it's doing the same thing there, right?
+- 100%. - Medicine, all over.
+- Yeah, 100%, 100%.
+All right, well, let's call it a, call it a wrap.
+I think we're out of time here.
+So really quick before we quit, PyPI package to recommend, maybe something AI related that you found recently, like all these things cool, people should check it out.
+- Promptimize, I think it would be something to check out.
+I think there's something called Future Tools that you could try to navigate there, but it shows all of the AI-powered tools that are coming out, and it's hard to keep up.
+- Yeah, I think I have seen that, yeah.
+- And then if you wanna keep up on a daily, what's happening in AI, there's TLDR AI, they have like a DL with their relevant list for the day.
+I think that's a...
+- It's hard to stay on, I prefer like their weekly digest of what's going on in AI.
+- It's more of a, just a stream of information.
+- Yeah, it's just kind of dizzying, and it's like, oh, this new model does this, I gotta change everything to that.
+And then something else, if you update the correct course too often, it's just like, you know, do nothing.
+'Cause you're like, the foundation's shifting too fast under you, so.
+- Yeah, absolutely.
+Well, very cool.
+All right, and then final question.
+You're gonna write some Python code.
+What editor are you using these days?
+- I'm a Vim user, yeah.
+I know it's not the best.
+I know all the limitation, but it's like muscle memory.
+And I'm a UX guy now working on supersets.
+I do appreciate the development of all the new IDEs and the functionality that they have.
+I think it's amazing.
+It's just like, for me, it's all, like I know all my bash commands and big commands.
+- Absolutely.
+All right, well, Max, thanks for coming on the show, helping everyone explore this wild new frontier of AI and large language models.
+And for James, - Yeah, well, you know, exploring it while we're still relevant, because I don't know how long we're gonna be relevant for.
+So yeah.
+- Yeah, enjoy it while we can, right?
+Get out there.
+Either control the robots or be controlled by them.
+So get on the right side of that.
+All right, thanks again.
+- Thank you.
+- This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+The folks over at JetBrains encourage you to get work done with PyCharm.
+PyCharm Professional understands complex projects across multiple languages and technologies, so you can stay productive while you're writing Python code and other code like HTML or SQL.
+Download your free trial at talkpython.fm/donewithpycharm.
+Listen to an episode of Compiler, an original podcast from Red Hat.
+Compiler unravels industry topics, trends, and things you've always wanted to know about tech through interviews with the people who know it best.
+Subscribe today by following talkpython.fm/compiler.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
+[BLANK_AUDIO]

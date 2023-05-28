@@ -391,5 +391,7 @@
   "412-pep-711-pybi.txt": 18636,
   "413-live-from-pycon.txt": 11322,
   "414-startup-row.txt": 12876,
-  "415-pydantic-20-and-fastapi.txt": 12351
+  "415-pydantic-20-and-fastapi.txt": 12351,
+  "416-sports-analytics.txt": 12382,
+  "417-tdd-prompt-engineering.txt": 16368
 }
