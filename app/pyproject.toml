@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "talking-python-app"
+description = "streamlit app"
+authors = [
+    {name = "Agustín Piqueres", email = "agustin.piqueres@gmail.com"}
+]
+dependencies = [
+    "streamlit~=1.22.0"
+]
+license = {file = "LICENSE"}
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3.10",
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "ruff"
+]
+
+[tool.ruff]
+# Enable Pyflakes and pycodestyle rules.
+select = ["E", "F", "I001"]
+line-length = 88  # Same as black
+# Assume Python 3.10.
+target-version = "py310"
+
+[tool.ruff.pydocstyle]
+convention = "google"
