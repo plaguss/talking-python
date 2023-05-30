@@ -16,12 +16,12 @@ st.header(":snake: Explore Talking Python")
 
 sb.sidebar()
 
-uploaded_file = st.file_uploader(
-    "Upload a pdf, docx, or txt file",
-    type=["pdf", "docx", "txt"],
-    help="Scanned documents are not supported yet!",
-    on_change=clear_submit,
-)
+# uploaded_file = st.file_uploader(
+#     "Upload a pdf, docx, or txt file",
+#     type=["pdf", "docx", "txt"],
+#     help="Scanned documents are not supported yet!",
+#     on_change=clear_submit,
+# )
 
 # index = None
 doc = None
