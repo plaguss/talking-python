@@ -9,7 +9,7 @@ from chromadb.api.models.Collection import Collection
 from chromadb.api.types import Include, QueryResult
 from chromadb.config import Settings
 
-EmbeddinFunction = Literal["sentence_transformers", "hugging_face"]
+EmbeddingFunction = Literal["sentence_transformers", "hugging_face"]
 
 
 @lru_cache
@@ -33,7 +33,8 @@ def get_client(chromadb_dir: Path) -> "chromadb.Client":
 
 def get_embedding_fn(
     model_name: str = "multi-qa-MiniLM-L6-cos-v1",
-    type_: EmbeddinFunction = "sentence_transformers",
+    type_: EmbeddingFunction = "sentence_transformers",
+    api_key: str | None = None
 ) -> eb.SentenceTransformerEmbeddingFunction | eb.HuggingFaceEmbeddingFunction:
     r"""Get the function to embed the texts.
 
@@ -47,6 +48,9 @@ def get_embedding_fn(
             Only tested to work with SentenceTransformerEmbeddingFunction
             and HuggingFaceEmbeddingFunction (as it works directly with the REST API,
             its better not to run a lot of embeddings through this function).
+        api_key (str or None):
+            If given, its used. If set to None, and the type_ variable is `hugging_face`,
+            it will try to read it from the environment variable.
 
     Returns:
         eb.SentenceTransformerEmbeddingFunction:
@@ -64,7 +68,9 @@ def get_embedding_fn(
     if type_ == "sentence_transformers":
         return eb.SentenceTransformerEmbeddingFunction(model_name=model_name)
     elif type_ == "hugging_face":
-        api_key = os.environ.get("HUGGINGFACE_APIKEY")
+        if api_key is None:
+            api_key = os.environ.get("HUGGINGFACE_APIKEY")
+
         embed_fn = eb.HuggingFaceEmbeddingFunction(
             api_key, model_name=f"sentence-transformers/{model_name}"
         )
