@@ -9,7 +9,9 @@ authors = [
     {name = "Agustín Piqueres", email = "agustin.piqueres@gmail.com"}
 ]
 dependencies = [
-    "streamlit~=1.22.0"
+    "streamlit~=1.22.0",
+    "lxml~=4.9.2",
+    "beautifulsoup4~=4.12.2"
 ]
 license = {file = "LICENSE"}
 classifiers = [
