@@ -28,8 +28,8 @@ def sidebar():
         st.markdown("---")
         st.markdown("# About")
         st.markdown(
-            ":snake: Explore Talking Python allows you to ask questions about your "
-            "documents and get accurate answers with instant citations. "
+            ":snake: Explore Talking Python allows you to ask questions about "
+            "the wonderful podcasts hosted in [Talk Python To Me](https://talkpython.fm/episodes/all). "
         )
         st.markdown(
             "This tool is a work in progress. "
