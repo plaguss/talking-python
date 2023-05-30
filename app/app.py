@@ -4,6 +4,7 @@
 import streamlit as st
 import components.sidebar as sb
 import utils as ut
+from embeddings import get_chroma, get_embedding_function
 
 TALK_PYTHON_LOGO = r"https://cdn-podcast.talkpython.fm/static/img/talk_python_logo_mic.png?cache_id=dd08157a0f56a88381ec34afe167db21"
 
@@ -11,7 +12,10 @@ TALK_PYTHON_LOGO = r"https://cdn-podcast.talkpython.fm/static/img/talk_python_lo
 def clear_submit():
     st.session_state["submit"] = False
 
-st.set_page_config(page_title="Explore Talking Python", page_icon=":snake:", layout="wide")
+
+st.set_page_config(
+    page_title="Explore Talking Python", page_icon=":snake:", layout="wide"
+)
 st.header(":snake: Explore Talking Python")
 
 sb.sidebar()
@@ -56,34 +60,31 @@ button = st.button("Submit")
 if button or st.session_state.get("submit"):
     if not st.session_state.get("api_key_configured"):
         st.error("Please configure your HuggingFace API Token!")
-    # elif not index:
-    #     st.error("Please upload a document!")
     elif not query:
         st.error("Please enter a question!")
     else:
-        st.error("Working on it")
+        st.session_state["submit"] = True
+        # Output Columns
+        answer_col, sources_col = st.columns(2)
+        sources = search_docs(index, query)
 
-        # st.session_state["submit"] = True
-        # # Output Columns
-        # answer_col, sources_col = st.columns(2)
-        # sources = search_docs(index, query)
+        try:
+            answer = get_answer(sources, query)
+            if not show_all_chunks:
+                # Get the sources for the answer
+                sources = get_sources(answer, sources)
 
-        # try:
-        #     answer = get_answer(sources, query)
-        #     if not show_all_chunks:
-        #         # Get the sources for the answer
-        #         sources = get_sources(answer, sources)
+            with answer_col:
+                st.markdown("#### Answer")
+                st.markdown(answer["output_text"].split("SOURCES: ")[0])
 
-        #     with answer_col:
-        #         st.markdown("#### Answer")
-        #         st.markdown(answer["output_text"].split("SOURCES: ")[0])
+            with sources_col:
+                st.markdown("#### Sources")
+                for source in sources:
+                    st.markdown(source.page_content)
+                    st.markdown(source.metadata["source"])
+                    st.markdown("---")
 
-        #     with sources_col:
-        #         st.markdown("#### Sources")
-        #         for source in sources:
-        #             st.markdown(source.page_content)
-        #             st.markdown(source.metadata["source"])
-        #             st.markdown("---")
-
-        # except OpenAIError as e:
-        #     st.error(e._message)
+        except Exception as e:
+            # Maybe an error from HuggingFace, check possible exceptions.
+            st.error(e._message)
