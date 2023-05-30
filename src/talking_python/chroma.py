@@ -9,6 +9,8 @@ from chromadb.api.models.Collection import Collection
 from chromadb.api.types import Include, QueryResult
 from chromadb.config import Settings
 
+from .release import get_chroma_dir
+
 EmbeddingFunction = Literal["sentence_transformers", "hugging_face"]
 
 
@@ -69,19 +71,19 @@ def get_embedding_fn(
         return eb.SentenceTransformerEmbeddingFunction(model_name=model_name)
     elif type_ == "hugging_face":
         if api_key is None:
-            api_key = os.environ.get("HUGGINGFACE_APIKEY")
+            api_key = os.environ.get("HF_ACCESS_TOKEN")
 
         embed_fn = eb.HuggingFaceEmbeddingFunction(
             api_key, model_name=f"sentence-transformers/{model_name}"
         )
-        # Force downloading the model, to have it ready once it's called
-        # to embed texts
         response = embed_fn(["sample text"])
-        if "error" in response.keys():
-            # Raise error if fails loading the embedding function.
-            raise ValueError(
-                f"Loading HuggingFaceEmbeddingFunction, response: {response}."
-            )
+        # By default returns a list if it works
+        if isinstance(response, dict):
+            if "error" in response.keys():
+                # Raise error if fails loading the embedding function.
+                raise ValueError(
+                    f"Loading HuggingFaceEmbeddingFunction, response: {response}."
+                )
         return embed_fn
 
     else:
@@ -118,7 +120,7 @@ class Chroma:
                 Function to embed the texts. Defaults to None, in which case
                 is obtained internally.
         """
-        self._chroma_dir = chroma_dir
+        self._chroma_dir = chroma_dir or get_chroma_dir()
         self.client = client or get_client(self._chroma_dir)
         self.embedding_fn = embedding_fn or get_embedding_fn()
 
