@@ -1,0 +1,8 @@
+[theme]
+#https://docs.streamlit.io/library/advanced-features/configuration
+base = "dark"
+# primaryColor = "#48d1cc"
+# backgroundColor = "#002b36"
+# secondaryBackgroundColor = "#586e75"
+# textColor = "#fafafa"
+font = "sans serif"
