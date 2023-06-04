@@ -18,6 +18,33 @@ def wrap_text_in_html(text: str | list[str]) -> str:
     return "".join([f"<p>{line}</p>" for line in text.split("\n")])
 
 
+def _map_transcript_to_show(title: str) -> str:
+    """Map a transcript name to a show number.
+
+    Args:
+        title (str): Title of the transcript obtained from querying chroma.
+            i.e. '012.txt', '410-intersection-of-tabular-data-and-general-ai.txt'... 
+    
+    Returns:
+        show (str):
+            The show number as represented in the episodes table from talk
+            python to me web page.
+
+    Examples:
+        ```python
+        >>> _map_transcript_to_show('012.txt')
+        #012
+        >>> _map_transcript_to_show('410-intersection-of-tabular-data-and-general-ai.txt')
+        #410
+        ```
+    """
+    # The show number corresponds to the episode number in the
+    # 3 first numbers of the title. Transform to int first to remove
+    # the possible initial 0.
+    return f"#{str(int(title[:3]))}"
+
+
+@lru_cache
 def _get_episodes_table() -> pd.DataFrame:
     """Extracts the table of episodes.
 
@@ -39,7 +66,7 @@ def _get_episodes_table() -> pd.DataFrame:
 
 
 @lru_cache
-def get_episodes_table() -> dict[str, str]:
+def get_episodes_table() -> pd.DataFrame:
     """Grabs the table from the episodes page and creates
     a dict between the episode (transcript) number and the
     page for the episode.
@@ -58,21 +85,20 @@ def get_episodes_table() -> dict[str, str]:
         for row in table.find_all("tr")
     ]
 
+    episodes_table = _get_episodes_table()
     # Create the new column for the dataframe with the titles and the links to
     # the episodes. There must be a way to do this using pandas, but the lack of
     # internet connection made me lazy, plus the dataframe is small.
     title_urls = [
         f'<a href="{link}">{title}'
-        for link, title in zip(links, episodes_table["Table"])
+        for link, title in zip(links, episodes_table["Title"])
     ]
-
-    episodes_table = _get_episodes_table()
     episodes_table["Title"] = title_urls
 
     return episodes_table
 
 
-def show_episodes_table(episodes: list[int] | None = None):
+def show_episodes_table(episode_titles: list[str] | None = None):
     """Shows the subset of episodes in a table.
 
     Args:
@@ -80,6 +106,11 @@ def show_episodes_table(episodes: list[int] | None = None):
             List of episodes to show in the table.
     """
     df = get_episodes_table()
-    if episodes:
-        df = df.loc[episodes]
+    print("DF", df)
+    if episode_titles:
+        # df = df.loc[episode_titles]
+        show_numbers = [_map_transcript_to_show(t) for t in episode_titles]
+        df = df[df["Show number"].isin(show_numbers)]
+    print("DF", df)
+    
     return st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)
