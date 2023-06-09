@@ -7,14 +7,19 @@ from typing import Callable
 from collections import defaultdict
 
 
+class AuthenticationError(Exception):
+    pass
+
+
 @lru_cache
-def get_embedding_function(api_key: str) -> chroma.EmbeddingFunction:
+def get_embedding_function(api_key: str | None = None) -> chroma.EmbeddingFunction:
     """Get the embedding function using the api key supplied
     by the user.
 
     Args:
-        api_key (str):
-            Hugging Face API token.
+        api_key (str | None):
+            Hugging Face API token. If None (the default), will try to obtain it from
+            the session state.
 
     Returns:
         chroma.EmbeddingFunction:
@@ -25,6 +30,13 @@ def get_embedding_function(api_key: str) -> chroma.EmbeddingFunction:
     # is necessary?
     # TOOD: Add retry:
     # https://github.com/mmz-001/knowledge_gpt/blob/main/knowledge_gpt/embeddings.py
+    if api_key is None:
+        api_key = st.session_state.get("HF_API_TOKEN")
+        if api_key == "":
+            raise AuthenticationError(
+                "Enter your HuggingFace API token in the sidebar. "
+                "You can get your API token from https://huggingface.co/settings/tokens."
+            )
     return chroma.get_embedding_fn(type_="hugging_face", api_key=api_key)
 
 
@@ -43,78 +55,189 @@ def get_chroma(embedding_fn: chroma.EmbeddingFunction) -> chroma.Chroma:
     return chroma.Chroma(embedding_fn=embedding_fn)
 
 
+MetadataType = list[dict[str, str]]
+DistanceType = list[float]
+
+def raw_distance(
+    metadatas: MetadataType, distances: DistanceType
+) -> dict[str, MetadataType | DistanceType]:
+    """Returns the values as they come.
+
+    TODO: REWRITE AS THE average_... FUNCTION,
+    AS WELL AS THE APP CODE.
+
+    Args:
+        metadatas (MetadataType): _description_
+        distances (DistanceType): _description_
+
+    Returns:
+        dict[str, MetadataType | DistanceType]: _description_
+    """
+    # result = defaultdict(list)
+    # for i, mt in enumerate(metadatas):
+    #     result["metadatas"].append(mt)
+    #     result["distances"].append(distances[i])
+
+    # return dict(result)
+    # metric = defaultdict(float)
+    metric = []
+    for i, mt in enumerate(metadatas):
+        metric.append((mt["title"], 1 / distances[i]))
+        # metric[mt["title"]] += 1 / distances[i]
+
+    # TODO, WE NEED TO SORT THE RESULTS
+    # sorted(values, key=...)
+    # return list(metric.items())
+    return metric
 
 
-# sample data, move this to tests
-"""
-result = client.query(query_texts=["tell me about pandas"])
+def minimum_distance(
+    metadatas: MetadataType, distances: DistanceType
+) -> dict[str, MetadataType | DistanceType]:
+    """_summary_
 
-metadatas = [[{'title': '402-polars.txt', 'line': '209'},
-   {'title': '012.txt', 'line': '198'},
-   {'title': '012.txt', 'line': '197'},
-   {'title': '410-intersection-of-tabular-data-and-general-ai.txt',
-    'line': '113'},
-   {'title': '341-25-pandas-functions.txt', 'line': '55'},
-   {'title': '414-startup-row.txt', 'line': '70'},
-   {'title': '402-polars.txt', 'line': '210'},
-   {'title': '338-cibuildwheel-scikit-hep.txt', 'line': '240'},
-   {'title': '402-polars.txt', 'line': '218'},
-   {'title': '402-polars.txt', 'line': '221'}]]
-distances = [[0.3780611753463745,
-   0.40761131048202515,
-   0.42179733514785767,
-   0.4531496465206146,
-   0.4663689434528351,
-   0.47604429721832275,
-   0.485452264547348,
-   0.5037158727645874,
-   0.5327827334403992,
-   0.5412342548370361]]
-"""
+    TODO: REWRITE AS THE average_... FUNCTION
 
+    Args:
+        metadatas (MetadataType): metadata from querying chroma.
+        distances (DistanceType): distances from each query.
 
-# Functions to aggregate the queried data.
-# Given a sample query, it is possible that the first
-# response pertains to a
-def minimum_distance(metadatas, distances):
+    Returns:
+        dict[str, MetadataType | DistanceType]: _description_
+    """
     # Removes repeated titles, keeps the first occurence only
-    # The distances are sorted from smaller to bigger, so the first 
+    # The distances are sorted from smaller to bigger, so the first
+    # titles = set()
+    # result = defaultdict(list)
+    # for i, mt in enumerate(metadatas):
+    #     if mt["title"] not in titles:
+    #         titles.add(mt["title"])
+    #         result["metadatas"].append(mt)
+    #         result["distances"].append(distances[i])
+
+    # return dict(result)
     titles = set()
-    result = defaultdict(list)
+    metric = defaultdict(float)
     for i, mt in enumerate(metadatas):
         if mt["title"] not in titles:
             titles.add(mt["title"])
-            result["metadatas"].append(mt)
-            result["distances"].append(distances[i])
+            metric[mt["title"]] += 1 / distances[i]
 
-    return dict(result)
-
-
-def average():
-    # Sort the results but using the average of distances.
-    pass
+    # TODO, WE NEED TO SORT THE RESULTS
+    # sorted(values, key=...)
+    return list(metric.items())
 
 
-@st.cache(allow_output_mutation=True)
+
+def average_weighted_distance(
+    metadatas: MetadataType, distances: DistanceType
+) -> list[tuple[str, float]]:
+    """Groups the functions giving more weight depending
+    the more times a title appears, with the weight being
+    the inverse of the distance (so adding more occurrences actually
+    weights more to the final decision).
+
+    Args:
+        metadatas (MetadataType): metadata from querying chroma.
+        distances (DistanceType): distances from each query.
+
+    Returns:
+        list[tuple[str, float]]: _description_
+    """
+    # Sort the results but using the average of distances, 
+    # a podcast that appears more often has more weight on the 
+    # final order.
+    # TODO
+    metric = defaultdict(float)
+    for i, mt in enumerate(metadatas):
+        metric[mt["title"]] += 1 / distances[i]
+
+    # TODO, WE NEED TO SORT THE RESULTS
+    # sorted(values, key=...)
+    return list(metric.items())
+
+
+def _match_aggregating_function(aggregating_function: str) -> Callable:
+    """Get the function to group the chroma results.
+
+    Args:
+        aggregating_function (str):
+            The name of a function to group the results from querying chroma.
+
+    Returns:
+        Callable: Function to be passed to query_db.
+    """
+    match aggregating_function:
+        case "minimum":
+            return minimum_distance
+        case "average":
+            return average_weighted_distance
+        case "raw":
+            return raw_distance
+        case _:
+            return NotImplementedError(
+                f"Unknown aggregating_function: {aggregating_function}"
+            )
+
+
 def query_db(
     chroma: chroma.Chroma,
     query: str,
     n_results: int = 10,
-    grouping_function: Callable = minimum_distance,
-):
-    """_summary_
+    aggregating_function: Callable | None = minimum_distance,
+) -> list[str]:
+    """Queries the chroma database to extract the most similar podcasts.
+
+    Example result from querying chroma:
+
+        ```python
+        >>> result = client.query(query_texts=["tell me about pandas"])
+
+        metadatas = [[{'title': '402-polars.txt', 'line': '209'},
+        {'title': '012.txt', 'line': '198'},
+        {'title': '012.txt', 'line': '197'},
+        {'title': '410-intersection-of-tabular-data-and-general-ai.txt',
+            'line': '113'},
+        {'title': '341-25-pandas-functions.txt', 'line': '55'},
+        {'title': '414-startup-row.txt', 'line': '70'},
+        {'title': '402-polars.txt', 'line': '210'},
+        {'title': '338-cibuildwheel-scikit-hep.txt', 'line': '240'},
+        {'title': '402-polars.txt', 'line': '218'},
+        {'title': '402-polars.txt', 'line': '221'}]]
+        distances = [[0.3780611753463745,
+        0.40761131048202515,
+        0.42179733514785767,
+        0.4531496465206146,
+        0.4663689434528351,
+        0.47604429721832275,
+        0.485452264547348,
+        0.5037158727645874,
+        0.5327827334403992,
+        0.5412342548370361]]
+        ```
 
     Args:
-        chroma (chroma.Chroma): _description_
-        query (str): _description_
-        n_results (int, optional): _description_. Defaults to 10.
-        grouping_function (Callable, optional):
+        chroma (chroma.Chroma): chroma db client instance.
+        query (str): str to query against chro,a
+        n_results (int, optional):
+            Number of results to obtain. Defaults to 10.
+        aggregating_function (Callable, optional):
             Used to sort the response and present unique titles.
+
+    Returns:
+        titles (list[str]): List of titles to show.
     """
-    # TODO: Even though it may return 10 results (given the passages),
-    #  we must apply some function to keep only as much results as
+    # Even though it may return 10 results (given the passages),
+    # we must apply some function to keep only as much results as
     # podcasts.
     result = chroma.query(query_texts=[query], n_results=n_results)
-    # Aggregates the response
-    
-    return grouping_function(result["metadatas"][0], result["distances"][0])
+    metadatas = result["metadatas"][0]
+    distances = result["distances"][0]
+    if aggregating_function is None:
+        return [m["title"] for m in metadatas]
+
+    agg = aggregating_function(metadatas, distances)
+    print("AGG", agg)
+    return [m[0] for m in agg]
+    # OLD VERSION
+    # return [m["title"] for m in agg["metadatas"]]
