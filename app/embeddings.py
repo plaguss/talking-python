@@ -58,6 +58,20 @@ def get_chroma(embedding_fn: chroma.EmbeddingFunction) -> chroma.Chroma:
 MetadataType = list[dict[str, str]]
 DistanceType = list[float]
 
+
+def _sort_episodes(episodes: list[tuple[str, float]]) -> list[tuple[str, float]]:
+    """Sorts the episodes in descending order, using
+    the inverse of the distance.
+
+    Args:
+        episodes (list[tuple[str, float]]): _description_
+
+    Returns:
+        list[str]: _description_
+    """
+    return sorted(episodes, key=lambda x: x[1], reverse=True)
+
+
 def raw_distance(
     metadatas: MetadataType, distances: DistanceType
 ) -> dict[str, MetadataType | DistanceType]:
@@ -73,21 +87,11 @@ def raw_distance(
     Returns:
         dict[str, MetadataType | DistanceType]: _description_
     """
-    # result = defaultdict(list)
-    # for i, mt in enumerate(metadatas):
-    #     result["metadatas"].append(mt)
-    #     result["distances"].append(distances[i])
-
-    # return dict(result)
-    # metric = defaultdict(float)
     metric = []
     for i, mt in enumerate(metadatas):
         metric.append((mt["title"], 1 / distances[i]))
-        # metric[mt["title"]] += 1 / distances[i]
 
-    # TODO, WE NEED TO SORT THE RESULTS
-    # sorted(values, key=...)
-    # return list(metric.items())
+    # This comes sorted already
     return metric
 
 
@@ -105,17 +109,6 @@ def minimum_distance(
     Returns:
         dict[str, MetadataType | DistanceType]: _description_
     """
-    # Removes repeated titles, keeps the first occurence only
-    # The distances are sorted from smaller to bigger, so the first
-    # titles = set()
-    # result = defaultdict(list)
-    # for i, mt in enumerate(metadatas):
-    #     if mt["title"] not in titles:
-    #         titles.add(mt["title"])
-    #         result["metadatas"].append(mt)
-    #         result["distances"].append(distances[i])
-
-    # return dict(result)
     titles = set()
     metric = defaultdict(float)
     for i, mt in enumerate(metadatas):
@@ -123,8 +116,7 @@ def minimum_distance(
             titles.add(mt["title"])
             metric[mt["title"]] += 1 / distances[i]
 
-    # TODO, WE NEED TO SORT THE RESULTS
-    # sorted(values, key=...)
+    # Don't need to sort these
     return list(metric.items())
 
 
@@ -144,17 +136,11 @@ def average_weighted_distance(
     Returns:
         list[tuple[str, float]]: _description_
     """
-    # Sort the results but using the average of distances, 
-    # a podcast that appears more often has more weight on the 
-    # final order.
-    # TODO
     metric = defaultdict(float)
     for i, mt in enumerate(metadatas):
         metric[mt["title"]] += 1 / distances[i]
 
-    # TODO, WE NEED TO SORT THE RESULTS
-    # sorted(values, key=...)
-    return list(metric.items())
+    return _sort_episodes(list(metric.items()))
 
 
 def _match_aggregating_function(aggregating_function: str) -> Callable:
