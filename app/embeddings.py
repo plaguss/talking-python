@@ -1,4 +1,4 @@
-""" """
+"""Functions related to  """
 
 from talking_python import chroma
 from functools import lru_cache
@@ -120,7 +120,6 @@ def minimum_distance(
     return list(metric.items())
 
 
-
 def average_weighted_distance(
     metadatas: MetadataType, distances: DistanceType
 ) -> list[tuple[str, float]]:
@@ -169,8 +168,8 @@ def _match_aggregating_function(aggregating_function: str) -> Callable:
 def query_db(
     chroma: chroma.Chroma,
     query: str,
-    n_results: int = 10,
-    aggregating_function: Callable | None = minimum_distance,
+    n_results: int = 20,
+    aggregating_function: Callable | None = average_weighted_distance,
 ) -> list[str]:
     """Queries the chroma database to extract the most similar podcasts.
 
@@ -223,7 +222,5 @@ def query_db(
         return [m["title"] for m in metadatas]
 
     agg = aggregating_function(metadatas, distances)
-    print("AGG", agg)
+    # print("AGG", agg)  # just while debugging
     return [m[0] for m in agg]
-    # OLD VERSION
-    # return [m["title"] for m in agg["metadatas"]]

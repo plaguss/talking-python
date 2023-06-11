@@ -1,6 +1,5 @@
 """General helper functions. """
 
-from functools import lru_cache
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -23,8 +22,8 @@ def _map_transcript_to_show(title: str) -> str:
 
     Args:
         title (str): Title of the transcript obtained from querying chroma.
-            i.e. '012.txt', '410-intersection-of-tabular-data-and-general-ai.txt'... 
-    
+            i.e. '012.txt', '410-intersection-of-tabular-data-and-general-ai.txt'...
+
     Returns:
         show (str):
             The show number as represented in the episodes table from talk
@@ -44,12 +43,12 @@ def _map_transcript_to_show(title: str) -> str:
     return f"#{str(int(title[:3]))}"
 
 
-@lru_cache
+@st.cache_data
 def _get_episodes_table() -> pd.DataFrame:
     """Extracts the table of episodes.
 
     Returns:
-        pd.DataFrame: _description_
+        pd.DataFrame: Table with all the episodes uploaded.
 
     Example:
         ```console
@@ -65,7 +64,7 @@ def _get_episodes_table() -> pd.DataFrame:
     return pd.read_html(WEB_EPISODES)[0]
 
 
-@lru_cache
+@st.cache_data
 def get_episodes_table() -> pd.DataFrame:
     """Grabs the table from the episodes page and creates
     a dict between the episode (transcript) number and the
@@ -106,11 +105,8 @@ def show_episodes_table(episode_titles: list[str] | None = None):
             List of episodes to show in the table.
     """
     df = get_episodes_table()
-    print("DF", df)
     if episode_titles:
-        # df = df.loc[episode_titles]
         show_numbers = [_map_transcript_to_show(t) for t in episode_titles]
         df = df[df["Show number"].isin(show_numbers)]
-    print("DF", df)
-    
+
     return st.write(df.to_html(escape=False, index=False), unsafe_allow_html=True)

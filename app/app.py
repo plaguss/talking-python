@@ -1,10 +1,14 @@
-"""
-"""
+"""Simple streamlit app to explore talk python to me podcasts. """
 
 import streamlit as st
 import components.sidebar as sb
 import utils as ut
-from embeddings import get_chroma, get_embedding_function
+from embeddings import (
+    get_chroma,
+    get_embedding_function,
+    query_db,
+    _match_aggregating_function,
+)
 
 TALK_PYTHON_LOGO = r"https://cdn-podcast.talkpython.fm/static/img/talk_python_logo_mic.png?cache_id=dd08157a0f56a88381ec34afe167db21"
 
@@ -20,71 +24,58 @@ st.header(":snake: Explore Talking Python")
 
 sb.sidebar()
 
-# uploaded_file = st.file_uploader(
-#     "Upload a pdf, docx, or txt file",
-#     type=["pdf", "docx", "txt"],
-#     help="Scanned documents are not supported yet!",
-#     on_change=clear_submit,
-# )
-
-# index = None
-doc = None
-# if uploaded_file is not None:
-#     if uploaded_file.name.endswith(".pdf"):
-#         doc = parse_pdf(uploaded_file)
-#     elif uploaded_file.name.endswith(".docx"):
-#         doc = parse_docx(uploaded_file)
-#     elif uploaded_file.name.endswith(".txt"):
-#         doc = parse_txt(uploaded_file)
-#     else:
-#         raise ValueError("File type not supported!")
-#     text = text_to_docs(doc)
-#     try:
-#         with st.spinner("Indexing document... This may take a while⏳"):
-#             index = embed_docs(text)
-#         st.session_state["api_key_configured"] = True
-#     except OpenAIError as e:
-#         st.error(e._message)
-
 query = st.text_area("Ask a question", on_change=clear_submit)
 with st.expander("Advanced Options"):
-    show_all_chunks = st.checkbox("Show all chunks retrieved from vector search")
-    show_full_doc = st.checkbox("Show parsed contents of the document")
+    # TODO: Explain this field is not the same as the number of episodes?
+    max_episodes = int(
+        st.number_input(
+            "Set the maximum numbers of episodes to suggest. Defaults to 10",
+            value=20,
+            min_value=1,
+            max_value=50,
+        )
+    )
+    aggregating_function_name = st.selectbox(
+        "Aggregating_function", ("minimum", "raw", "average")
+    )
 
-if show_full_doc and doc:
-    with st.expander("Document"):
-        # Hack to get around st.markdown rendering LaTeX
-        st.markdown(f"<p>{ut.wrap_text_in_html(doc)}</p>", unsafe_allow_html=True)
 
 button = st.button("Submit")
+
 if button or st.session_state.get("submit"):
     if not st.session_state.get("api_key_configured"):
         st.error("Please configure your HuggingFace API Token!")
     elif not query:
         st.error("Please enter a question!")
     else:
-        st.session_state["submit"] = True
-        # Output Columns
-        answer_col, sources_col = st.columns(2)
-        sources = search_docs(index, query)
-
         try:
-            answer = get_answer(sources, query)
-            if not show_all_chunks:
-                # Get the sources for the answer
-                sources = get_sources(answer, sources)
+            emb_fn = get_embedding_function()
+            chroma = get_chroma(emb_fn)
 
-            with answer_col:
-                st.markdown("#### Answer")
-                st.markdown(answer["output_text"].split("SOURCES: ")[0])
+            with st.spinner("Querying the database... This may take a while⏳"):
+                # TODO: The results should be aggregated outside to avoid
+                # hitting the model again to embed the query and finding in
+                # crhom.
+                episode_titles = query_db(
+                    chroma,
+                    query=query,
+                    n_results=max_episodes,
+                    aggregating_function=_match_aggregating_function(
+                        aggregating_function_name
+                    ),
+                )
 
-            with sources_col:
-                st.markdown("#### Sources")
-                for source in sources:
-                    st.markdown(source.page_content)
-                    st.markdown(source.metadata["source"])
-                    st.markdown("---")
+            st.session_state["submit"] = True
+            # Output column to show the results
+            podcasts_col = st.columns(1)[0]
+
+            with podcasts_col:
+                st.markdown("#### Suggested podcasts")
+                with st.spinner(
+                    "Extracting episodes table... The first time may take a while⏳"
+                ):
+                    ut.show_episodes_table(episode_titles=episode_titles)
 
         except Exception as e:
-            # Maybe an error from HuggingFace, check possible exceptions.
-            st.error(e._message)
+            # Unexpected error, just print it
+            st.error(e)
