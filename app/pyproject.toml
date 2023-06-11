@@ -28,7 +28,9 @@ dynamic = ["version"]
 [project.optional-dependencies]
 dev = [
     "black",
-    "ruff"
+    "ruff",
+    "pytest",
+    "pytest-mock"
 ]
 
 [tool.ruff]
