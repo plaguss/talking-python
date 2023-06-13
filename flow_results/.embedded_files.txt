@@ -1497,3 +1497,13 @@
 417-tdd-prompt-engineering.txt703
 417-tdd-prompt-engineering.txt767
 417-tdd-prompt-engineering.txt782
+418-secrets.txt127
+418-secrets.txt191
+418-secrets.txt255
+418-secrets.txt319
+418-secrets.txt383
+418-secrets.txt447
+418-secrets.txt511
+418-secrets.txt575
+418-secrets.txt624
+418-secrets.txt63

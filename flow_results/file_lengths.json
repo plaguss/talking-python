@@ -393,5 +393,6 @@
   "414-startup-row.txt": 12876,
   "415-pydantic-20-and-fastapi.txt": 12351,
   "416-sports-analytics.txt": 12382,
-  "417-tdd-prompt-engineering.txt": 16368
+  "417-tdd-prompt-engineering.txt": 16368,
+  "418-secrets.txt": 15576
 }
