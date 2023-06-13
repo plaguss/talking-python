@@ -5,6 +5,7 @@ from components.faq import faq
 
 def set_huggingface_api_token(api_key: str):
     st.session_state["HF_API_TOKEN"] = api_key
+    st.session_state["api_key_configured"] = True
 
 
 def sidebar():
@@ -28,7 +29,7 @@ def sidebar():
         st.markdown("---")
         st.markdown("# About")
         st.markdown(
-            ":snake: Explore Talking Python allows you to ask questions about "
+            ":snake: Explore Talk Python To Me allows you to ask questions about "
             "the wonderful podcasts hosted in [Talk Python To Me](https://talkpython.fm/episodes/all). "
         )
         st.markdown(

@@ -18,9 +18,9 @@ def clear_submit():
 
 
 st.set_page_config(
-    page_title="Explore Talking Python", page_icon=":snake:", layout="wide"
+    page_title="Explore Talk Python To Me", page_icon=":snake:", layout="wide"
 )
-st.header(":snake: Explore Talking Python")
+st.header(":snake: Explore Talk Python To Me")
 
 sb.sidebar()
 

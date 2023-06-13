@@ -1,3 +1,5 @@
+"""Add a section with possible Frequently Asked Questions. """
+
 import inspect
 
 import streamlit as st
@@ -8,29 +10,23 @@ def faq():
         inspect.cleandoc(
             """
         # FAQ
-        ## How does Explore Talking Python work?
+        ## How does Explore Talk Python To Me work?
         The podcast's transcripts have been embedded in a [chroma](https://docs.trychroma.com/)
-        database that allows for semantic search and retrieval.
-        **ADD GUIDE TO THE PROCESS**
+        database that allows for semantic search and retrieval. When you insert
+        a question, the text is embedded, and chroma is in charge of finding
+        the most similar pieces of content to show.
 
-        When you upload a document, it will be divided into smaller chunks 
-        and stored in a special type of database called a vector index 
-        that allows for semantic search and retrieval.
-
-        When you ask a question, the model finds the nearest passage of text
-        in the podcast's transcripts and suggests the most similar.
-        **NEEDS A FUNCTION TO SORT THE RESULTS. THE MAX, SOME KIND OF AVERAGE?**
+        ## In need of inspiration? Here are some ideas
+        - how to run machine learning models in production
+        - rich and terminal user interfaces
+        - content about the python package ecosystem
 
         ## Limits using the 🤗Hugging Face API token
         Please visit [Hugging Face API FAQ](https://huggingface.co/docs/api-inference/faq#more-information-about-the-api)
         for more information.
 
-        ## What do the numbers mean under each source?
-        EXPLAIN RESULTS OBTAINED FOR THE MODEL
-
-        ## Are the answers 100% accurate?
-        **EXPLAIN IN RELATION TO THE MODEL USED, STARTING WITH:**
-        **[multi-qa-MiniLM-L6-cos-v1](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1)**
+        ## Additional information
+        Please visit the [repo](https://github.com/plaguss/talking-python).
         """
         )
     )
