@@ -22,6 +22,11 @@ st.set_page_config(
 )
 st.header(":snake: Explore Talk Python To Me")
 
+st.markdown(
+    "##### Use [semantic search](https://www.sbert.net/examples/applications/semantic-search/README.html#background)"
+    " to find episodes related to your queries."
+)
+
 sb.sidebar()
 
 query = st.text_area("Ask a question", on_change=clear_submit)
@@ -29,14 +34,14 @@ with st.expander("Advanced Options"):
     # TODO: Explain this field is not the same as the number of episodes?
     max_episodes = int(
         st.number_input(
-            "Set the maximum numbers of episodes to suggest. Defaults to 10",
+            "Set the maximum numbers of episodes to suggest. Defaults to 20",
             value=20,
             min_value=1,
-            max_value=50,
+            max_value=60,
         )
     )
     aggregating_function_name = st.selectbox(
-        "Aggregating_function", ("minimum", "raw", "average")
+        "Aggregating_function", ("average", "minimum", "raw")
     )
 
 
