@@ -1,0 +1,3 @@
+# apt-get dependencies for streamlit
+update
+install build-essential
