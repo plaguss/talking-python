@@ -1,0 +1,6 @@
+# Requirements to deploy on streamlit cloud
+# Install developer tools for hnswlib on chroma
+# Reference: https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/app-dependencies
+# Internal packages just for streamlit cloud:
+./streamlit-dir/app/talking_python_app-0.0.0-py3-none-any.whl
+./streamlit-dir/src/talking_python-0.0.0-py3-none-any.whl
