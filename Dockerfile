@@ -15,4 +15,7 @@ COPY /app /app/
 WORKDIR /app/
 RUN python -m pip install .
 
+# Download chroma database
+RUN python -c "from talking_python.utilities import prepare_chroma;prepare_chroma()"
+
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
