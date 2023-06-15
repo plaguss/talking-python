@@ -1,5 +1,0 @@
-chroma/chroma-collections.parquet filter=lfs diff=lfs merge=lfs -text
-chroma/chroma-embeddings.parquet filter=lfs diff=lfs merge=lfs -text
-chroma/index/index_e08d6b8a-362d-4c5c-8bb0-150d73b15908.bin filter=lfs diff=lfs merge=lfs -text
-*.parquet filter=lfs diff=lfs merge=lfs -text
-chroma/index/*.bin filter=lfs diff=lfs merge=lfs -text
