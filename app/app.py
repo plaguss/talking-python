@@ -12,6 +12,15 @@ from embeddings import (
 
 TALK_PYTHON_LOGO = r"https://cdn-podcast.talkpython.fm/static/img/talk_python_logo_mic.png?cache_id=dd08157a0f56a88381ec34afe167db21"
 
+# The following check is needed for streamlit cloud to download the data,
+# if starting from docker this is done prior to deploying the app
+import talking_python.release as rel
+
+if not rel.get_chroma_dir().exists():
+    print("chroma database wasn't found, downloading!")
+    from talking_python.utilities import prepare_chroma
+    prepare_chroma()
+
 
 def clear_submit():
     st.session_state["submit"] = False
