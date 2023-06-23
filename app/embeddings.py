@@ -77,9 +77,6 @@ def raw_distance(
 ) -> dict[str, MetadataType | DistanceType]:
     """Returns the values as they come.
 
-    TODO: REWRITE AS THE average_... FUNCTION,
-    AS WELL AS THE APP CODE.
-
     Args:
         metadatas (MetadataType): _description_
         distances (DistanceType): _description_
@@ -100,8 +97,6 @@ def minimum_distance(
 ) -> dict[str, MetadataType | DistanceType]:
     """_summary_
 
-    TODO: REWRITE AS THE average_... FUNCTION
-
     Args:
         metadatas (MetadataType): metadata from querying chroma.
         distances (DistanceType): distances from each query.
@@ -120,7 +115,7 @@ def minimum_distance(
     return list(metric.items())
 
 
-def average_weighted_distance(
+def sum_weighted_distance(
     metadatas: MetadataType, distances: DistanceType
 ) -> list[tuple[str, float]]:
     """Groups the functions giving more weight depending
@@ -155,8 +150,8 @@ def _match_aggregating_function(aggregating_function: str) -> Callable:
     match aggregating_function:
         case "minimum":
             return minimum_distance
-        case "average":
-            return average_weighted_distance
+        case "sum_weighted":
+            return sum_weighted_distance
         case "raw":
             return raw_distance
         case _:
@@ -169,7 +164,7 @@ def query_db(
     chroma: chroma.Chroma,
     query: str,
     n_results: int = 20,
-    aggregating_function: Callable | None = average_weighted_distance,
+    aggregating_function: Callable | None = sum_weighted_distance,
 ) -> list[str]:
     """Queries the chroma database to extract the most similar podcasts.
 

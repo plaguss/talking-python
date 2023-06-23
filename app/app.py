@@ -50,7 +50,7 @@ with st.expander("Advanced Options"):
         )
     )
     aggregating_function_name = st.selectbox(
-        "Aggregating_function", ("average", "minimum", "raw")
+        "Aggregating_function", ("sum_weighted", "minimum", "raw")
     )
 
 
