@@ -32,6 +32,18 @@ Lets explore the different parts behind the app by visiting the different parts 
 
 The first step we need is to obtain the episodes transcriptions, which Michael Kennedy is kind enough to offer on a [talk-python-transcripts](https://github.com/talkpython/talk-python-transcripts). 
 
+---
+
+<details>
+  <summary> 🎬 Demo </summary>
+  <hr>
+
+    Video demo
+
+https://user-images.githubusercontent.com/554369/197188237-88d3f7e4-4e5f-40b5-b996-c47b19ee2f49.mov
+
+ </details>
+
 ### Prefect flows
 
 The transcripts are added on a weekly basis, the frequency of new episodes. We can keep *talk-python-transcripts* as a *git submodule* and pull the contents regularly using cron on a github action, which can be seen in 
@@ -53,6 +65,12 @@ A second GitHub action runs another prefect flow after the first has finished:
 
 
 ### `talking-python` repo and the vector store
+
+This repository works as a datastore in two ways.
+
+- When the first flow 
+
+HABLAR DE PUNTOS 2 Y 4, COMO FUNCIONA COMO ALMACEN PARA LOS EPISODIOS LIMPIOS Y LOS RELEASES
 
 points 2) and 4).
 
