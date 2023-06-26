@@ -38,9 +38,7 @@ The first step we need is to obtain the episodes transcriptions, which Michael K
   <summary> 🎬 Demo </summary>
   <hr>
 
-    Video demo
-
-https://user-images.githubusercontent.com/554369/197188237-88d3f7e4-4e5f-40b5-b996-c47b19ee2f49.mov
+https://github.com/plaguss/talking-python/assets/56895847/0891c67d-2a36-4ffe-bdb3-83986575d319
 
  </details>
 
