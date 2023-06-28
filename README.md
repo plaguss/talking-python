@@ -2,11 +2,19 @@
 
 If you don't already know [Talk Python To Me](https://talkpython.fm/) maybe you should visit its page first, and take a look at its [episodes](https://talkpython.fm/episodes/all).
 
-Already done? Then you can take a look at the demo app at [explore-talk-python-to-me](https://explore-talk-python-to-me.streamlit.app/), or take a look at the short video demo on the *How it works* section.
+Already done? Then you can take a look at the demo app at [explore-talk-python-to-me](https://explore-talk-python-to-me.streamlit.app/),  or take a look at the short video demo on the *How it works* section.
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_red.svg)](https://explore-talk-python-to-me.streamlit.app/)
 
-This repository contains all the code behind the demo app *explore-talk-python-to-me*, a demo of how to look for episodes related to your preferences using natural language. You can see from the code to embed the podcast's episodes, the prefect flows run on github action to update the contents as new episodes are added, to the final streamlit app.
+<details>
+  <summary> 🎬 See a demo here </summary>
+  <hr>
+
+https://github.com/plaguss/talking-python/assets/56895847/0891c67d-2a36-4ffe-bdb3-83986575d319
+
+</details>
+
+This repository contains all the code behind the demo app *explore-talk-python-to-me*, a demo of how to look for episodes related to your preferences using natural language. Here you can read the code and an explanation on whats behind the app, including things like how to embed the podcast's episodes, the prefect flows to update the contents as new episodes are added, and the final streamlit app.
 
 Table Of Content
 
@@ -34,40 +42,31 @@ Table Of Content
 
 ## How it works
 
-Lets explore the different parts behind the app by visiting the different parts of the following figure:
+To explore the different parts, lets start from the following figure representing the architecture:
 
 ![architecture](./assets/arch.png)
 
-The first step we need is to obtain the episodes transcriptions, which Michael Kennedy is kind enough to offer on a [talk-python-transcripts](https://github.com/talkpython/talk-python-transcripts). 
-
-<details>
-  <summary> 🎬 See a demo here </summary>
-  <hr>
-
-https://github.com/plaguss/talking-python/assets/56895847/0891c67d-2a36-4ffe-bdb3-83986575d319
-
- </details>
+The first task is obtaining the episodes' transcriptions, which Michael Kennedy is kind enough to offer on [talk-python-transcripts](https://github.com/talkpython/talk-python-transcripts). 
 
 ### Prefect flows
 
-The transcripts are added on a weekly basis, the frequency of new episodes. We can keep *talk-python-transcripts* as a *git submodule* and pull the contents regularly using cron on a github action, which can be seen in 
-`download-transcripts.yml`.
+On a weekly basis (the frequency of new episodes in the podcast), new episodes are added to the repository. We can keep *talk-python-transcripts* as a *git submodule* and pull the contents regularly using cron on a github action, which can be seen in `download-transcripts.yml`.
 
 - [`download-transcripts.yml`](./.github/workflows/download_transcripts.yml)
 
-    This github action, which corresponds to the point 1) in the architecture figure is in charge of running the following prefect flow [clean_transcripts.py](./flows/clean_transcripts.py), which downloads the
-    transcripts in the submodule, *cleans* the content (some simple preprocessing to remove unnecessary content for the final embeddings[^1]), and adds the new files in the `/flow_results` for posterior use
-    (the repository itself works as storage, point 2)).
+    This github action, which corresponds to the *point 1)* in the architecture figure, is in charge of running the following prefect flow:[clean_transcripts.py](./flows/clean_transcripts.py). There we download the
+    transcripts found in the submodule, *clean* the content (some simple preprocessing to remove unnecessary content for the final embeddings[^1]), and add the new files in the `/flow_results` for posterior use
+    (the repository itself works as storage, *point 2)*).
 
 A second GitHub action runs another prefect flow after the first has finished:
 
 - [`embed.yml`](./.github/workflows/embed.yml)
 
-    This github action is in charge of running the prefect flow in [embed.py](./flows/embed.py), 5 minutes after *download_transcripts.yml* with the same frequency (point 3)). It downloads the latest chroma database released, embeds the new episodes that were added since the last run, and releases the new chroma database to the github repo.
+    This github action is in charge of running the prefect flow in [embed.py](./flows/embed.py), 5 minutes after *download_transcripts.yml* and with the same frequency (*point 3)*). It downloads the latest chroma database released, embeds the new episodes that were added since the last run, and releases the new chroma database to the github repo.
 
 [^1]: There is an error in the code and some transcripts are not being properly processed yet!.
 
-### talking-python repo and the vector store
+### `talking-python` repo and the vector store
 
 This repository works as a datastore in two ways:
 
@@ -222,4 +221,4 @@ In this case the model used to create the embeddings is much simpler (it produce
 
 ## Further steps
 
-There are a lot of things to add/improve, but for a demo its good enough :).
+There are a lot of things to add/improve (the first fixing the original transcripts processing), but for a demo is good enough :).
