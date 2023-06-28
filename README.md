@@ -160,7 +160,7 @@ After making a query, the response we obtain is formed by passages of the episod
 
 ## Running the app
 
-In case streamlit cloud is not working by any reason, or if you want to test on your own, take a look at your preferred way: 
+In case streamlit cloud is not working by any reason, or if you want to test on your own, take a look at your preferred way of running the app locally: 
 
 <details><summary> With Docker </summary><hr>
 
@@ -170,7 +170,7 @@ It can be built using docker directly:
 docker build -t talking-python . && docker run -p 8501:8501 -it talking-python
 ```
 
-Or if you prefer docker compose:
+Or docker compose if you prefer:
 
 ```bash
 docker compose up --build
@@ -182,7 +182,7 @@ Visit the url that streamlit shows you in the console.
 
 <details><summary> Without Docker </summary><hr>
 
-Basically we are going to follow the steps in the `Dockerfile` here (*use a virtual environment*).
+Basically we are going to follow the steps in the `Dockerfile` here (*use a virtual environment* please).
 
 Install the dependencies (all the contents are contained in `/src` and `/app` folders as python packages):
 
@@ -198,7 +198,7 @@ The first time we run the app, it will download the chroma database if it isn't 
 python -c "from talking_python.utilities import prepare_chroma; prepare_chroma()"
 ```
 
-Go to the `/app` directory, and run the following comand:
+Then go to the `/app` directory, and run the following comand:
 
 ```bash
 streamlit run app.py
