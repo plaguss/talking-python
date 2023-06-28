@@ -18,7 +18,7 @@ Table Of Content
 
     1.3. [App](#app)
 
-        1.3.1. [Advanced settings](#advanced-settings)
+    1.3.1. [Advanced settings](#advanced-settings)
 
     1.4. [Deployment](#deployment)
 
