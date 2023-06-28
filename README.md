@@ -80,26 +80,23 @@ We can [deploy chroma](https://docs.trychroma.com/deployment), but this is a sim
 
 ### App
 
-The app is built using [*streamlit*](https://streamlit.io/) (*point 5)*), the code can be seen in the [`app`](./app/) folder. The layout is *heavily inspired* by [KnowledgeGPT](https://knowledgegpt.streamlit.app/).
+The app is built using [*streamlit*](https://streamlit.io/) (*point 5)*), the code can be seen in the [`app`](./app/) folder. The layout is *heavily* inspired by [KnowledgeGPT](https://knowledgegpt.streamlit.app/).
 
-The first thing we must do is insert a Hugging Face API token.
-You have to get an [account](https://huggingface.co/join) in Hugging Face (if you don't have one yet, its simple and free) and get an [access token](https://huggingface.co/settings/tokens) to use the [inference API](https://huggingface.co/inference-api). 
+To start using the app, the first thing we must do is insert a Hugging Face API token. You have to get an [account](https://huggingface.co/join) in Hugging Face (if you don't have one yet, its simple and free) and get an [access token](https://huggingface.co/settings/tokens) to use the [inference API](https://huggingface.co/inference-api). 
 
-Now its just a matter of asking some question about the episodes' contents (some examples are given in the sidebar's FAQ). The question will be embedded using the inference API (point 6)), and chroma does its magic to find the episodes that are more likely to talk about the content yo asked about.
-
-It extracts the table of episodes from [talk python to me](https://talkpython.fm/episodes/all), and shows the subset of episodes sorted from most to less similar.
+Now its just a matter of asking some question about the episodes' contents (some examples are given in the sidebar's FAQ). The question will be embedded using the inference API (*point 6)*), and chroma does its magic to find the episodes that are more likely to talk about the content you asked about. It extracts the table of episodes from [talk python to me](https://talkpython.fm/episodes/all), and shows the subset of episodes sorted from most to less similar.
 
 #### Advanced settings
 
-The app offers a expander section to play with two different concepts. A query to a vector database (chroma in this case), works by finding the pieces of text that are closer (have the smallest distance, for )
+You can see an expander section to play with two different fields.
 
-- maximum number of episodes.
+- `maximum number of episodes`.
 
     It limits the number of passages (pieces or lines of a given episode) to gather from the database (sorted from smallest to biggest distance).
 
-- aggregating function.
+- `aggregating function`.
 
-    The results from querying chroma are in the form of different passages that pertain to different (or the same) episodes, these results must be aggregated to offer just the list of relevant episodes for the user. Three different functions are available, but the default content should yield the best results. 
+    The results from querying chroma are in the form of different passages that pertain to different (or the same) episodes, these results must be aggregated to offer just the list of relevant episodes for the user. Three different functions are available, but the default function should yield the best results. 
 
 For more information take a look at the *Model behind the embeddings* section.
 
