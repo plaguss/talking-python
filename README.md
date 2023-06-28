@@ -102,9 +102,9 @@ For more information take a look at the *Model behind the embeddings* section.
 
 ### Deployment
 
-[Streamlit cloud](https://streamlit.io/cloud) offers free deployment for demo apps, its hard to beat that :) . We just have to prepare the data just for streamlit cloud to find it.
+[Streamlit cloud](https://streamlit.io/cloud) offers free deployment for demo apps, its hard to beat that :) . We just have to prepare the data for streamlit cloud to find it.
 
-Streamlit will look for a [*requirements.txt*](./requirements.txt) at the root of the repo, and we have two different internal libraries, so some unusual process must be done to go the streamlit way, vs for example installing the libraries inside a Dockerfile. [Pip](https://pip.pypa.io/en/latest/reference/requirements-file-format/) allows us to install libraries directly from specific local distributions, so the libraries can be prebuilt and stored locally:
+Streamlit will look for a [*requirements.txt*](./requirements.txt) at the root of the repo, and we have two different internal libraries, so some unusual process must be done to go the streamlit way vs for example installing the libraries inside a Docker container. [Pip](https://pip.pypa.io/en/latest/reference/requirements-file-format/) allows us to install libraries directly from specific local distributions, so the libraries can be prebuilt and stored locally:
 
 To build the UI code:
 
@@ -122,9 +122,9 @@ Then streamlit will look at the [requierments.txt](./requirements.txt) at the ro
 
 ## Model behind the app
 
-The transcripts of the episodes are long enough (13.000 words on average) to embed all the content at once, so a different route was taken. 
+The transcripts of the episodes are long enough to embed all the content at once (13.000 words on average), so instead of embedding the whole episodes, a different route was taken. 
 
-Lets take a look at a piece of the transcription of episode `419-pystack.txt`:
+Lets take a look at a piece of the transcription of episode `419-pystack.txt` as an example:
 
 ```diff
 ...
@@ -152,12 +152,11 @@ Which after the preprocessing (cleansing) becomes the following:
 ...
 ```
 
-We can embed each line (a turn in the conversation, or a passage) and store the reference of the episode it occurred. The model chosen is sentence transformer's [multi-qa-MiniLM-L6-cos-v1](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1) (take a look at the [intended uses](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1#intended-uses) section). Its open source, integrated with [chroma](https://docs.trychroma.com/embeddings#sentence-transformers) (the open source embedding database), and [hugging face's](https://github.com/chroma-core/chroma/blob/main/chromadb/utils/embedding_functions.py#L140) inference API.
+We can embed each line (a turn in the conversation, or a *passage*) and store the reference of the episode it occurred at. The model chosen is sentence transformer's [multi-qa-MiniLM-L6-cos-v1](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1) (take a look at the [intended uses](https://huggingface.co/sentence-transformers/multi-qa-MiniLM-L6-cos-v1#intended-uses) section for background on its intended use). Its open source, integrated with [chroma](https://docs.trychroma.com/embeddings#sentence-transformers) (the open source embedding database), and [hugging face's](https://github.com/chroma-core/chroma/blob/main/chromadb/utils/embedding_functions.py#L140) inference API.
 
-From the user perspective, the interaction with the model occurs when a query is made (point 6) in the figure), when it is embedded using the [Hugging Face inference API](https://huggingface.co/inference-api), (thats why you must supply the required api token).
+From the user perspective, the interaction with the model occurs when a query is made (*point 6)* in the figure), when it is embedded using the [Hugging Face inference API](https://huggingface.co/inference-api), thats why you must supply the required api token.
 
-After making a query, the response we obtain would be formed by passages of the episodes, so to supply the table of episodes instead of the corresponding passages the response must be aggregated. Just 3 forms are used:
-raw (which returns the episodes each passage corresponds to), minimum (returns the episodes without repetitions, sorted by the minimun distance to the query), and the sum weighted. This last function is the default (and maybe a bit more sensible than the others). When computing the distances between the query and the passages, it may occur that a single passage is very similar to the query made, then showing an episode that maybe is not what you expected. By using the `sum weighted` of the distances, we are trying to take into account this, and reward episodes which have more passages with similar content to the query made, and weigh them using the distance.
+After making a query, the response we obtain is formed by passages of the episodes, so to supply the table of episodes instead of the corresponding passages the response must be aggregated. Just 3 aggregation forms are used (these correspond to the `aggregating_function` expander in the app): `raw` (which returns the episodes each passage corresponds to), `minimum` (returns the episodes without repetitions, sorted by the minimun distance to the query), and the `sum weighted` option. This last function is the default (and maybe a bit more sensible than the others). When computing the distances between the query and the passages, it may occur that a single passage is very similar to the query made, then showing an episode that maybe is not that much similar. By using the sum passages weighted by the distance, we are trying to take into account this effect, and reward episodes which have more passages with similar content to the query made.
 
 ## Running the app
 
