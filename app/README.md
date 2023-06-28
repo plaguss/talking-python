@@ -1,3 +1,3 @@
-# Explore Talking Python app
+# Explore Talk Python To Me app
 
-It is inspired by [KnowledgeGPT](https://knowledgegpt.streamlit.app/)
+The layout is heavily inspired by [KnowledgeGPT](https://knowledgegpt.streamlit.app/).

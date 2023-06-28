@@ -18,25 +18,25 @@ This repository contains all the code behind the demo app *explore-talk-python-t
 
 Table Of Content
 
-1. [How it works](#how-it-works)
+- [How it works](#how-it-works)
 
-    1.1. [Prefect Flows](#prefect-flows)
+    - [Prefect Flows](#prefect-flows)
 
-    1.2. [talking-python repo and the vector store](#talking-python-repo-and-the-vector-store)
+    - [talking-python repo and the vector store](#talking-python-repo-and-the-vector-store)
 
-    1.3. [App](#app)
+    - [App](#app)
 
-    1.3.1. [Advanced settings](#advanced-settings)
+        - [Advanced settings](#advanced-settings)
 
-    1.4. [Deployment](#deployment)
+    - [Deployment](#deployment)
 
-2. [Model behind the app](#model-behind-the-app)
+- [Model behind the app](#model-behind-the-app)
 
-3. [Running the app](#prefect-flows)
+- [Running the app](#prefect-flows)
 
-4. [Inspiration](#inspiration)
+- [Inspiration](#inspiration)
 
-5. [Further Steps](#further-steps)
+- [Further Steps](#further-steps)
 
 ---
 
@@ -50,19 +50,19 @@ The first task is obtaining the episodes' transcriptions, which Michael Kennedy 
 
 ### Prefect flows
 
-On a weekly basis (the frequency of new episodes in the podcast), new episodes are added to the repository. We can keep *talk-python-transcripts* as a *git submodule* and pull the contents regularly using cron on a github action, which can be seen in `download-transcripts.yml`.
+On a weekly basis (the frequency of new episodes in the podcast), new episodes are added to *this* repository. We can keep *talk-python-transcripts* as a *git submodule* and pull the contents regularly using cron on a github action, as can be seen in `download-transcripts.yml`. Two prefect flows are run every  week through github actions:
 
 - [`download-transcripts.yml`](./.github/workflows/download_transcripts.yml)
 
-    This github action, which corresponds to the *point 1)* in the architecture figure, is in charge of running the following prefect flow:[clean_transcripts.py](./flows/clean_transcripts.py). There we download the
+    This github action, which corresponds to the *point 1)* in the figure, is in charge of running the prefect flow [clean_transcripts.py](./flows/clean_transcripts.py). There we download the
     transcripts found in the submodule, *clean* the content (some simple preprocessing to remove unnecessary content for the final embeddings[^1]), and add the new files in the `/flow_results` for posterior use
     (the repository itself works as storage, *point 2)*).
 
-A second GitHub action runs another prefect flow after the first has finished:
+After this, a second GitHub action runs the second prefect flow:
 
 - [`embed.yml`](./.github/workflows/embed.yml)
 
-    This github action is in charge of running the prefect flow in [embed.py](./flows/embed.py), 5 minutes after *download_transcripts.yml* and with the same frequency (*point 3)*). It downloads the latest chroma database released, embeds the new episodes that were added since the last run, and releases the new chroma database to the github repo.
+    This github action is in charge of running the prefect flow in [embed.py](./flows/embed.py), 5 minutes after *download_transcripts.yml* and with the same frequency (*point 3)*). It downloads the latest chroma database released, embeds the new episodes that were added since the last run, and releases the new chroma database to the github's repo releases.
 
 [^1]: There is an error in the code and some transcripts are not being properly processed yet!.
 
@@ -70,17 +70,17 @@ A second GitHub action runs another prefect flow after the first has finished:
 
 This repository works as a datastore in two ways:
 
-- When the first flow is run, some contents are stored in [`/flow_results`](./flow_results/) folder. The cleaned transcripts are added (they are a preprocessed version of the original transcripts to simplify the embedding, the content that is really embedded in point 3)), and a txt file (.embedded_files.txt) to keep track of the already embedded episodes. This corresponds to the point 2) in the architecture figure.
+- When the first flow is run, some contents are stored in [`/flow_results`](./flow_results/) folder. The cleaned transcripts are added (they are a processed version of the original transcripts to simplify the embedding, the content that is really embedded in *point 3)*), and a txt file (.embedded_files.txt) to keep track of the already embedded episodes. This corresponds to the *point 2)* in the figure.
 
-- After running the second flow (point 3)), the embedded episodes are stored locally using the default format provided by *chroma*. To store and share the data two (free) options came to mind. The first, git LFS was discarded due to the [limits](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage) it imposes. *Explosion* uses github releas assets to store its [spacy models](https://github.com/explosion/spacy-models), and the contents of the chroma database aren't much different to those of a deep learning model, so this seems like a good choice for storage.
+- After running the second *flow* *(point 3)*), the embedded episodes are stored locally using the default format provided by *chroma*. To store and share the data two (free) options came to mind. The first, git LFS was discarded due to the [limits](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage) it imposes. Another one, inspired by [*Explosion's*](https://explosion.ai/) [spacy models](https://github.com/explosion/spacy-models), uses github release assets to store its models, and the contents of the chroma database aren't much different to those of a deep learning model, so this seemed like a good choice for this use case.
 
 So at the end of the second flow, the chroma database content is compressed and uploaded to GitHub [releases](https://github.com/plaguss/talking-python/releases) in the repository.
 
-We can [deploy chroma](https://docs.trychroma.com/deployment), but this is a simple demo, so I had to come up with something simpler (and cheaper). Instead, the chroma content is persisted as [parquet in disk](https://docs.trychroma.com/usage-guide#initiating-a-persistent-chroma-client), released to github as a compressed asset, and wherever we want to make queries to the data (when deploying on *streamlit cloud* or using *Docker*), we can download the vector store, just like we would do with any deep learning model. It allows us to keep track of the last chroma checkpoint (even though we will always be interested in the last release, which includes all the episodes up to the day of the last run).
+We can [deploy chroma](https://docs.trychroma.com/deployment), but this is a simple demo, so I had to come up with something simpler (and cheaper). Instead, the chroma content is persisted as [parquet in disk](https://docs.trychroma.com/usage-guide#initiating-a-persistent-chroma-client), released to github as a compressed asset, and when we want to make queries to the data we can download the vector store and keep it at hand locally, just like we would do with any deep learning model. It allows us to keep track of the last chroma checkpoint (even though we will always be interested in the last release, which includes all the episodes up to the day of the last run).
 
 ### App
 
-The app is built using [streamlit](https://streamlit.io/) (point 5)), the code can be seen in the [`app`](./app/) folder. The layout is *heavily inspired* by [KnowledgeGPT](https://knowledgegpt.streamlit.app/).
+The app is built using [*streamlit*](https://streamlit.io/) (*point 5)*), the code can be seen in the [`app`](./app/) folder. The layout is *heavily inspired* by [KnowledgeGPT](https://knowledgegpt.streamlit.app/).
 
 The first thing we must do is insert a Hugging Face API token.
 You have to get an [account](https://huggingface.co/join) in Hugging Face (if you don't have one yet, its simple and free) and get an [access token](https://huggingface.co/settings/tokens) to use the [inference API](https://huggingface.co/inference-api). 
