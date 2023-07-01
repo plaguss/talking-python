@@ -1,0 +1,458 @@
+When you use a SQL database like Postgres, you have to understand the subtleties of isolation levels from read committed to serializable.
+And distributed databases such as MongoDB offer a range of consistency levels from eventually consistent to linearizable and many options in between.
+Plus, it's easy enough to confuse isolation with consistency.
+To break it all down for us, we have A. Jesse Giroux-Davis from MongoDB back on the podcast.
+This is Talk Python Me, episode 420, recorded June 7th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, Kennedy and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances, there are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Sentry.
+Let those errors go unnoticed.
+Use Sentry.
+Get started today at talkpython.fm/sentry.
+And it's brought to you by InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try it for free at talkpython.fm/influxdb.
+Hey, Jesse. - Hey, Michael.
+- Great to have you here on the show.
+Welcome back to "Talk Python and Me." - Thanks a lot.
+- Yeah, it has been a little while since you were on the show.
+You were the second guest ever.
+How about that?
+How cool is that?
+>> That's really cool. I knew it was a while ago.
+I think it was 2015, and we were talking about Python and MongoDB, which is a natural subject, but I didn't know it was so early in your career.
+>> Yeah. You really helped launch the podcast.
+So thanks for that. Then you also did a really popular episode about writing an excellent programming blog.
+We talked about fun things like design patterns of writing for technical writing. That was really well received. So, yeah, excellent to have you back.
+We're going to make it a little bit more modern than just, you know, five, six years ago, whatever that was. Cool. So what have you been up to? Give us maybe a quick intro for people who don't know you and catch up on what you've been up to since then.
+You and I met because when I joined MongoDB around 2011, I was the Python evangelist, which is still my favorite job title of all time. I'm still at MongoDB. And I've been doing various sorts of engineering the whole time I switched over to doing C and C++ and moved from doing Python client library work, I had been working on PyMongo, to working on the core MongoDB server, and helped develop the first version of serverless MongoDB, which is pay-as-you-go.
+And now I'm a researcher with MongoDB Labs, which is our tiny little research organization.
+And I'm looking at new products, cutting-edge techniques that we might want to adopt at MongoDB.
+All of those things sound super awesome.
+Maybe take them in order, if I remember them right.
+So you worked on PyMongo, which is if people use MongoDB at all, they basically either use PyMongo or Motor, right?
+And did you also work on Motor? You did, right?
+Yeah, I invented Motor and came up with the cute name.
+At the time, Tornado was one of the major asynchronous Python servers.
+Very ahead of its time in that sense.
+That was way before Async and Await and Async.io and all those things.
+Yeah, that's right. It was extremely influential. And I wanted PyMongo to work well with Tornado.
+So I came up with this very complicated way to sort of asynchronize PyMongo and make it work with Tornado. And I combined Mongo with Tornado to come up with Motor. And it's still maintained, but not by me. And it's a good choice. If you want that asynchronous API, it now supports async and await. And it now works with async IO, as well as tornado. So if you have some reason for wanting to do async Python already, and then you want to connect to MongoDB without fear of blocking your application, then motor is the driver of choice.
+Yeah, absolutely. And much like if you're using if you're doing synchronous MongoDB stuff in Python, and chances are using PyMongo.
+If you're doing async stuff, you're probably using motor.
+For example, the website you're looking at here is backed by MongoDB, that is talk by them.
+And it uses Beanie, which does basically Pydantic and async and await plus MongoDB.
+But the way you work with it is you create a motor connection, motor client, and hand it off to the underlying framework.
+So really, it's still using your code.
+That's cool.
+- That's neat. - Yeah.
+Pretty neat.
+So I imagine those are two really different worlds, building client libraries to talk to some semi-black box type of system, like I send requests over the API to Mongo and it does its thing and I get a response, to switching and being inside that box.
+What's the, maybe contrast those two worlds, 'cause I think they're probably pretty different.
+- Yeah, the problem spaces are practically disjoint.
+When I was working on MongoDB drivers, I had a great deal of concern for making the API usable by application developers.
+A lot of my time was spent figuring out how to make a consistent experience for people who were using MongoDB from Python and also from JavaScript or C or PHP.
+These are completely different kinds of languages, but you need as much consistency as possible while still respecting the style of the language itself.
+And then of course, since these are semantically versioned libraries, almost every decision you make is permanent.
+On the server side, on the other hand, I was mainly concerned with how to implement algorithms that solved tricky problems.
+And so we could change our minds every few years with sort of upgrade downgrade logic.
+It's complicated, but it's not permanent in the way that an API is.
+A lot of the problems that it was handling on the server side, first of all, it was working with C++ in a half million line code base.
+So that was a great deal more complexity than I'd ever confronted before.
+>> It's probably really super polished and every little change probably has many, many knock-on effects that you've got to carefully think about.
+You're like, "Do we really need to check for that?
+Would this ever happen or can we reorder those bytes?
+Probably it's fine.
+There's a lot of hidden complexity that people who've been working on the server code base longer than I kept pointing out to me.
+Like, no, you can't just change this data structure.
+You have to take the following six locks before you can even think about touching that.
+Then interactions among the servers in a replica set or a sharded cluster are literally exponentially complex.
+>> Yeah, like n factorial type of thing.
+>> Right.
+>> Okay. And C++ versus Python, that's a pretty big distinction there.
+>> Yeah, I had coded C++ right out of college. I thought I was going to be a 3D graphics guy working for Pixar, which never happened.
+But I had known C++ once upon a time. But C++ in the '90s is a completely different language from modern C++.
+So I had a lot of catching up to do.
+On the other hand, I really enjoyed the fact that you can make things run fast.
+And I hope that this is not offensive, but C Python has a very low ceiling for performance.
+And you can make algorithms more efficient, but you can't really make your code run all that fast.
+And I found it really enjoyable to write C++ and have things finish in microseconds.
+Right, right. Near, about as fast as it gets, unless you're going to go do assembler.
+And then maybe not, maybe you should use a compiler.
+- Certainly not for me. - Yeah, exactly.
+Yeah, and who would want to write assembler, right?
+Especially, oh my gosh.
+No, I think the story with Python performance is interesting.
+A lot of times it's plenty fast for what people need to do, but if you're building a server, like a high-end database server, you know, those microseconds count.
+And, you know, that's a different world, right?
+That's a different trade-off, trading somewhat developer speed for performance and code speed.
+Although I do think we're getting some proper attention on Python speed in the last couple of years and will for the next couple as well.
+With the faster CPython initiative and 3.10, 3.11, 3.12, all that stuff.
+But it's still, even the fast versions of those are not C++ type of speed.
+It's a fundamentally different way of executing code and they're never really going to overlap.
+- Yeah, maybe someday we'll get fully compiled Python.
+Who knows what the future holds, but until then.
+As long as it's interpreted, probably not.
+All right, the third thing you mentioned, which sounds interesting as well, is MongoDB Labs.
+Can you give us an example of some of the things that have come out of there or some of the types of problems you're researching, anything like that?
+How secret is the lab?
+Is it like a skunk's work at Lockheed Martin?
+Can you talk a little about it?
+>> I can certainly talk about it.
+It's small and fairly new, couple of years old, about a dozen people, working on a number of things.
+One of them is streaming data processing, which I think we'll be able to announce quite a bit more.
+>> Is this like a high-speed time series data, like I'm hooked up to some pipe to the NASDAQ or something like this?
+-What's an example? -Right.
+Where you've got a source of data events, not necessarily stored in any database anywhere, but coming in as a continuous stream of events.
+And you want to connect stream processors in some sort of network of pipes and nodes and eventually drop the results into MongoDB or another data store or send it off to another service.
+MongoDB Labs has been a place where we can incubate some of those ideas and make them available in our developer data platform.
+Sounds like a really cool place to work, just sort of playing with ideas and got the time and space to do that, right?
+Yeah. Labs has also been a place where we incubate cryptography ideas, like queryable encryption, where MongoDB doesn't know the contents of your data, but can nevertheless answer queries about it.
+I personally have been working on improving the debugging experience for people who are writing complex aggregation pipelines.
+And then what I'm working on right now is predictive scaling for Atlas.
+The idea is that a lot of customers have really regular weekly business cycles or daily business cycles.
+Like you might have Monday through Friday, traffic gradually increases around nine or 10 a.m.
+and then it drops off at the end of the day.
+And then you have a huge spike at midnight when all of your nightly analytics queries go off and then the weekend is quiet.
+We should be able to detect those patterns and automatically scale you up and down so that you have the capacity you need just before you need it.
+And then you don't pay for it at a time when you predictably do not need it.
+Actual deployment of that idea, I have no idea how far off that is, but that's what's nice about labs is that we are working on things that the larger company doesn't have scheduled yet.
+- You can experiment, right?
+That's, I mean, it's a lab.
+- Exactly.
+- This portion of Talk Python to Me is brought to you by Sentry.
+You know that Sentry captures the errors that would otherwise go unnoticed.
+Of course, they have incredible support for basically any Python framework.
+They have direct integrations with Flask, Django, FastAPI, and even things like AWS Lambda and Celery.
+But did you know they also have native integrations with mobile app frameworks?
+Whether you're building an Android or iOS app or both, you can gain complete visibility into your application's correctness, both on the mobile side and server side.
+We just completely rewrote Talk Python's mobile apps for taking our courses.
+And we massively benefited from having Sentry integration right from the start.
+We used Flutter for our native mobile framework, and with Sentry, it was literally just two lines of code to start capturing errors as soon as they happen.
+Of course, we don't love errors, but we do love making our users happy.
+Solving problems as soon as possible with Sentry on the mobile Flutter code and the the Python server-side code together made understanding error reports a breeze.
+So whether you're building Python server-side apps or mobile apps or both, give Sentry a try to get a complete view of your apps' correctness.
+Thank you to Sentry for sponsoring the show and helping us ship more reliable mobile apps to all of you.
+Tell people about Atlas a little bit.
+You talked about your predictive scaling in Atlas.
+I imagine not everyone knows what that is.
+Sure. Atlas is MongoDB's cloud services, and we originally launched it as a database as a service.
+So you decide how you want to deploy your database, a replica set or a sharded cluster, which cloud providers you want to use.
+We allow you to use multiple cloud providers, and what size of server you need.
+And so we would manage backups and administration and that sort of thing, upgrades and so on.
+More recently, we've announced Atlas Serverless, which is pay as you go.
+So you no longer have to worry about how your database is deployed, what instance size you don't need to do, capacity planning.
+We just auto scale you and bill you for what you used.
+We've also got a few other services, which I'm not an expert in, but we've got Atlas Data Federation, which helps you move data among different services, both MongoDB services and other ones.
+And those are kind of the highlights as far as I'm aware.
+- All right, I'll put a link to the GitHub organization for MongoDB Labs up there.
+There's some cool looking repos and also some funny names like Coberta Snooty.
+- We don't have to be professional over here, it's nice.
+- Exactly, you can just have fun with it.
+Yeah, excellent.
+All right, well, let's talk a little bit about databases in the broad sense, and then we can dive into the core ideas that I invited you here, which I guess is worth pointing out.
+The reason I knew about this and reached out to you was you gave a talk at PyCon 2023.
+Maybe tell us a bit about that experience before we jump into the databases.
+- It's really nice to have PyCon back after COVID.
+I went to PyCon at Salt Lake City last year and this year.
+Last year, I spoke about modern concurrency patterns in Python.
+This year, I talked about consistency and isolation.
+I also learned a lot.
+After being a C++ programmer and going to PyCon and being not sure what I was doing at PyCon anymore, this year I came as a researcher.
+The areas of my interests are essentially everything.
+And so I went to a bunch of talks and learned a bunch of stuff and renewed my love for being at PyCon.
+Oh, that's so exciting.
+I wanted to talk about consistency and isolation at PyCon because these are fundamental database concepts. They are some of the hardest to learn that I've ever encountered in computer science.
+And I kind of think that most of the approaches are bad. You can read the fundamental papers, and you probably should, but reading the original papers is a very hard way to learn something, and they tend to be too concise and too abstract and not very well digested. And then maybe if I'd taken that databases elective in college and read the textbook, I would be in better shape, but I didn't. Then I joined a database company and I had to learn it on the job.
+So I came up with a few ways of thinking about it, which took me a few years. So I wanted to come to PyCon and share those and hopefully accelerate other people's learning.
+Yeah, I imagine approach everything about a conference like that is really different if if you come with a researcher's mindset.
+You go hit all the expo booths and you're like, "All right, I need your ideas.
+Tell me all about this with a special focus." >> Yeah.
+>> Cool. All right. Let's talk databases.
+I think we can start with just, not every database is the same.
+I think long ago, people when they said database, they just meant relational database.
+Nowadays, there's more variety.
+But nowadays, I'm thinking the last 15 years, it's not just today.
+>> Yeah.
+>> Let's just maybe get just a quick high-level landscape view of the different kinds of databases.
+Relational, that's probably what most people are using.
+I'm going to just give us a rundown of your thoughts on how this categorization goes, taxonomy, I guess.
+Yeah, relational databases, which are made of tables of rows and columns, and you almost always query them with SQL, which is standardized, although every database has its own extensions, came to really dominate in the 90s. And they are great for a lot of reasons.
+And I think everybody should know how to use them. But, you know, around the time that I joined MongoDB in 2011, something was happening, which is that the scale of data came to the point where you needed specialized approaches. And then another thing that was going on was that, sort of funny enough, object-oriented programming and relational databases had both come to dominate at the same time, and they work very, very poorly with each other.
+Yeah, that is funny, but that did happen.
+Because relational, I mean, a relation is sort of the object opposite of an object.
+Object-oriented programs are quite hierarchical and fairly flexible and relations are not hierarchical and extremely inflexible. So we call that the impedance mismatch. I don't know if that's actually a helpful term. It's just, it's bad. >> The object-relational impedance mismatch, if people are familiar with that term. I haven't thought of that for a while, but yeah, that's, That was a big concern often.
+NoSQL was kind of a movement, and it encompassed a number of solutions to these problems.
+One of them is that NoSQL databases tend to be distributed.
+So before I came to MongoDB, I was working with an Oracle database, and as load increased, we just needed to buy a bigger and bigger single box until we had like a million dollar refrigerator sized thing, which must never ever go down.
+Many of the NoSQL databases, including MongoDB, are distributed, so you can use a large number of smaller machines, which is much more economical.
+Much more cloud-friendly.
+Much more cloud-friendly. It's not only a good way to scale your CPU and RAM, but it's also a good way to ensure reliability in geo-distribution.
+So, we took advantage of all that. We kind of built in the distributed nature of it quite early. And a lot of the other NoSQL databases did as well.
+We're also a document database with the data format is a lot like JSON, and it's easily convertible to JSON. And that means that it's very familiar for people who write Python or JavaScript or anything like that. We store things that are a lot like dictionaries and lists.
+and there is--
+- Very API friendly, right?
+Like you're exchanging JSON.
+So you're 95% of the way there just on your API data exchange often.
+- Yeah, if you want to expose a MongoDB collection as something to a REST API, you can do that in a couple of lines because JSON and MongoDB data are so similar.
+- All right, so document databases is probably the best known NoSQL, but we also have key value stores and column oriented databases.
+Still trying to grok them.
+Yeah, key value stores are just like big dicks in the sky.
+And in exchange for that simplicity, they're usually extremely fast and extremely robust.
+Memcached, for example.
+And column oriented databases, I'm still wrapping my head around.
+So I'm not gonna talk about that all that much, but it's my impression that they're good for giant analytics jobs where you tend to need to do a huge aggregation, like find the sum or the mean of a very large amount of consistent data.
+Maybe Pandas is a good mental model or NumPy or something like that where you say, I'm going to apply this operation to this whole column and you don't want it on a per user basis.
+You want to say, I want all the latency times as a thing.
+That's a more natural thing to ask for instead of projecting out the latency where across all of them, that kind of thing.
+Graph databases, I think, are also seem to be going strong still.
+And this is an area where MongoDB hasn't, has kind of left it to our competitors for the moment.
+But graph databases are great at representing nodes that are connected by edges.
+So for example, a social network of people with friendships or a network of servers that are connected by Ethernet cables and you want to do queries like, how closely connected is this to that?
+Maybe even modeling like hierarchies within a large corporate organization or something.
+>> Right.
+>> This person reports to that person and then those kind of things.
+Yeah. Okay. So I think that sets the stage for a lot of what we're talking about.
+What ones in terms of consistency and isolation, this applies to relational documents, probably not key value stores.
+I don't know about graph databases at all in terms of these.
+Which ones of these are relevant to the main topic here?
+Actually, it's interesting. So first of all, let's separate out that isolation is a way of height. So even on a single machine, a database can run concurrent operations. So you can do have two transactions that are going on at once, and their operations may be in some way interleaved. And if the database allows concurrency like this on a single machine, then that can reveal phenomena that you would not observe if concurrency were not allowed. These phenomena are called anomalies. These terms, phenomena and anomalies, go all the way back to the 1970s database theory.
+There's nothing specific to relational or non-relational data, to the SQL language, or any other query language. So long as the database allows concurrency, then anomalies are possible. And so the database may choose to provide isolation levels to you. There are four isolation levels that people have probably heard of that are in the SQL standard.
+And so obviously, they've got that connection to the relational model in the SQL language.
+But in my PyCon talk, I was just showing a key value store.
+Yeah, that's right. You actually were kind of more or less writing the code for the different implementations or demonstrating the code for the different implementations of how you might do a key value store.
+So what you did was you said, let's imagine we just have a giant dictionary in memory and that was our database, at least for a table or a collection, right?
+And then like, how do we model these isolation levels in Python code, right?
+Yeah, right, exactly. So there was no SQL involved. The data was just a dict. But I was showing how you could use Python locks to provide each of the four well known isolation levels and allow concurrency.
+All right, so I interrupted you a tiny bit there. What are the four isolation levels, at least the SQL standard ones?
+Right. So there's read uncommitted, which is anything goes.
+YOLO.
+YOLO. Every operation that one transaction does is immediately visible to all the others, or may be visible to all the others, even if the transaction hasn't committed yet, even if it aborts later. And so the concurrency is nakedly displayed to all of the clients.
+Basically, you don't see this in practice. Read committed is what people are much more accustomed to, where your transaction as it's going along may see the data change as other transactions commit, but then its own writes are only visible to other transactions all in one instant at the moment that your transaction commits. But of course, you could read the same value multiple times in a row and get different answers because other transactions are allowed to commit and modify it as you go.
+Right. I imagine that that's a pretty common level.
+The read uncommitted is just chaos, right?
+It's like multi-threading without locks, basically.
+Without any locking mechanism or protection.
+While that it would be the fastest, it's probably too risky.
+But read committed, how common do you think that is?
+Read committed is quite prominent.
+It's the default for a number of the SQL databases.
+I don't remember which exactly, but people can live with it pretty happily.
+You know, and to be honest, MongoDB's default is read uncommitted.
+If you write to the primary, other clients can see those writes immediately.
+There's no transaction by default.
+After all, you have to opt into transactions on MongoDB.
+There are atomic changes you can make, like you can use the set and push those kinds of operators on a single document.
+But as soon as you start talking to two documents in the same collection or cross collection, then this is what you're talking about. There's no transaction, right?
+Yeah, that's exactly right. And the document model does make it much more practical to do things without transactions because you can keep related data all together in a single document and update it in one statement. Whereas the relational model tends to kind of spray your data around and make it much more difficult to maintain whatever application invariants you want because you have to modify multiple rows at the same time. Yeah, multiple rows, multiple tables, like there could be a many-to-many relationship that you're adding to or taking away from, right, just to update part of some statement. Yeah, right.
+This portion of Talk Python to Me is brought to you by Influx Data, the makers of InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Developers can ingest, store, and analyze all types of time series data, metrics, events, and traces in a single platform.
+So dear listener, let me ask you a question.
+How would boundless cardinality and lightning-fast SQL queries impact the way that you develop real-time applications?
+InfluxDB processes large time series data sets and provides low-latency SQL queries, making it the go-to choice for developers building real-time applications and seeking crucial insights.
+For developer efficiency, InfluxDB helps you create IoT, analytics, and cloud applications using timestamped data rapidly and at scale.
+It's designed to ingest billions of data points in real-time with unlimited cardinality.
+InfluxDB streamlines building once and deploying across various products and environments, from the edge, on-premise, and to the cloud.
+Try it for free at talkpython.fm/influxdb.
+The link is in your podcast player show notes.
+Thanks to Influx Data for supporting the show.
+Okay, so read uncommitted, read committed.
+The next one is serializable, which takes a while to wrap your head around, but with serializable isolation, there is a total order of operations that every client sees that is as if each transaction ran one at a time, and each one read at one moment of time and then committed at one moment of time with no other transactions operations interleaved. So it's hard to explain. It's also extremely intuitive. It's almost what you would assume.
+It's kind of like, assume that there was no concurrency, this is what it would look like.
+The pedantic detail here is that the order that the transactions appear to occur might not be exactly the order that you did them in for complicated implementation reasons.
+So if you have multiple different databases talking to each other, it might not be good enough for you because they might end up choosing different orders of operations.
+And so you can see anomalies there. But basically, serializable is the highest isolation level that you're likely to need in a relational database.
+I feel like that might be the default for some of the relational databases.
+Not 100% sure.
+I'm not 100% sure either. There's also a compromise, less than serializable, called repeatable read, which means that any single piece of data that you've read, you'll continue to see the same value for it for the duration of your transaction until you commit.
+And the way it's usually actually implemented is a slightly stronger level called snapshot isolation, where you just get a copy of the data at the point in time when you first started your transaction, approximately, and you just read as if you are always reading from that version of the data until you commit. So snapshot isolation is what people usually actually mean by by repeatable read and a lot of databases provided.
+And it's the default for MongoDB.
+When you start a transaction in MongoDB, you read from a version of the data for the rest of that transaction.
+Okay, interesting.
+Yeah, you did say that MongoDB typically doesn't have transactions as its kind of recommended default way.
+You know, look at a lot of the tutorials and stuff.
+People are just making updates and so on.
+But this is, didn't come out originally with MongoDB, but at some point, what version did you all add transactions, like actual transactions?
+>> I wish I could remember.
+>> Yeah, I don't remember either, but I feel like, there we go, how about that?
+>> Four.
+>> Four, I think version four-ish.
+>> Okay.
+>> Which we're on version six now, but that was quite a while ago.
+>> Yeah.
+>> You've got to pick to go do those transactions in Mongo, for example.
+>> Right.
+>> Whereas that's also true, say for Postgres or Microsoft SQL Server.
+You've got to actually do the transactional stuff in whatever code you're using to talk to that as well.
+It's just more visible in a lot of the tutorials and examples for those libraries, I think.
+MongoDB in general has taken a more kind of "show our guts to you" approach, where we, early on, the distributed nature of MongoDB, which was much more visible to our users than other databases, And transactions now, we kind of show you the details a bit more than other databases do, but that actually allows you to write more reliable code.
+The interesting thing about an SQL interface is that you can start a transaction, do a bunch of writes, and then send the commit message.
+And if you get some sort of error, like a network error, Perhaps you got disconnected, or the server crashed.
+You don't know, and you don't know whether your transaction committed or not.
+And if you reconnect, you don't know whether you will see the data that you committed or not.
+This is somewhat difficult to handle, and most people aren't aware of it.
+The MongoDB transaction API makes you think about this.
+The drivers essentially have you pass a function in, which executes the transaction code and that it's automatically retried if the commit fails.
+And so we give you the mechanism to ensure reliable transaction commits.
+- I see. - But it's more work.
+Yeah, sure. You can either be sure it happened or you have the mechanism to run it again.
+- Exactly. - Yeah, okay. Interesting.
+Let's look at two aspects here. One of the things is you spoke about anomalies and what might go wrong. The read uncommitted, I think people can probably conceptualize that pretty well, right?
+It's just as multi-step transactions are happening, other ones are potentially running and you could read something, either that transaction could roll back after you've carried on, or you could have just had something of the equivalent of a race condition, right?
+So, there's a term for that kind of anomaly, right?
+Each of these anomalies have terms I've learned.
+And you can definitely memorize them. And if you go to jepson.io, there's a lovely diagram of the relationship among all of the consistency and isolation levels.
+CB: G-Y-P-S-U-M?
+That is J-E-P-S-E-N dot I-O.
+Ah.
+Yeah. This is a researcher named Kyle Kingsbury, his website about consistency and isolation and testing. This is the best place, I think, to go learn about this stuff.
+Yeah, there's a lot of cool visualizations and stuff here.
+Yeah. For those watching on the live stream, we've got a tree diagram up that shows all of the isolation levels, all of the consistency levels that are commonly used, and how they relate to each other in terms of how, let's say, the serializable isolation is strictly stronger than read committed.
+Every anomaly that is prohibited by serializable is also prohibited by read committed.
+>> Got it. Maybe help us understand the read committed anomalies.
+The read uncommitted one is full of them.
+But maybe I'll just understand some of the things that can go wrong in the safer ones, like trying to decide between read committed and serializable, for example.
+>> Right. This was also my approach when I first started learning, [LAUGHTER]
+was to try to memorize these things.
+The reason why I'm not answering your question is that I don't think that this is the right approach.
+>> What would you suggest?
+>> I think the right approach is to step back and ask, Why do anomalies exist?
+And the answer, as I've come to understand it, is that databases want to permit more concurrency so that you can get higher throughput with multiple transactions at once.
+But you've got to sacrifice something for that, and what you've got to sacrifice is isolation.
+Some of these anomalies have to appear.
+And, you know, so why is that? Why do you have to make that tradeoff?
+Well, the short answer is that databases prevent anomalies by in some way locking pieces of data to prevent one transaction from modifying or even reading it if another transaction has modified or read it. And so the more things you lock, the less concurrency is permitted. And if you want to understand that in detail for each of the isolation levels and each of the anomalies, you could watch the video of my PyCon talk, which goes through like 20 or 30 line long Python implementations of databases that provide each of these isolation levels. So you can see why they need different amounts of locking. You can see why they permit different levels of concurrency. You can start to get a feel for what amount of concurrency each of them permits, and also what sort of anomalies each of them permits. And with With that in mind, for me at least, thinking about how these things are actually implemented gave me a much, made it much easier for me to then memorize.
+>> Sure.
+>> Read committed provides phantom reads.
+Why is that?
+What does that mean?
+Now I understand that because I understand how unimplementation might work.
+>> I think that makes a lot of sense.
+That really is the relationship that people should understand, right?
+there's an inverse relationship between sort of the data consistency and the lack of these anomalies and how much you can handle scale and concurrency.
+The stricter, the more consistent the data is, the less scale that you get.
+And so where do you live?
+Can you get to points where the database actually like locks up in kind of a deadlock situation?
+I'm going to show one of those in my PyCon talk.
+the serializable level of isolation is particularly prone to this. Basically, if--and I do this all with Star Trek memes. So I show an example where Sulu reads one piece of data and something which they're fighting over who gets to check out the shuttle to go to surface for a shore leave. And Sulu checks if Uhura has the shuttle and he sees no. But then Uhura starts a transaction checks if sulu has the shuttle. The answer is also no. So each of them tries to then check out the shuttle. But since they have each locked the row that the other needs to modify, they then deadlock.
+This then gets into fancy old database theory of deadlock detection and resolution, which is the the subject of many textbooks.
+But essentially, you're probably going to block for some period of time, and then a deadlock detector will come along and abort one of the transactions to allow the other to continue.
+- Right, making your code more complex, harder to work with, right?
+- And now your code needs to be able to handle this situation.
+If you are aborted due to deadlock, should you retry that transaction or not?
+That's now something that the developer needs to make a decision about.
+Okay. So all of this that we've discussed so far has to do with one or more database servers that just, the requirement is that it allows concurrent queries and updates and all that.
+On the other side, we might have some kind of distributed topology with, in MongoDB case, we have both replication and sharding, which maybe worth touching on those things.
+But in a lot of scale out situations, you know, you have some sort of data spread around, some kind of distributed database, or even you'll see like geo-replicated databases.
+You know, I want to have my data replicated in Asia and the US so that we can run our server-side code near data for those different users, right?
+That's the consistency, not the isolation side of your talk, right?
+That's right. So to review, isolation is a response to anomalies caused by concurrency on one machine.
+And then consistency is a response to anomalies that are due to replication in a distributed database.
+So the distributed database, you always write to one of the nodes or you read from one of the nodes for any particular operation.
+there are different rules about is there only one leader that can take rights or can any node take rights? Can you only read from the leader? Can you read from any node? Can you only read from some of the nodes? But no matter what database you're using, you always read or write to some nodes, and then they replicate rights to other nodes. And so there's always a lag because that replication takes time. The most obvious example is if you write to the leader and then immediately read from the follower, the data that you just wrote may or may not be there yet.
+So that's the source of inconsistencies, and those inconsistencies are called anomalies as well.
+And then there are multiple isolation levels, sorry, consistency levels, which allow or prevent various of those. This is not standardized, by the way. So here you're going to see different terms and then even more upsetting, you'll see some of the same terms, but they mean different things depending on which database documentation you're using or which paper you're reading.
+So I talked about three levels, eventual consistency, causal consistency, and linearizability in my talk, which I think is kind of a good sample, but this area of computer science is a lot less paved than isolation is.
+Yeah, I agree with that. And it also seems to me like it really matters for the particular database server that you're using, what its flavor of distributed means.
+My understanding from MongoDB is replication is largely about reliability, failover, uptime, the possibility of reading from a replica for some read scaling.
+>> Exactly.
+>> Whereas you might have another one, kind of with the example that I talked about with like, we want our data located in multiple geographies, and all of them are kind of the local database for those areas.
+So the types of issues you run into as well as the words you use, they probably vary somewhat, right?
+Because you're kind of solving different problems.
+Well, we both know the MongoDB one pretty well.
+So maybe give us the story on a replica set, which is all you talk about.
+>> Yeah.
+>> What's the motivation of a replica set and what are the challenges and different modes there?
+>> Ninety percent, 95 percent of people use MongoDB, deploy it as a three node replica set.
+Ninety to 95 percent of the time, as you said, their goal is failover. If the primary goes down, they want a very recent hot copy of their data available in a secondary, which will be promoted to primary as quickly as possible. And if you're writing to and reading from the primary, somewhat surprisingly, you can still see anomalies because there could be a failover in between the time that you wrote to the primary and the time that that you do that read, you might be reading from a different member which didn't get the copy.
+And so we've changed the default in the last few years, I think, to make every right weight to be replicated to a majority of the members. And then we've got a protocol that ensures that whoever becomes primary after a failover, therefore, is guaranteed to have that data.
+So with that setup, you're pretty well protected from anomalies.
+I'm sure that pedants and stress testers have found exceptions to this.
+So I'm not going to make any promises.
+>> Yeah. Maybe if your right to the primary is the thing that takes it down, potentially, something really, really instantaneous almost.
+>> But there are always edge cases.
+>> Yeah. But potentially, yeah. Okay.
+>> The real inconsistencies that you start to see is if you do secondary reads.
+So if you read from a follower, that can be useful because you're shifting load from the primary, or maybe the follower is located at a lower latency location on Earth to you, but it's always going to have some degree of lag compared to the primary. So by default, you're going to get what we call eventual consistency. Any write that occurs on the primary that gets acknowledged by a majority of the members will eventually be replicated to all of the members. So all of the members will pass through the same series of states as the primary does, at least the same set of states that the primary got majority acknowledgement of, to be extremely technical. But if you read from the primary and then a secondary and then a different secondary, you'll feel like you're jumping around in time because you'll always be reading a different version of the data and some of those versions will be older than the last version that you saw.
+In MongoDB, in order to make that happen, you've got to pass extra flags opting into this read from secondary thing, right? In the driver?
+Yes, that's right. We call that read preference and there are a bunch of options, but the default is just to read from the primary and not see a lot of inconsistencies.
+So you mentioned a couple, this is the eventual consistency issue.
+What are some of the other consistencies that you talked about?
+There's causal consistency, which I think is quite nice.
+You can get it in MongoDB by using the Sessions API.
+And causal consistency ensures that every write that you do and everything affected by that write, you will be able to read its consequences.
+And here again, I think talking about the implementation really makes things a lot clearer than talking about the abstract mathematical...
+- Of course, yeah. - ...definition.
+So here's the way MongoDB does it.
+You connect a client, you do an update.
+The primary applies the update, sends it to, waits for a majority of members to acknowledge it.
+And then the primary also increments a counter.
+So let's say that counter now has the value four.
+And so it replies to the client and says, "Your update succeeded, and the counter value is now four. Now you can read from a secondary, you can say I want to read some value but don't reply until your counter is at least four. Now in the background, secondaries are replicating from the primary and they're also replicating the primary's counter value. And so only when they get to the number four or past do they reply to your query and they're also guaranteed at that point to have applied that update that you just sent to the - Yeah, that's a really cool solution.
+You know, one of the problems, if you're allowed to read from secondaries, is imagine you're going to create a new account, let's say, on a website.
+Go in there and say, "Here's my information.
+"Yes, my password has a lowercase and uppercase "and a special number and," you know, whatever, right?
+Say create, it inserts it into the primary.
+It response redirects back to the server and says, "Great, you're on your account page.
+"Let me just pull back from the database who you are to show you your details on the page.
+And if, you know, that's basically instant, right?
+Down to ping time to the server.
+And you could potentially end up in a situation where you've just created an account, but then you hit a replica that has yet to receive that.
+So what you're saying is, if we use this concept of sessions, we'll get some kind of point in time marker that we're going to wait until just MongoDB behind the scenes will basically block and say, "We're still waiting on that answer. Hold on for who it is until that replica makes that point in time or further." Exactly.
+Okay, that's excellent. Question from the audience from Marwan says, "How do you keep the counter store consistent if you need to replicate it across regions?" The counter at any given moment in time will have different values on different replicas.
+that's actually its purpose, is that it represents how caught up each of the members is on their shared sequence of operations. Once you have replicated a given operation, you've also updated your counter value to the counter value that the primary had when it did that operation.
+And so you're now consistent, but the primary may be ahead of that as well. There's never any the absolute truth. There's only a sequence of operations in your position in it.
+>> I think another important piece of information here is that you're writing to the leader.
+The leader always knows what its point in time number is and it can increment that.
+>> That's right.
+>> Right? And so that thing's always going to be consistent and auto-incrementing forward.
+It's just a matter of how caught up are the replicas, right?
+>> Exactly. And if you want the MongoDB terms for these, that sequence of operations is the op log and that counter is the op time.
+>> Yeah. That's basically that op log.
+That's the thing that gets pushed to the replicas and is copied as it goes.
+>> Exactly.
+>> Which brings us a little bit back full circle to your talking about these time series stream data.
+It's like replicating across these clusters.
+>> Yeah, that's right. The op log is the original streaming data at MongoDB, and people have done all sorts of hacks on top of it.
+We're making that kind of mechanism more and more general.
+So you can do all sorts of different things with streams of operations.
+>> What should we throw in here before we call it?
+>> We can mention the final consistency level, which is called linearizability.
+It's pretty easy to understand.
+If you do an operation and then you try to read the results of what you just did, from any member, you are guaranteed to see that result.
+It's pretty much the strictest level of consistency, but it's also quite expensive and slow.
+So MongoDB does provide this, but it requires a lot of machination behind the scenes.
+So don't use it unless you need to.
+But if you do need it for something like, if you're updating users password, where you want to make sure that every attempt to read that password will always get the freshest copy, then linearizability is the consistency level to use.
+>> Excellent. They all sound pretty straightforward, but the consequences of choosing these different levels, and then what that means for how you write code around those systems is pretty complex.
+Also, just this whole conversation has made me appreciate how much databases serve as the actual concurrency coordinators of modern applications.
+>> That is a great point.
+>> Yeah. You can write web apps or APIs or queues and just almost forget that concurrency is happening, and you just talk to the database.
+How can you forget that?
+Because it falls upon the database to keep this stuff hanging together.
+>> Yeah.
+>> Cool.
+>> In the show notes or wherever, we should drop a link to a blog post that I wrote, which has a link to lots of papers and other places where you can learn more.
+because this is a very hard topic to learn, especially from a podcast or a conference talk.
+You need to read multiple times, maybe make flashcards. But I think this way of talking about things where we think of, okay, isolation is a way of hiding the consequences of concurrency and consistency is a way of hiding the consequences of replication.
+That was a useful breakthrough for me, and so I hope it's useful for other people too.
+Yeah, I'm sure it will be. And I'll definitely link this article in the show notes along with the consistency diagrams and all the other things.
+Great.
+Yeah, cool. All right, Jesse, thank you for being here. It's been really great to have you back on the show.
+Thanks a lot, Michael.
+This has been another episode of Talk Python to Me. Thank you to our sponsors. Be sure to check out what they're offering. It really helps support the show. Take some stress out of your life. Get notified immediately about errors and performance issues in your web or mobile applications with Sentry. Just visit talkpython.fm/sentry and get started for free. And be sure to use the promo code "talkpython" all one word. InfluxData encourages you to try InfluxDB. InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics. Try it for free at talkpython.fm/influxdb. Want to level up your Python? We have one of the largest catalogs of Python video courses over at Talk Python. Our content ranges from true beginners to deeply advanced topics like memory and async. And best of all, there's not a subscription in sight. Check it out for yourself at training.talkpython.fm. Be sure to subscribe to the show, open your favorite podcast app, and search for Python. We should be right at the top. You You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening. I really appreciate it.
+Now get out there and write some Python code.
+[MUSIC]
+(upbeat music)
+(upbeat music)
+(upbeat music)
+[MUSIC]

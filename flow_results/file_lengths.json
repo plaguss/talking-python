@@ -395,5 +395,6 @@
   "416-sports-analytics.txt": 12382,
   "417-tdd-prompt-engineering.txt": 16368,
   "418-secrets.txt": 15576,
-  "419-pystack.txt": 18159
+  "419-pystack.txt": 18159,
+  "420-isolation-and-consistency.txt": 10446
 }
