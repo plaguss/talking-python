@@ -1,0 +1,749 @@
+When you think of Netflix as a technology company, you probably imagine them as cloud innovators.
+They were one of the first companies to go all in on a massive scale for cloud computing, as well as throwing that pesky chaos monkey into those servers.
+But they have become a hive of amazing Python activity from their CDN, their demand predictions and failover, security, machine learning, executable notebooks, and lots more.
+The Python at play is super interesting.
+And on this episode, we have Zorin Simic and Amjith Ramanujan on the show to give us this rare look inside.
+This is "Talk Python to Me," episode 421, recorded June 8th, 2023.
+(upbeat music)
+Welcome to "Talk Python to Me," a weekly podcast on Python.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances, there are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+Download your free trial of PyCharm Professional at talkbython.fm/done-with-pycharm.
+And it's brought to you by InfluxDB.
+InfluxDB is the database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try them for free at talkbython.fm/influxDB.
+Hey, Soren.
+Hey, MG. - Hello, Michael.
+- Hello, Michael.
+to talk Python to me, you guys.
+It's excellent to have you here.
+- Thank you very much.
+I'm a big fan, so it's very nice to be on the show, actually.
+- Awesome, yeah.
+We've got to meet a couple times at PyCon, which is honestly one of my favorite purposes of PyCon is to meet people and just hang out and have those experiences, you know?
+- Yeah, absolutely.
+- Yeah, and nice to have you on the show, Zorin.
+- Yeah, I'm a big fan as well.
+- Thank you very much.
+That's very kind of both of you.
+So we're gonna talk about a pretty awesome tech company, I think Netflix, you both work at Netflix, and people who are watching the video, you're coming to us from the Netflix headquarters, which I've got the chance to be there for like some Python stuff going on there before as well.
+Got cool posters and like sort of movie studio feel.
+So that's the backdrop you both have going on, which is excellent.
+- Yeah, yeah.
+It's pretty nice to work at Netflix.
+It's a very good company.
+I'm very happy.
+- A lot of Python we're gonna learn.
+- Yes, yeah.
+We do use a lot of Python, yeah.
+- Excellent, so we're gonna talk about Python and Netflix, a wide ranging sort of survey of a lot of projects you all have created, how you're using it, some other ones that both of you personally created, either tied to or not tied to Netflix, but I think people are gonna really enjoy this look inside what you all got going on.
+Before we get to that though, let's start with your stories.
+Quick introduction, how'd you get here working on Python?
+Sorin, you wanna go first?
+- Yeah, so I was hooked into programming Ever since I saw my first computer, I finished at 13 in middle school.
+It was an Amstrad CPC.
+Right.
+I was, yeah, that was the thing I wanted to do.
+So, yeah, I started programming as a hobby at first.
+And fun fact, way back then, later on in high school, one of my math teachers told me, Hey, do something real.
+Don't, don't do programming.
+It's like a dead end.
+You know, you won't be able to find a job.
+Did they tell you things like these drag and drop visual tools are going to replace all the programmers and all like the low code of the eighties and nineties, maybe?
+Yeah, back then, I guess it was very, well, didn't seem that obvious.
+Yeah.
+And then, yeah, I decided to go computer science anyway, because that's what I wanted to do.
+And then I spent the vast majority of my career in a language that is not very much known or used, I think, iPhone.
+So I spent more than a decade on doing iPhone mostly.
+And then I discovered Python once I joined LinkedIn in 2011.
+And that's when I kind of, well, got hooked and decided to do more and more things Python.
+And now at Netflix, even more so trying to support NetPython across the board.
+Yeah.
+You were kind of doing meta Python in the sense that your team does a lot of stuff to facilitate other people doing Python too, right?
+Exactly.
+Yes.
+Yeah.
+That's our, that's our team at Netflix.
+Like we enable other Python developers to be more productive by building tools or building the infrastructure necessary to ship their code faster or build their products sooner, things like that.
+Yeah.
+Cool.
+How about you Amjith?
+Oh, I got introduced to programming in high school.
+We had like one hour of a computer lab every week.
+I got to learn GW basic, that was my first language.
+It was fantastic.
+I still have fond memories of like trying to draw circles on the screen.
+And then I went to college, I learned C and C++.
+I liked those, but then after I got a job, I wanted to learn, you know, how to be a better programmer and somebody mentioned, you know, oh, functional programming is the bee's knees, you should actually, you know, if you learn how to do functional programming, your general programming will get better and the best language to learn functional programming is Haskell.
+And so I took a book called, learn new Haskell.
+And then I went through like the first few chapters and, and it was mind blowing.
+It was like a really fantastic language.
+And, and I got first introduced to a concept of REPL and like trying out like little snippets in the interpreter and getting answers and it was fantastic.
+And I got introduced to lists comprehension in Haskell and it was just mind blowing.
+It's like, you know, without having to write a, write like five lines of for loop, you could just, it's a single line thing.
+And I quickly realized that, you know, you can't find actual jobs writing Haskell or at least, you know, not, not, not in a good way.
+So, so I figured out like, what's a language that has list comprehension that is actually employable, you know, that, that I could find jobs in.
+That's how I found Python because I came to Python because of list comprehension.
+Oh, awesome.
+Yeah.
+Okay.
+Learn you a Haskell for great good, a beginner's guide.
+Is that the book?
+That is the book.
+Yeah.
+And it's actually still available online for free that anybody could read, I'm fairly certain.
+And I actually bought like a paper copy of the book.
+It's a good book.
+It's a fun one to go through.
+- Yeah, it looks like it's really got a playful nature to it.
+- Yeah, exactly.
+- Yeah.
+You know, your thoughts about less comprehensions really connects with me as well.
+I guess my first exposure to something like that was Link, L-I-N-Q and C#, which is, it's honestly, I think it's better than Python less comprehensions.
+I wish Python had just a little bit more.
+- Nice. - A little bit.
+Just one or two things more.
+For example, wouldn't it be nice in a list comprehension if you could specify a sort?
+'Cause I find myself often doing a list comprehension and then sorting the thing in the end afterwards.
+But if you could just say order by and give it an expression like you would to pass a lambda over to a, you know.
+So there's room for more.
+What pep do I need to write to get sort in a list comprehension?
+I don't know, but I want it anyway.
+Yeah. So I really think that that's a cool language feature.
+And you know, it's also one of the areas that they're applying some of these speed-ups in the faster C Python work that's coming, they're doing, you know, list comprehensions for isolation purposes and Python three are basically hidden function calls with their own stack frame and variables that you, you don't actually see, right.
+You don't write it, but that's kind of the execution level.
+And now they're inlining those to make them a little bit faster.
+Yeah, I think the faster Python team is doing like a fantastic job.
+Like the, there was a talk that I attended at PyCon, not this year, but the previous year where they introduced like switch case, how they were doing the, the case statements, it's not the exact switch case, but you know, I coming from C and C plus plus, I knew what switch cases are.
+And when I saw what, what is possible with the pattern matching, like structural pattern matching in Python, it's like take switch case and then like turn it up to 11 and that's what this is.
+And you're right.
+I mean, there is always more that can be done, but I think it's going in a great direction, I think it's fantastic.
+- Yeah, let's talk about that.
+I mean, we're going to dive into the details of Netflix and stuff, but just, you know, this whole Python 3.11, 3.12, these are really big performance improvements coming along.
+- Yeah.
+- Are you able yet to take advantage of those at Netflix?
+And is that making a big difference?
+You know, like, are you guys still running, you know, 3.8 or are you more closer to the cutting edge in terms of releases?
+- So I think one of the advantages here at Netflix is that every team has the freedom to choose the tools that they need to use.
+And it's great and also kind of painful for central teams because now, you know, there is like a bifurcation of all kinds of different versions out there.
+But where I'm going with this is that every team is allowed to choose what is what they need to use in order to get their job done.
+And so my previous team, we were at the cutting edge, like we used 3.11, or we still use 3.11 in the projects that we built, and the services that we use.
+And it is a nice boost, like we could certainly see.
+So for instance, there is like a periodic job that runs, and it's like a sort of a cron job that runs every five minutes or so.
+And we had put in like so much optimization so that it will actually finish within the five minutes because we were doing a lot of data crunching and so forth.
+And just so we don't like stack up the cron tasks.
+But when we switched from, I think from, like, we did jump from 3.9 to 3.11 directly.
+We did not like go to 3.10.
+But then when we jumped, it felt like, you know, things that were taking like four minutes, we're now finishing in like two minutes.
+And it was like a huge improvement that you could see.
+And like, it felt very rewarding to see that.
+So yeah, absolutely.
+So every team gets to choose what they want to use.
+And our job as a central Python team that Zorin and I are currently part of is to try and enable people to use that, use whatever is the latest that is available.
+So, you know, whatever internal tools that we have, we have to make sure that it actually gets exercised in the latest Python version that got released and make sure that everything is building and deploying as they are supposed to do and so on.
+- Okay, excellent.
+That's pretty cool, that story of speeding up your Cron jobs.
+That's non-trivial, and it probably wasn't a lot of work to move from 3.9 to 3.11.
+I know my upgrade path was rebuild some virtual environments on the server, and now we're good to go.
+- Exactly, yeah.
+- So, René, anything you want to add about that?
+3.11, faster CPython side?
+- Oh yeah, absolutely, it's so faster.
+So much faster.
+Yeah.
+The main issue on when upgrading is the lack of wheels, if you're like stuck on older libraries, but we do have a, like a few numbers, like the most used right now is Python 3.10 across the board, right?
+It will depend on the team right now.
+Everybody is upgrading at their own pace and 3.11 is starting to grow a bit.
+But yeah, most used right now is 3.10 statically.
+You should look at it.
+- Honestly, that sounds really quite good for a company the size of Netflix and how much Python you're doing.
+That's pretty close to pushing the envelope.
+- Yeah, there are still some teams that are sort of stuck on 3.8 or 3.7, I wanna say, simply because they provide a platform that allows data scientists to write their code and they have this pre-built image with all of the necessary libraries pre-installed in there.
+And so they have like a pretty tight control over which libraries will get upgraded on what cadence and so on.
+And so for them, I think they have, they're still, you know, running on 3.7.
+And I'm sure when they switch to 3.10 or 3.11, it's going to be like a screaming fast improvement.
+So looking forward to that migration to happen.
+Yeah, excellent.
+This number is very static, right?
+It's a number of like short pythons across repos.
+But yeah, dynamically, right?
+Like you may have lots of instances who still run on 3.7, and they will massively move to a, so that team is moving from 3.7 to 3.10, for example.
+- Right, yeah.
+- Yeah, so upgrade paths.
+- This portion of Talk Python to Me is brought to you by JetBrains and PyCharm.
+Are you a data scientist or a web developer looking to take your projects to the next level?
+Well, I have the perfect tool for you, PyCharm.
+PyCharm is a powerful integrated development environment that empowers developers and data scientists like us to write clean and efficient code with ease.
+Whether you're analyzing complex data sets or building dynamic web applications, PyCharm has got you covered.
+With its intuitive interface and robust features, you can boost your productivity and bring your ideas to life faster than ever before.
+For data scientists, PyCharm offers seamless integration with popular libraries like NumPy, Pandas, and Matplotlib.
+You can explore, visualize, and manipulate data effortlessly, unlocking valuable insights with just a few lines of code.
+And for us web developers, PyCharm provides a rich set of tools to streamline your workflow.
+From intelligent code completion to advanced debugging capabilities, PyCharm helps you write clean, scalable code that powers stunning web applications.
+Plus, PyCharm support for popular frameworks like Django, FastAPI, and React make it a breeze to build and deploy your web projects.
+It's time to say goodbye to tedious configuration and hello to rapid development.
+But wait, there's more.
+With PyCharm, you get even more advanced features like remote development, database integration, and version control, ensuring your projects stay organized and secure.
+So whether you're diving into data science or shaping the future of the web, PyCharm is your go-to tool.
+Join me and try PyCharm today.
+Just visit talkpython.fm/done-with-pycharm, links in your show notes, and experience the power of PyCharm firsthand for three months free.
+PyCharm, it's how I get work done.
+Let's start by talking about kind of the broad story of Python at Netflix.
+Maybe we could start with what you all do day to day in terms of what's your role, 'cause you kind of support other people's Python as I hinted before.
+So maybe we can get a sense of what you all do day to day and then we'll, Amjith you wrote a nice blog article That's a big, broad, pure survey of how Python's being used in all these different places.
+So maybe start with what you all do day to day on your, on your team, and then we'll go into that.
+Yeah, sure thing.
+I've been with Netflix for about six years now.
+And previously I was in a different team and we were doing fail overs, which was a way of running, you know, if Netflix ever goes down in one of the AWS regions, we are the team that gets paged in and we go and move all the traffic from that region to another other two regions that we run in.
+So that's what I was doing up until like February of this year.
+And let me just take a step back real quick with you.
+Netflix is kind of all in on AWS, right?
+Like there's been a lot of stories about how you all have set loose the chaos monkey into your data centers and how you worked on failover from AWS regions.
+And so I don't know if you all are the largest users of AWS, but certainly one of the more interesting, complicated deployments out there, right?
+Yeah, so I think we were the earliest adopters of cloud computing when AWS first came out.
+And so AWS has used as the poster child for, you know, see big companies can run in cloud, and you don't have to be on prem. And so we think of them as partners, not so much as, you know, like this client owner relationship or anything like that. So we consider AWS as our business as partners. And yes, we are full in on AWS. And Chaos Monkey, even now, yes, it is, it functions in AWS, like it goes around and just inside our VPC, it does terminate instances occasionally or not occasionally, like once every day, one instance every day on every service.
+So that is so wild. I mean, obviously, you don't want to set it loose on other people's AWS instances, right? Just Yeah, that's a really interesting way to force people to think about developers and infrastructure folks to think about what happens if the cloud somehow your server dies, it may be sending the clouds fall, right? It's just like, okay, there's a Linux machine running and that thing died. It could have been running anywhere. It happened to be an AWS, but to force them to think about outgoing, like we will, it's not a eventuality. This will happen. And so you plan for it.
+Yeah, it's even more than just the idea of like, it will happen. So we plan for It's more like, you know, it's a way of building software where you need to build software that's resilient and has enough fallbacks built in.
+So for instance, if you are not able to reach the database, do you have a cache in front that can sort of, you know, keep the thing going for the few network calls that are failing to reach the database?
+Those are like basic common things, paradigms that have become commonplace nowadays in software development where, you know, building fallbacks automatically is like standard practice these days.
+these days. But when Chaos Monkey was created, which was about 10 years ago, these were like new concepts that people were not using. And it was assumed that once you have a server and you put your software on the server and you run it, it's basically done. Until you do the next deploy, which takes another month or so to refresh that server, refresh that code. But that all changed once we went to cloud, where we started doing deployments on a daily basis or maybe even more hourly basis and things like that. And so when you are doing that, when you are shutting down one server with old version and bringing up the new server with a new version, how are you going to make sure that the connections are not going to fall?
+And how are you going to make sure that the network continuity continues and so forth?
+So yeah, Chaos Monkey was just introduced as a way to ensure that people are building software in a way that is resilient.
+And this is just a way to sort of test that on an ongoing basis.
+Yeah, it's quite an operational challenge.
+I mean, I don't recall seeing Netflix saying, our scheduled maintenance is coming up on Sunday, we'll be down for five hours.
+Not acceptable is it?
+It just makes you laugh to even think about it.
+Especially not on a Sunday.
+I've even seen government sites, I can't remember which government it was, saying that the website was closed, like the website had business hours.
+That's a different deal.
+Like, you came at night, like, "Oh, you can't come here right now." It's like, "What? It's the web. I don't understand what's going on." All right. So let's go through this blog post that you wrote here, entitled just Python at Netflix on the Netflix technology blog.
+- Technology blog.
+Yeah, so you wrote this in preparation of PyCon.
+This is PyCon 2023?
+- No, this was 2019 actually.
+So this is old by at least two or three years now.
+- Okay, yeah, you had pointed out before we press record that some of these projects mentioned here that used to be internal things are now also open source.
+So there's a little more access to these than the blog posts might indicate.
+- Yeah, some of the things that are mentioned here, yes, they have been open source since then.
+So specifically the one that I remember right now is Metaflow, which is an infrastructure, it's like a platform orchestration infrastructure framework that is used by our machine learning organization where scientists would try and build their model or they use existing models from like XGBoost or like tons of other Python libraries.
+And their interest and their expertise lies in crafting those models, training those models and building the correct algorithm to do the predictions and so on.
+They are not so interested in making sure that enough compute is available to run these models, or they're not interested in making sure that the plumbing works, or this model's data is now going to the next step of this algorithm, or even getting it deployed and making it available in the production environment.
+So that's all that abstraction is taken care of by Metaflow.
+So Metaflow is a project that was mentioned here, and that allows you to make it easy for machine learning folks to get their system running and as well as deploying it out to production.
+And now that is now open sourced and it is available for folks to use.
+And I think some other companies have actually adopted to using that as well.
+So, yeah.
+- It kind of operate like a DevOps automation for machine learning.
+So the people they're writing, creating the models and the data scientists don't have to also be DevOps people.
+- Right, it's slightly more than DevOps as well because it also does the pipelining work to make it possible for someone to, you know, bring the data from this database and load it in, all of that work is already taken care of, or at least there are libraries that are built into Metaflow that makes it possible to bring those in.
+And then it allows you to also do orchestration.
+So for instance, machine learning models typically happen in multi-steps and multi-stages.
+And so the data gets processed by this function, and then it gets moved on to this other function, and then it gets moved on to this other thing and so forth.
+And so it does the plumbing to make sure that the data can flow through this topology and actually produce results and so on.
+- Yeah, you probably have enough data that that's a lot of data to move, so.
+(laughing)
+All right, a quick question from the audience before we dive into the topics here.
+Diego asks, "On such a big platform "with so many software engineers "with different coding practices, "do you all get together and follow some set norms "by Netflix, or is it more team by team basis?" - It is very much team by team basis.
+So each team has their style and the areas that they focus on.
+So for instance, like machine learning engineers are not going to care too much about how do I make this production grade super heavily fortified or whatever?
+And security engineers might be focusing on completely different things.
+So it is different.
+But at the same time, I do want to mention that there are certain norms that are common across the entire company where, you know, so for instance, Chaos Monkey is one of those things where since Netflix operates in a way where, you know, every team is given the freedom to choose and operate the way they see fit, there is no edict that can come from a VP or a president that says, like you must write code in this way, like that doesn't happen.
+And so what that means is, how are you going to enforce, like, you know, you have to write resilient software, or how are you going to make sure that your software will continue to run if one of the servers out of the hundred servers has gone down?
+And so there is not a good way to enforce that.
+And Chaos Monkey was created as a way to enforce that, which is, yes, we're not going to be able to tell you how to write software, but this particular service that exists, it's going to go around killing servers.
+And so you better make sure that your software is actually resilient to servers going down.
+So that's a way in which we influence people to write the--to produce the right outcome without telling them how to do it.
+- I see. So sort of, you agree on a common principle of design for failure and design for resiliency, and then it's up to people how to make that happen.
+- Yes, and also, we have the concept of paved paths, or paved road, which is we have certain libraries that are made to operate within our infrastructure.
+So there is an internal discovery tool, and there is an internal metrics collection tool, and there is an internal, you know, like a failure recovery tool and so forth.
+And these libraries that are provided in these languages, they make it really that simple to just integrate with these services.
+And so it makes it the obvious choice for people to start using those libraries rather than, you know, paving their own path, for instance.
+So we try and make it as easy as possible to do the right thing.
+And so people generally fall into that paved road solutions that we have.
+Excellent.
+And we try to make it also now, especially as a central Python team, to promote good practices, right?
+Like, you should have a pipeline, you should choose a release strategy, you should have tests, and we help.
+If you don't, we can help you set that up and choose a good relevant release strategy for you.
+Excellent. Yeah, that's really good.
+So let's dive into this blog post.
+Now it was written by Amjit, but Soren, jump in as well as we talk about, please.
+So the first one is related to bandwidth.
+To somewhat like delivering the content.
+And there's some interesting articles and stuff that says how much of the internet's bandwidth does Netflix use?
+And I don't know how accurate this is, but maybe give us a sense of like, you got to have a lot of traffic, right?
+Yes.
+So I think when I first joined Netflix, I was told that we use about one third of all of internet's bandwidth, but that was back in 2017.
+So things have changed quite a bit since then.
+Our use of bandwidth is slightly interesting in the sense, the actual, when somebody goes to their website and they're browsing around, all of that data is served directly from AWS servers.
+And so we have servers running in AWS that does the search functionality, the thumbs up, the thumbs down, you're selecting something and reading the review or looking at related things and whatnot.
+But as soon as they click on the play button on a particular video, the actual video file itself is not streaming from AWS, but instead it's coming from a CDN called Open Connect.
+And this is a proprietary thing that we built where we ship these CDNs to various internet exchanges that are already filled with the right videos and they get populated with the correct videos that are getting released overnight or on a regular basis.
+The reason we do that is because we want the videos to stream from the closest possible place for the end user.
+And so when a end user in Florida clicks on it, it's coming from an internet exchange that is located in Florida.
+And that's why you don't see a lot of buffering when videos are playing from Netflix is because there's, you know, it's inside their, their network to a large extent, that's our open connect team.
+And that's, that's what they do.
+And yeah.
+Yeah.
+That's, CDNs are awesome.
+And they really are just, they're kind of a bit of magic performance dust you can sprinkle on sites.
+That works for CSS and JavaScript and stuff, but when it comes to large content, then it makes all the difference.
+So in the blog post you write, let's see, yeah, it says, "Various software systems "are needed to design, build, and operate "the CDN infrastructure, and a big part of them "are written in Python.
+"The network devices that underlie a large portion of it are mostly managed by Python and so on.
+Give us a sense of where Python fits in this Open Connect CDN that you all run.
+Sure. Yeah. So the CDNs themselves run like high performance code to stream the video.
+Obviously that software is not written in Python.
+But the software, all the software that orchestrates and makes sure that these CDNs are remaining healthy, getting metrics out of them, as well as managing them and forecasting like what sort of videos are going to be going into these CDNs and so forth.
+those are all orchestrated using Python applications.
+So these are all internal tools.
+There's like an OC tools team.
+OC stands for the Open Connect, which is the name of the CDN.
+And OC tools team is the one that builds that.
+And they use quite a lot of Python for not just tracking our CDNs, but also for projecting, you know, which videos and what shapes they should be going into.
+So for instance, like to give you a quick example, like if we are launching, let's say like Stranger Things, like the newest season, we know for a fact that these videos are going to be, you know, they're either going to be streamed like 90% of the time from television, like a 4k definition television, or people are going to be watching on their iPhone. So all these videos get encoded in different formats, like for, for different resolutions. And how much do we put into the CDNs and how do we get them prepared?
+Do we need like multiple copies so that multiple streams can be read without having to, to have contention and so on. Things like those kinds of projections, those are all done using Python applications. Yeah.
+You probably can't put every version of every video at every location all the time, right?
+I don't know how much that is, but that's a large amount of video content, large load of files.
+You probably got to predict, right?
+These we can fall back to, you know, letting them stream from some higher upstream thing, but then it'll get cached after it gets viewed a little bit.
+But these were pre-loading, right?
+Yeah, yeah. Actually, Zorin used to work in the team that did all the encoding in different shapes and sizes.
+and they use quite a bit of Python as well, he'd be able to tell you more about that stuff.
+Yeah, did you just have like a huge office, like a whole building full of GPUs and just go in the whole time?
+Encoding is a lot of work. Yeah, tell us about this.
+Yeah, encoding is a lot of work.
+That was my original start here and we do a lot of Python as well.
+And yeah, we sum it up, we kind of try and scour, scavenge as many instances that we can put our hands on.
+So if we have any, say, AWS reservations, that it so happens that nobody's using right now, we come and grab them and spawn our workers dynamically on it as much as we can.
+- Interesting, almost like grid computing, like a steady at home.
+- Yeah, exactly.
+- Like steady at home, yeah.
+- And if we do have something like we have this high priority, well, you know, there's not enough, like kind of workers laying around, then we can go and get some on the spot, you know, market or, well, get to grab more reservations if need be. So that is the, the encoding is basically we take these big master files, right? Like the, these originals and we encode them for every single variation where it makes sense, like for this TV, for that phone, for, you know, Android phone, iOS phone.
+What is the product of all the different resolutions and different platforms?
+How many video files do you have to make for how many formats do you have to have for one movie?
+Do you know?
+That changes per need.
+And, you know, we kind of keep fine tuning how we want the smallest files with the best quality.
+Right.
+So that keeps evolving.
+And sometimes we re-encode the full catalog because now we have like a better way of encoding, say, anime things versus, you know, action movies versus like, it gets to us.
+I see.
+You might choose a different encoder for a cartoon like thing versus the planet earth type of.
+Yes.
+Yeah.
+Okay.
+Yeah.
+Yeah.
+And all of this, basically by way of a product of all of this ends up on OpenConnect.
+I mean S3, but also OpenConnect.
+Yep. Excellent.
+One thing in there that is mentioned on my team, very interesting project called vMath.
+So that is written in Python, it's machine learning.
+And once you have encoded, right, like let's say you're trying a new way of encoding to make the files even smaller, right?
+You want to know during, while you're researching, right?
+you want to know, did you come up with a very good, better encoder than before?
+So VMAF is like a little bot that will look at encoded new file and give it a human-like score, like what quality would the human assess this to be?
+And it has to be, you know, basically excellent quality, get a high score, I think 90 out of a hundred, roughly, to pass.
+And then this is better, right?
+Like we have a smaller file, but the quality is still excellent and perceptibly it's as good as before, but just a slightly smaller.
+Then we could decide and re-encode the full catalog.
+I see. That's really interesting.
+So what you're telling me is you have an AI that you just make watch Netflix movies all the time.
+All the time.
+All the time.
+And we have other AIs that watch the whole catalog, for example, and find where text appears, say.
+you know, so that when we put subtitles, we can move them up or down, you know, to not put text on text and all kinds of metadata, like, where can we find landscapes? Where does broad pitch show up? Things like that. Incredible. I had no idea. People are always full of a lot of surprises. This portion of Talk Python to Me is brought to you by InfluxData, the makers of InfluxDB. InfluxDB is a database purpose built for handling time series data at a massive scale for real-time analytics. Developers can ingest, store, and analyze all types of time series data, metrics, events, and traces in a single platform. So, dear listener, let me ask you a question.
+How would boundless cardinality and lightning-fast SQL queries impact the way that you develop real-time applications? InfluxDB processes large time series datasets and provides low-latency SQL queries, making it the go-to choice for developers building real-time applications and seeking crucial insights. For developer efficiency, InfluxDB helps you create IoT analytics and cloud applications using timestamped data rapidly and at scale. It's designed to ingest billions of data points in real time with unlimited cardinality. InfluxDB streamlines building once and deploying across various products and environments from the edge on premise and to the cloud. Try it for free at talkpython.fm/influxdb. The link is in your podcast player show notes. Thanks to Influx Data for supporting the show.
+And I think the VMAF software that's written in Python, I believe that is open source, right Zorin?
+It is. It is open source. Yes.
+And I think it's one of the Emmy award winning software. I did not know that software could win Emmy awards before this one. And it's kind of, it, it apparently won an Emmy award for something videography or something. Probably. Yeah. Wow. Yeah. That's awesome. All right. The next major section is demand engineering. Yeah. This is kind of like DevOps type stuff, right? Keeping things running capacity plan. Yes, that is exactly right. Yeah. That was the team that I was in previously.
+And the regional fail overs is the one where I mentioned where you could traffic from one of the of the AWS regions into the other two regions.
+So we run in three separate AWS regions, and any time any of those regions is having a difficulty, we can easily move the traffic to the other two regions without users even noticing that there was a glitch or any kind of issue there.
+- How long does it take?
+If you say you've got to move 50% of the traffic out of US East, Virginia, to somewhere else, is that hours, minutes?
+- So the fastest we have done is, So on average, it takes about seven minutes to do all of that.
+And that was our target.
+So when I first joined, I was given as a target.
+It used to be around 45 minutes at the time.
+And we built some, you know, interesting things to make it possible to run it inside seven minutes.
+But the fastest we've done is like around five minutes in like an emergency where, you know, oh God, the entire region is tanked and people in the US are not happy about this.
+Let's, let's move as fast as we can.
+We can do it in five minutes.
+Doesn't happen often, but you know, when it happens, especially, you know, when AWS Virginia goes down because a quarter of the internet stops working.
+Sure.
+But it's not just AWS that goes down.
+Sometimes sometimes we shoot ourselves in the foot.
+One of the interesting things to make sure that we release software that is safe is we do something called regionally staggered releases.
+And so when a new software or when a new version gets released, since it's like hundreds of microservices that are running inside of Netflix to make it all possible, every service will deploy.
+and when they start to deploy, they deploy it into a single region, wait about like five to ten minutes to make sure that nothing bad has happened, and then they proceed to the next one and then the next one.
+And so when they release it to the first region, they can either, if they find out that it's bad, they can either quickly roll it back, or we could just evacuate out of that region, because we can do that in like under seven minutes.
+And so if the rollback takes longer than seven minutes, then a call will be made by the core team, which will say, "Let's evacuate out.
+we haven't figured out what the problem is.
+So and then, you know, we evacuate and then we'll debug, you know, oh, which service did a release and what do we need to roll back and so on.
+Because there are like hundreds of services that are simultaneously releasing at the same time.
+So it's like quickly trying to identify which service that we need to roll back can sometimes be tricky.
+So we have used failovers for that as well.
+Yeah, so it's not just AWS's fault.
+Yeah, sure.
+And I don't mean to pick on AWS, because all these data centers go down.
+The difference is when AWS goes down, it's like the internet goes down, you know, it's like the observability of it.
+So why?
+Cause so much runs on there.
+It's like that in CloudFlare when they go down to you're like, Oh, I see everything's broken.
+Okay.
+Yeah.
+And when, when sites go down in production, even for places way smaller than Netflix, it's really stressful and you might make it worse by trying to fix it.
+So the ability to just go, let's buy ourselves some time to figure this out and just get everyone out and then we're going to look at it and then we'll we can bring them back.
+That's pretty cool.
+You did write an article called how Netflix does failovers in seven minutes flat, which I'll put in the show notes so people can read more about that if they want.
+- Thanks.
+- So this demand engineering side, talk about obviously tools are primarily built in Python there.
+You got some NumPy and SciPy and even the B Python shell.
+Tell us about some of the Python stuff going on here.
+- Before I joined Netflix, like when I actually first started learning Python, I loved the REPL, but I always felt like the REPL did not have auto-completion in it.
+And that, like, BPython is an alternate REPL for Python that provides you with, like, auto-completion and syntax highlighting and all that stuff.
+So I am a huge fan of BPython.
+One of the things that we have done, like, demand engineering specifically, is, you know, we get paged and we have to go in and try and rescue our traffic out of that region into the other two regions.
+And sometimes our software itself will not work because if an entire region is down, let's say it's because of a network connectivity issue or something, then the things that we call out to in order to make these, you know, changes to scale up the other regions and like evacuate and make DNS changes or whatever, that itself might be broken.
+And when that's broken, like we're literally SSH into the box and we will open up like a shell, Python shell, and do whatever we need to do.
+that has not happened in like the last four years, I would say, but six years ago, yeah, that was a thing that we used to do.
+And I wanted to call out bPython specifically in this particular case because it was so much more useful than trying to remember, "Oh, I remember I wrote this function. What is it?" Instead of opening my IDE to try to find out what that function is, I just import the module and then I do the module.
+And it lists me all the functions.
+And I could invoke it, and yeah, it's such a time saver.
+Yeah, Python REPL is cool, but it leaves a lot to be desired in terms of history or even if you want to edit a function that is five lines long, it's hard to go through.
+>> It becomes cumbersome.
+>> Another one is PT Python that I'm also a fan of that one.
+>> Yes.
+>> They're the same category.
+>> Yeah. Prompt Toolkit, the one that powered PT Python written by Jonathan Slenders actually, and it's a fantastic library.
+Kudos to Jonathan for doing that.
+It's a fantastic library.
+Yeah.
+Awesome.
+So are you, you got a particular enhancement there for your, your REPL?
+I'm not like that big of a user of REPL.
+In the terminal, we do like, you know, ask questions for generating new projects, et cetera.
+I'm much more of a PyCharm user myself.
+Like I go in there over there.
+As you bring that up, you know, one of the really nice Python REPLs is the, what I guess it's called probably the Python console in PyCharm, right?
+Because if you go to that and you get the Python REPL, but you get PyCharm's auto-complete and type consistency, and it automatically modifies the path to import your project.
+So yeah, you got one in there.
+- Yeah.
+- That one's yours, huh?
+All right, let's see the core team, alerting and statistical work.
+What's this one about?
+- Core team is our frontline SRE.
+So demand team is like building tools that the core team will leverage to get us out of trouble.
+So core team is the one that anytime there is, like they monitor a lot of metrics, not just streaming metrics, but also things like error rates between services that are happening and how many requests are successfully coming back and so forth.
+They obviously use Python to kind of keep tabs on, like obviously a person can't be sitting in front of a dashboard, just monitoring it themselves.
+And so they use quite a bit of Python to analyze the data from all of the hundreds of microservices and between them, the inter-process communication that actually happens and the metrics that come through and so forth.
+So they use Python for alerting.
+And so actually they use the monitoring, the next section that's right there is monitoring, alerting, and auto-remediation.
+We have an internal observability organization that has built our own time series database that's not in Python, but it's open source, called Atlas.
+And that uses, that collects all of the time series data from all of these services, and then they try and do alerting and remediation, auto-remediation.
+So when a particular alert condition is met, you can run a small Python script inside of a framework called Winston, that's again internal, that allows you to do more complicated things.
+So for instance, if you have like this one bad instance in like this collection of 20 instances, instead of a user going and terminating that instance, you can now automate that by writing a script that says, you know, automatically restart that instance or just kill it, and so on.
+That's our--
+Cool, that's part of the auto remediation of it.
+And it says it's built on G-Unicorn, Flask, and Flask Rest Plus.
+I'm familiar with the first batch, but the Flask Rest Plus, this is an extension for Flask that adds support for quickly building REST APIs.
+Okay, interesting.
+Because Flask itself already does REST.
+So REST Plus, I think, provides things like Swagger endpoints automatically, so you could try it out on the browser and so on.
+I have not used Flask Rest Plus myself, but that team uses it quite a bit.
+- Yeah, cool.
+Probably some of the, some similarities to like what FastAPI kind of brings in addition to standard Flask, I'd imagine.
+- Exactly, yeah, yeah.
+- We use more FastAPI nowadays.
+- Yes. - Oh yeah?
+- Yeah, we're using quite a bit of FastAPI in most of our internal tools actually.
+- Yeah, just from reading through this article, it sounds like there's a lot of APIs and just a lot of connectivity through, there's probably a lot of JSON going around Netflix.
+- Yes, yeah, so some of the heavier data stuff or like high streaming services, like that are in the streaming path are all typically written in Java.
+And they use for enterprise communication, they use gRPC and that uses Protobuf to communicate and so forth.
+But most of our internal tools that are written in Python, either use JSON directly, or sometimes they need to talk to a gRPC service.
+And so they use Python gRPC to get the work done.
+- Cool.
+Maybe we'll have some time to come back to gRPC.
+I'm not sure.
+We got a lot of things to talk about here.
+- Yeah, we don't have to go through every section here.
+- No, I know, there's just so many interesting angles, right?
+And so the next one here is information security, which obviously, if you just put anything on the internet and just tail the log of it, within minutes, you'll see a request for wpadmin.php.
+Like it's already just constantly being, people are just after it, right?
+One of the things you have here that looks interesting is security monkey written in Python, which is I guess like chaos monkey, but.
+- It is kind of like chaos monkey.
+I think this project may have been archived or it's not actively in development.
+It tries to scan our infrastructure for unsafe practices.
+That's like an umbrella term to try to add like whatever is like good practices that should exist from the security standpoint.
+- Yeah, okay, so people can check it out.
+Maybe it's not totally active anymore, but they can take it as inspiration, right?
+- Yeah.
+Like back in 2019, it was one of our most active projects that have happened.
+(laughing)
+2023 is a different world.
+- It is a different world.
+And one of the areas in which 2023 is a different world is really the AI/ML side.
+And you all are doing a lot of stuff with personalization algorithms, recommendation engines, machine learning.
+And you talked about Metaflow, which is now available.
+- Yeah, the personalization one, I think we've just mentioned a bunch of things that we use from the open-source world here.
+So I think XGBoost is a library that does machine learning.
+So personally, I am not in this field.
+So I just went and interviewed the team and asked them to give me a blurb.
+So I wouldn't be able to talk in detail about any of the personalization stuff here.
+But this is just a showcase of how much this team relies on Python and the open-source ecosystem that comes with Python in general.
+So it's like heavy users of Panda, TensorFlow, and PyTorch and so on.
+Yeah.
+So, Aron, let me ask you, is it your, both of your team supports Python developers and Python applications indirectly in that way, but is it different to support the data scientists than it is to support, say, software developers?
+Like, do you have to think about that differently? How so?
+Yes, yes, we do have like a team that is dedicated to supporting all the data scientists.
+And we're like the team that supports the team who supports for data science.
+And shit.
+Right now.
+So, yeah, we're definitely like now in 2023, you know, betting more on Python.
+Before Python was more like, if it makes sense for you because of freedom and responsibility, if it makes sense to use Python in your team, you use Python, you know, and now we're trying to provide basically like a better paced path.
+This is me and MG with this new team that we started.
+And we're trying to kind of enhance this space path better and better for all these teams.
+And we, you know, it's hard to know all the specifics in every single team, but we're trying to provide them with as good practices and automation as possible.
+So I think you asked, like, how is it different supporting one versus the other?
+I think we built, so when we first started the team, we met with 10 different organizations inside of Netflix to find out how they use Python, and we found that there were some commonalities, but the way, for instance, algorithms engineering uses Python is very different from the way a SRE team uses Python, and it's very, very different from how our animation studio uses Python.
+So our VFX animation uses Python in a way where once they start...
+This is apparently common in all of the movie industry, which is once they start a particular project, whatever they have chosen at the start of that project, they will stick to it until that project is completed.
+So if that movie takes two years to finish, you cannot upgrade anything inside of that particular hermetically sealed environment, development environment that you have.
+So that is very different from like another, like a machine learning person who's interested in like, you know, I just want to write my algorithm.
+Like I don't care about how pip works or like how I pip install.
+Like I don't want to worry about like virtual environments and things like that.
+Whereas a person who is writing internal tools, they want to own the entire tool chain.
+It's like, I not only want to maintain virtual environment, I also want this thing to work with a front-end that is written in React.
+And so I would like you to be able to make it possible to do NPM and pip to coexist and live together.
+That's not a hard thing to do, but it's one of those things where it's like, if I'm trying to solve a problem, let's say I'm bringing in Python dependency locking as a mechanism to help these web developers, because they don't want to automatically upgrade any time they build their system and suddenly break in production.
+Now, that might be completely useless for someone who's working in machine learning.
+And so they're like, "Why are you solving that problem?
+"This, you bringing locking to packaging "doesn't help me in any way.
+"Why are you wasting your time?" And so we had to sort of build personas for various ways in which Python is used inside of Netflix so that when we are working on a particular feature, we can tell them, "We are now targeting this persona.
+We are working towards making life easy for animation engineers.
+So if it doesn't work for you, that's fine.
+You know, that's fine. We will get to you.
+It's just that our persona that we're targeting right now is not yours.
+So that's how it's different, I'd say.
+Yeah.
+Data scientists have a lot less legacy code that's just still cranking along because a lot of times once they get, they discover an insight, they don't need to run it again, right?
+Or the algorithms are changing so fast, they can just, Well, now we're using L large language models instead of whatever, you know?
+Yeah. There you go. Yeah.
+Yeah. Whereas once you get a web app running, you might not touch that thing if it doesn't need touching. Right.
+So you just exactly stability is what you need there.
+So anything else you want to call out out of this article before we move on?
+We don't have time left, honestly, but No, no, I think this was a great article, but yeah, a few things.
+But with regard to this, let's just leave people with this idea that we only touched on a small part of what is laid out here and all the projects and all the ways in which it's being used. So certainly check out the article just called Python at Netflix. It'll put in the show notes.
+It's hard to cover it all in just one hour.
+It sure is. It sure is. So let's maybe talk for a minute here about this project that you're involved with Soren called Portable Python.
+You know, I not long ago had Nathaniel Smith on to talk about PEP 711, distributing Python binaries and maybe treating like CPython runtimes as wheels almost.
+And you guys also have a way that you've been using for a while internally to package up Python into something that can run as well called portable Python, which is open source.
+You want to talk a bit about that?
+Yes, that is indeed PEP 711.
+I discovered it by listening to your podcast.
+Right around Python, I think, yes, it would be very interesting to see if we could partner up once this is.
+So Portable Python is, we want to provide Python, of course, to all Python developers inside, right?
+Like you can always grab your own Python via all kinds of ways, right?
+PyEnv, Docker image, et cetera.
+But we also provide builds of Python inside to be used internally.
+So Portable Python is trying to solve just that.
+Well, one particular issue, how do you go and distribute Python on laptops?
+So the end goal is we want to provide a tarball, just like that Pep says, like a wheel, a tarball that you can download and drop somewhere, typically in a user's own folder, tilde slash, you know, myPythons, and we want it to work from there.
+So you could use PyEnv for that, but with PyEnv, you need to wait for it to build.
+And we want to basically build it ahead of time and as soon as it's available and, you know, make it available internally.
+So what Portable Python is designed to do is to do such a build, which we call portable, and drop it in our factory and then our tooling can just go fetch that real quick, unzip, and it's ready to go.
+So your tooling, the Portable Python tooling basically says I'm on this platform.
+So I'm on Mac OS and it's Apple Silicon.
+So here's the, and they want this version of Python.
+So that means this binary, let's go grab it.
+Right.
+Right.
+So portable Python is invoked by our building machinery.
+There is a one worker on Mac OS, x86, Mac OS M1, Linux, x86, Linux, ARM 64.
+And there's some external internal tooling that kind of detects that the new open source version is available using portable Python.
+So Portable Python can report you what is the latest, 3.11, for example, by looking at the ftp.python.org, basically.
+Okay, so the latest is 3.11.3.
+Let's see, do we have it internally? No.
+Okay, let's kick off a build.
+So we kick off one build for M1, one build for Linux, etc.
+And with Portable Python, with its configuration, we say we want OpenSSL, that version, we want SQLite, that version, and Portable Python goes ahead and does the build, produces a tarball, We take that more and publish it.
+That's interesting.
+So you can control a little bit, some of the internals as well, like the open SSL version and SQLite version, maybe a bit more carefully.
+Yes.
+Yes.
+And since it's written in Python, then we met like, it's able to also inspect, say, any Python, like you could run portable Python, inspect path to this installation and it will tell you, okay, it has a sound, that version SQLite, that version it does it use like homebrew a library of shared libraries or, or what.
+it can report on that.
+And, oh yeah, it generates a thing that I find very important, like a little file that says, it's called manifest.yaml.
+So every time it builds anything, it generates that manifest.yaml where it says, well, I did a build with --LTO optimization--
+like it says everything that was used to inform what the build had, and which worker it ran on, what time, what was the platform, like a little bit of metadata, which sometimes you could even see things like what C compiler optimization flags were enabled when you created it, for example, right?
+Yes.
+Okay.
+And there is one additional thing.
+So portable Python does not install Python on your system for you.
+So it, it is a builder, so it builds them and produces tarballs that can be used in a standalone manner.
+And so if you want to bring Python onto your system, you just download the tarball from our internal artifact storage and then expand it.
+And that we have another tool that automatically does that.
+And so when somebody bootstraps a brand new Python project and they say, I would like to use 3.11.3, which 3.11.4, I think that got released yesterday, then we will already have a binary ready for them that is in the artifactory, in our internal artifactory.
+And when they run their build for the very first time, it will bring the appropriate Python version that they have specified in either pyproject.toml or in their talks.ini or somewhere.
+and it will bring that appropriate Python, install it or expand it in a known location, and it will use that for building their project and so forth.
+So it's a way to make it easy for people to not have to manage their Python on their laptop individually.
+And also, this can build Python with a specific prefix.
+So on servers, on our internal servers, what we do is we install Python in a specific location.
+Like, we always put it inside, let's say, for example, /app/python, for example.
+it will build it in a way that it makes it easy for Debian to be built.
+And when you install the Debian, it will put the Python in a specific location.
+And also, it has other benefits, such as it tries to make the Python binary as small as possible, because we're trying to deploy it out to like hundreds of thousands or 100,000 servers.
+So we would try to reduce the amount that we need to put on that server.
+It does that, the final product that Zorin checked yesterday, I believe it was only 50 megabytes compared to what other like PI and other things are producing, which was 200 megabytes.
+It does it by a few tricks, like it removes the test folder, because, you know, once you have built it, like, you know, having the test folder as part of your final artifact makes no sense.
+That was like a hundred megabytes savings right there.
+So things like that, some optimizations that we do that is custom for our work.
+Yeah, that's a really interesting system.
+I think there's increasing momentum around having some kind of tool that is outside of Python for managing Python, right?
+So far, primarily what we've had is things like Pip, PipX, so when you have a project called Piccoli, it's all about like, okay, you have Python, now how do you go forward?
+But I think a lot of people are realizing like, wait, that assumption that I have Python, now what?
+Is not a great assumption, right?
+And so people are starting to look at tools like RustUp, which actually is kind of like Pip, but it brings Rust also over.
+Yeah, so we're gonna see something there, I think.
+I don't know what it is, but it'll be interesting.
+Yeah. Did you see the one Rai?
+Rai is the package manager that Armin wrote.
+Yeah, from Armin Roenicker.
+Yeah.
+He, that brings Python for you.
+That he, his inspiration is from Rust up apparently.
+So Rai is actually written in Rust.
+And it does all the things that Poetry and PDM and other package managers does.
+But in addition to that, it also brings Python for you.
+And it's using a different Python called standalone Python or something that you already had a link for, I forgot, but it brings Python from there to expand it into your system.
+Yeah, Python build standalone, that's the project that it uses.
+Yeah, I've heard of that. I haven't done anything with it, but it looks interesting.
+Yeah.
+All right, I think we have time. We're getting short on time here.
+I think we have time for one more really quick thing, something that you're participating in, Amjith.
+I'm sure, and I don't know if you are as well, but command line database clients with autocomplete and syntax highlighting.
+Tell us about this. This looks cool.
+Yeah, this is just my personal project that I wrote before.
+This was a while back, but the idea is at the time I was trying to learn Postgres and I didn't know how to do like, I was, I was learning Postgres and I was using PSQL to do this.
+And every time I, I come to like a table, I'd be like, you know, Oh, what columns were there?
+I forgot the exact name of the column and I tried to find it and so forth.
+And so finally, you know, I just, I broke down and decided to write like a shell for, for Postgres called PGCLI that uses actually from toolkit, like the same toolkit that's used by PT Python.
+- I was going to say, it looks a lot like PT Python.
+It's got that Emacs mode.
+- Yep.
+- You've got autocomplete for basically the whole SQL language, but also the database schema that you're connected to, right?
+- Yes, that is correct.
+So it reads the tables and the columns in that database, and then it tries to autocomplete as part of the SQL segment.
+So after a WHERE clause, it'll only suggest columns, And after a from clause, it'll only suggest tables and so on.
+Wow.
+So after PGCLI, people wanted something for MySQL.
+So I created MyCLI and then Microsoft came over and said, like, we would like to fork PGCLI to make one for Microsoft's MS SQL server.
+So they did that themselves.
+Like we didn't, so they, they took PGCLI source code and then they created that.
+And then I, another person created light CLI, which is for SQLite.
+And yeah.
+And there's other things now.
+I-Redis is like for a Redis client that's similar to these things, but there's a lot more, like more friendlier shells for databases in general.
+- Excellent.
+All right, this looks really cool, I think.
+- Yeah, this has got nothing to do with Netflix.
+It's mostly just like, hey, it's my personal project, and, you know, just what I do in my free time sort of a thing.
+- Yeah.
+Well, it looks really helpful for people because talking to databases just in your terminal, it can be tricky, right?
+And having auto-complete, especially not so much, you know, the select and where people get that pretty quick, but the database schema understanding keeps you in your flow pretty well.
+Right.
+Yeah.
+Again, inspired by B Python actually took inspiration from them.
+Yeah.
+Excellent.
+All right.
+Well, that'll be in the show notes as well.
+Guys, I think that is it for time that we have today.
+So I'm going to have to wrap it up with the final two questions here and recommendations.
+Let's start with a PyPI project.
+Not necessarily the most popular one, but something that you're like, Oh, this is awesome.
+People should know about it.
+Soren, got a recommendation for folks?
+I'm going to say PICLI, go check out PICLI.
+PICLI, okay, so give us the elevator pitch on PICLI.
+It's a CLI tool that allows you to install other CLI tools, very similar to PIPX in that sense.
+The main difference is being that if you PICLI install Poetry, every time you run Poetry, it will keep itself up to date in the background.
+So it will keep self-upgrading by default.
+You can tell it also not to do that, but that's its main useful thing.
+- Cool, so when you launch it, basically you're launching like a shim that says, "Run this," and then the background check for update, and when it exits, if there's an update, just update it.
+- Yes, you can take a look at the little shell script, shell wrapper that it wraps it with.
+- Yes.
+- All right, Pickly, awesome.
+Amjith?
+- Oh, I guess I could plug again for BPython.
+Like good design aesthetics, I think, yeah, it's an overall better shell than Python shell.
+- Yeah.
+- Oh, actually, PDB++, that's the one that I would actually recommend.
+So if you ever use PDB, and you wish that PDB had auto-completion, PDB, it's PDB PP in PyPy.
+You don't have to change your thing at all.
+All you have to do is pip install PDB PP, and then any time you do a breakpoint, and it stops you there, you can do like, you know, variable dot, and it'll give you auto-completion.
+And yeah, I don't know, I'm a huge fan of auto-completion.
+Yeah, I was gonna say, you and I are kindred spirits.
+I am all about the auto-completion.
+I'm like, this tool is broken if it doesn't give me auto-complete.
+Because it sends you into the documentation, you'll be like, Oh, I need to create one of these, client libraries.
+What does it take?
+Oh, star org, star star KW orgs.
+Great.
+Now what am I supposed to do?
+Right?
+Like, you know, the auto-complete it, it really makes you more productive.
+All right.
+And then, if you're gonna write some Python code, what editor, if you're not in the ripple, are you using?
+Oh, for me, it's a PyCharm.
+Python, mostly, Sublime Text, and VI if I'm messaging somewhere.
+Excellent. And Amjit?
+Vim all the way.
+You know, even if I don't know how to quit it, I can restart my computer.
+[laughter]
+That is the source of, the endless source of jokes, you know, like, I saw some laptop, a picture of a laptop, and it was just smashed to pieces.
+And it said, "Finally figured out how to quit Vim." [laughter]
+>> For the longest time, actually, I had colon Q as a way to quit out of PGCLI because I, by instinct, just kept hitting colon Q and, yeah.
+>> That's amazing.
+All right, you guys.
+Well, it's been great to have you on the show.
+Thanks for being here.
+Thanks for giving us this look at what you're all doing up over at Netflix and in your personal projects.
+>> Yeah, thank you, Michael.
+I just would like to mention that we have a lot of jobs at Netflix that require Python.
+So if you are at all interested, please go to jobs.netflix.com and type in Python and you should get all of the Python job openings that are available.
+There's a wide variety.
+If you want to do infrastructures up, there's that.
+If you want to do data science, there's that, right?
+Like a lot of coolers.
+Yes, absolutely.
+All right.
+Have a great day, guys.
+Thank you.
+Bye.
+Bye.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+The folks over at JetBrains encourage you to get work done with PyCharm.
+PyCharm Professional understands complex projects across multiple languages and technologies, so you can stay productive while you're writing Python code and other code like HTML or SQL.
+Download your free trial at talkpython.fm/donewithpycharm.
+Influx data encourages you to try InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try it for free at talkpython.fm/influxdb.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show.
+your favorite podcast app and search for Python. We should be right at the top. You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm. We're live streaming most of our recordings these days. If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube. This is your host, Michael Kennedy. Thanks so much for listening. I really appreciate it.
+Now, get out there and write some Python code.
+[MUSIC]

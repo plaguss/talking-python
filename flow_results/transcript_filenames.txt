@@ -418,3 +418,5 @@
 418-secrets.txt
 419-pystack.txt
 420-isolation-and-consistency.txt
+421-python-at-netflix.txt
+422-how-data-scientists-use-python.txt
