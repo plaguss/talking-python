@@ -398,5 +398,7 @@
   "419-pystack.txt": 18159,
   "420-isolation-and-consistency.txt": 10446,
   "421-python-at-netflix.txt": 14716,
-  "422-how-data-scientists-use-python.txt": 14020
+  "422-how-data-scientists-use-python.txt": 14020,
+  "423-solving-10-different-simulation-problems.txt": 14554,
+  "424-shiny-for-python.txt": 14247
 }

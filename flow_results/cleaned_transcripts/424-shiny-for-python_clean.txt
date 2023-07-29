@@ -1,0 +1,633 @@
+If you want to share your data science results as interactive web apps, you could learn Flask or Django and a bunch of other web technologies.
+Or you could pick up one of the powerful frameworks for deploying data science specifically.
+If you're searching through that space, you're likely to hear about Shiny.
+But that's just for the R side of data science, right?
+Not any longer.
+Joe Chen is here to introduce us to the recently released Shiny for Python, and it looks like a really solid new framework on the block.
+This is Talk Python and Me, episode 424, recorded June 19th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org. Be careful with impersonating accounts on other instances, there are many. Keep up with the show and listen to over seven years of past episodes at talkpython.fm. We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode. I'm really excited to have a new sponsor for For this episode, welcome on board to GlareDB.
+GlareDB is an open source database for querying distributed and disparate data.
+Connect your data sources and use the Python tools you already know to ask questions and integrate data across data sources.
+Get started today at talkpython.fm/glareDB and it's brought to you by InfluxDB.
+InfluxDB is the database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try them for free at talkpython.fm/influxdb.
+Hey Joe, welcome to Talk Python and Me.
+- Hi Michael, it's a pleasure to be here.
+- It's a pleasure to have you here.
+We're talking Python to an R person.
+What's going on here?
+(laughing)
+What is happening?
+- I know, right?
+- Cats and dogs living together, oh my gosh.
+No, it's great, glad to have you here.
+- Yeah, thanks.
+- So we're gonna talk about Shiny, which has traditionally been UI framework, a web framework for kind of rad, rapid development for R applications that need some interactivity.
+But you have a big release for the Python people. That's also interesting and we're talking about. So that's the topic of today's show.
+Yeah, absolutely. I hope you starting out mentioning R that people haven't dropped off already. I promise. Lots to say about Python and Shiny for Python.
+Of course, I'm sure.
+Shining for Python's gonna be super fun.
+Before we get to that though, let's get started with your story.
+How'd you get into programming?
+R and then what brought you over to Python?
+At least temporarily or partially.
+- Yeah, my background was in web programming really more than anything else.
+I got into programming actually through desktop publishing and graphic design.
+That was what I was really excited about.
+And in college that turned into web design.
+I went to college from 1996 through 2000 so that the height of the dot com sort of craziness.
+And I just found myself--
+- CBeebee and all that stuff, oh yeah.
+- Absolutely. - Pets.com.
+- Pets.com, that's right.
+And I just found myself sort of pulled into just all the cool things that we could do on the web.
+And went from sort of front end web development, which meant something very different back then than it does today.
+- I mean, HTML, right?
+- HTML, yep.
+Basically string interpolation as a career.
+That was what I was all about.
+And that sort of led me into really falling in love with programming as a discipline.
+And I got more into the backend, more into sort of closer and closer to the systems level programming.
+And I just really enjoyed being sort of full stack, both on the website and even spent a few years doing Windows desktop programming, just to kind of see what that world was like.
+And one of the things that I, like one of the best things that happened to me early in my career was hooking up with JJ Allaire, who's the founder of RStudio and the founder of two other companies that I worked for previous to that in Boston.
+And I kind of got to the point in my career where I was more interested in the people I was working with than the technologies or even the idea.
+I knew I liked startups and I knew I liked working for JJ and the people that he had around him.
+And he got excited about R.
+I don't, I think his friend who is like a high school science teacher somehow got turned on to R and JJ was fascinated by the fact that this is in 2008 or 2009.
+There was this GPL licensed platform for doing what traditionally people would do in very proprietary platforms like all these statistics packages that you might have been forced to learn in college, you know, back in the 2000s.
+And here was this pretty rough, pretty raw, but all the pieces were there kind of platform for doing all this stuff with code.
+And he immediately saw something and I definitely saw nothing, but I believed in JJ and he had the idea to build an IDE in a web browser for this R language.
+And I was like, I don't see the chain and thinking that leads you to think that this is a good idea, but also sounds super fun.
+I would love to see if it's possible to build an IDE for the web.
+And so in the beginning, really, I was in R completely by accident, and I didn't even really learn much R as I was building, helping to build the RStudio IDE.
+That's kind of the irony of those types of platforms, right?
+100%.
+When I talk to people about Jupyter Notebooks, they're enabling Python people, but they're writing TypeScript.
+That's exactly right.
+That's right.
+What's the story for RStudio's side?
+Yeah, yeah. Oh, it's a crazy story technology wise.
+Well, the part that's not crazy, the sort of hardcore server bits are written in C++.
+But the front end, the front end is written in Java, which is then transpiled to JavaScript using a package called Google Web Toolkit.
+Oh, yeah. Okay, sure.
+Oh, okay. So you've heard of GWT.
+I haven't written anything with it, but yeah, I know it. Sure.
+Yeah. I mean, in a world before TypeScript and before React, This really was a godsend, like to be able to have static typing and the right sort of abstractions to be able to really build large scale. I mean, RStudio is a giant, giant piece of software, hundreds and hundreds of thousands of lines of code. And I think the very best JavaScript developers can write codebases at large with pure JavaScript, but not me. Like I definitely needed the crutch of, you know, static time, static type checking. And anyway, Working on RStudio IDE was a blast.
+And the best thing about it was I got to meet so many data scientists.
+And at the time, we called them statisticians.
+Now they call data scientists.
+But learning what they do, what the problems they were solving was so interesting.
+And that eventually led to Shiny.
+And that's when I really started getting serious about actually writing R code in my day to day, which was a fascinating journey in and of itself.
+Yeah, well, I would say that your faith was well placed, right?
+even if you're like, I'm not sure about this RStudio thing.
+I think some people have heard of it.
+>> Yeah. It really has been such an incredible ride.
+There were many steps along the way where I was like, this does not really make a ton of sense to me, but JJ has proven out time and time again that things that he cares about, it turns out that there are other people that care about it.
+He was really super into reproducible research before it was on everybody's lips.
+He really spent a lot of time trying to make that world better for R.
+And by then I'd certainly learned to sort of trust in his instincts.
+And, you know, just time after time there have been many bets like that that have paid off really well.
+It must have been pretty gratifying to work on this project and then talk to these data scientists and say, you know, here, oh, we're doing this work at the Large Hadron Collider, or we're doing this work to solve cancer.
+or, and let me, you gotta, can you help me with this?
+I'm trying to like work on this protein folding or, you know, something like that, right?
+It was probably some really cool experiences you had like that.
+- 100%. Yeah, I think the first time I ever demoed Shiny in particular at a user group meeting, and I was super nervous and went a little overboard on having like lots of demos.
+And one of them, this is back in 2012, was charting the spread of AIDS throughout the world and showing the sort of levels rise and fall as time went on.
+And it was interesting at the time because AIDS was sort of receding as education and drugs were getting better, except in South Africa, it was getting much, much worse before finally starting to get better because-- well, because of many reasons.
+And so I showed this demo.
+And then afterwards, a friend of mine who I didn't know what he worked on, I just knew him through these user group meetings, came up and said, oh, yeah, I'm working at--
+I think he was at Fred Hutch at the time-- working on an AIDS vaccine and we're using Shiny to basically be the bridge between the biostatisticians and the biologists and looking at the results of these, you know, assays or whatever it was that they were analyzing. And I, that was just blew me away. And, and absolutely every conference I go to, you know, many times a year between then and now I've just been humbled by the kind of things that people are doing with Shiny.
+You know, I can relate. I hear some stories like that as well. And I imagine it's just 10 X when you're building developer tools like that. So how about What are you doing day to day? Yeah. Well, my title is CTO. That is an honorary title that I think reflects that I was the first employee, but I don't do traditional CTO type activities. Most of the time, my day to day, I help lead the Shiny team specifically, which is a team of maybe 10 or 11 right now, mostly engineers. And we split our time between Shiny for R and Shiny for Python.
+Right now, probably more on the Shiny for Python side, given that there's so much more to do.
+And right now I am in the thick of it writing features for the next release of Shiny for Python, really getting to lean into React.
+I've been working with some really fun headless table libraries to build data grids with fast virtualized scrolling.
+That should be a really nice addition to Shiny for Python for the next release.
+Okay, yeah, that sounds really cool.
+Well, let's talk about Shiny itself.
+I suspect a lot of people on the data science side have heard of Shiny, even though it's in the R space.
+I know the conversations come up around it.
+Other ones that live in a similar orbit, maybe are Streamlet.
+I've had Adrian on, the founder of Streamlet on before, and we've got Dash, and Panel, and Pinecone, and others.
+That sets the stage for what this could be about.
+Maybe give folks a sense of just what is Shiny, and maybe even in its R form originally, and then we can talk about the Python side.
+>> Yeah, absolutely. Shiny is a way to create web applications easily without having to learn a lot of web development technologies like HTML, CSS, and JavaScript.
+>> Especially JavaScript.
+>> Especially JavaScript, 100 percent.
+>> The interactive part of all these, like this callback, it's that.
+>> Yeah, 100 percent.
+>> Yeah.
+It was conceived primarily for data science.
+It is, I think a lot of the ideas behind Shiny are quite general and we'll, I'm sure we'll delve more into that, but we, in the creation design of this, we really are laser focused on data science and the kinds of problems that people want to solve by creating interactive visualizations, interactive reports, and even like workflow applications, but all of it around the analyzing of data.
+This was in 2012, this was like a pretty radical notion.
+And I think there was a little bit of skepticism from some people close to us who were thinking like, you're going to make data science, you know, like, why would data science scientists want to become web developers?
+And I think this was, the answer was like, there are really a lot of problems that they can solve using interactive artifacts, but the whole point is that they don't do not have to become web developers.
+Yeah, I was going to say, like, you should turn that on its head and say, they don't want to become web developers, which is exactly the value proposition, right?
+They want to share their work and they want to make it interactive and collaborative.
+But the last thing they want, generally speaking, is to like, and I'm diving into Vue and React and Yeah, yeah, that's absolutely, absolutely. Yeah. Yeah.
+And that being said, I think I personally am, you know, I've been doing web development since basically 1996.
+And the idea of working day in and day out on a project that was really sort of like my first website type, you know, like something that had a lot of guardrails, something that really limited you to whatever few tools were in its toolbox, that wouldn't be really satisfying or interesting for me.
+So even though Shiny is designed to be very easy to get started and for you not to have to know JavaScript or anything like that.
+If you do know JavaScript, if you do know HTML and CSS, if you live and breathe that stuff, but you want to create a convenient way to create data science related applications, Shiny really lets you lean into those skills as well and use HTML, CSS, and JavaScript to enhance or customize or extend Shiny for your own purposes.
+It's really important to us to capture sort of both ends of that spectrum.
+- This portion of "Talk Python to Me" is brought to you by Influx Data, the makers of InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Developers can ingest, store, and analyze all types of time series data, metrics, events, and traces in a single platform.
+So, dear listener, let me ask you a question.
+How would boundless cardinality and lightning-fast SQL queries impact the way that you develop real-time applications?
+InfluxDB processes large time series data sets and provides low latency SQL queries, making it the go-to choice for developers building real-time applications and seeking crucial insights.
+For developer efficiency, InfluxDB helps you create IoT, analytics, and cloud applications using timestamped data rapidly and at scale.
+It's designed to ingest billions of data points in real time with unlimited cardinality.
+InfluxDB streamlines building once and deploying across various products and environments from the edge, on-premise, and to the cloud.
+Try it for free at talkpython.fm/influxdb.
+The link is in your podcast player show notes.
+Thanks to Influx Data for supporting the show.
+We'll talk about the programming model and how it works, but I think maybe the first big contrast that I'd like you to set up for us is thinking of the Python side now.
+Like, why not just Jupyter Notebooks?
+Why not Jupyter notebooks or JupyterLab and just, we have that, that's on the web, sort of, kind of sometimes.
+(laughing)
+It depends how we want to put it up there or share it or let it be executable, but you know, compared to that, I think it's pretty different, but I think it's something that people maybe want to get their head around.
+- Yeah, no, totally.
+You're right, I mean, you hear a lot of the same words being used, right?
+Like, you know, it's browser-based applications that do interactive things.
+And I think the difference is that Jupyter and JupyterLab, those are sort of the places where data scientists can do work, right?
+Where you can ask unbounded kinds of questions from your data.
+And that's where you iterate, where you do exploratory data analysis, where you write functions and things like that.
+And yeah, you do have this beautiful immediacy to the results that you get, right?
+And that's why everybody really loves working in notebooks.
+And Shiny and frameworks like it are really for communicating outwards.
+It's really not for the data scientists to write code for their own understanding most of the time.
+It's really about creating a web application to show somebody else.
+Let's say that you are collaborating with some people that don't have the programming chops that you do, that have never launched a REPL in their life or installed Python, and you want to give them the ability to ask questions of your data and of your analysis.
+Maybe what-if scenarios, or in the simplest case, think like a BI dashboard or something like that.
+Like nobody's asking why execs need to look at a BI dashboard instead of running SQL queries on their own inside of a console.
+And this is similar.
+So if you want to create an interactive artifact for other people to consume, then Shiny and frameworks like it come into play.
+And Jupyter, not as much.
+I mean, you can certainly save Jupyter notebooks and then sort of share a link to the published notebook.
+But the interactivity is either non-existent or more limited when you do things that way.
+- Right, absolutely.
+You don't wanna give them the full notebook because the last thing you want is the general public typing Pantos code in there or arbitrary Python code, but you want to give them some interactivity.
+Maybe we could look at this little example down here, just to talk through what an app might look like.
+Right on the homepage, shiny.poset.co, you have, I think this is a big statement towards your commitment to Python.
+It's like right on the homepage, on equal, on par with R, it says, get started with R, get started with Python.
+You scroll down, it has the R and the Python code, right?
+Like, they're not like, "Hey, we also, we're making an attempt at this Python thing." But you've got this example.
+Do you want to just give us a quick - Sure. - what this app is?
+It looks like it evaluates things about ducks, and that's all I can tell about it.
+- Yeah. - Stuff about ducks.
+- This is using the Palmer's penguins data set.
+- Penguins, rather. Okay.
+- Yeah, yeah.
+So on the left, we have a sidebar with a number of controls.
+There's two select boxes.
+There's some check boxes and then there's a couple of toggle switches.
+And on the right, you have a matplotlib generated scatterplot with some marginal plots added on, and this is sort of the hello world of Shiny, where you have one or more outputs and some inputs that when you change them, the output automatically updates.
+In this case, you can decide what variables do you want to apply to the X and Y axes, and then you can filter it by the species of penguin.
+And then there are a couple of toggles to just decide whether you want coloring by species and whether you want the marginal plots or not.
+And it sort of does everything that you would expect it to do when you select and deselect those, those values.
+Yeah.
+So for example, you have filter by species and Gen two is checked.
+But if I uncheck it, the whole UI redraws with just showing the other two species of penguin and you can turn the species on and off and terms on whether or not like it highlights based on that.
+>> Yeah.
+>> You got to drop down for different things you might compare and you can just toggle those and the UI changes like you wrote a fancy front-end JavaScript framework where that's happening behind the scenes, right?
+>> That's right.
+>> Okay. Sorry, I didn't mean to cut you off there.
+>> Yeah. Just to be clear, when you say the UI redraws, we're not talking about a whole page reload.
+I mean, it's not 1998.
+It is, you know, the things that need to update, update on the page.
+Yeah, it's a really interesting way to create programs.
+And there's a couple other things I've seen that are like this, but I really, I think it's, it's a super slick framework.
+Before we get into it, Diego's got a question.
+It says, "Could Shiny be used to do fancy math, say for someone trying to upload their GitHub website for their PhD thesis model?" Like, what can we create?
+Like, could you create a kind of a LaTeX looking integrated thing with interactive math bits in there?
+Right, right. Yeah, yeah.
+So yes, you do have the ability to do...
+Well, I could interpret that question one of two ways.
+One is, yeah, can you do the computation for this PhD thesis model?
+And in that case, absolutely.
+It's just whatever you can express in Python or R for that matter.
+And in terms of putting like LaTeX equations on the screen, Yes, this is a completely built in feature for Shiny for R and for Shiny for Python.
+It's a little less slick, but we do have an example application that shows how to drop in.
+It's based on MathJax, basically.
+So you can include the resources for MathJax and then write your equation in LaTeX format.
+And yeah, it'll render.
+Diego, I hope that answers your question.
+- Hope so as well. - Yep.
+Seems like it.
+All right, so let's jump over to the GitHub page for a minute here and talk through some of the things that you all call out right at the top.
+So it's open source for one, right?
+That's a big deal.
+It's under the MIT license right here on GitHub under Shiny.
+Yeah, I should add, full disclosure, we are a for-profit company.
+We are a B Corp.
+Actually, we're a benefit corp, but we are for-profit.
+And Shiny for Python is completely open source, MIT license, no sort of gotchas there.
+When it comes to deploy your Shiny app, we have a variety of different ways you can do that that we offer as a company.
+We have an open source on-prem solution called Shiny Server.
+We have hosted cloud, cloud hosting that we manage that you can easily deploy to.
+And we have free and paid tiers.
+And we also have Posit Connect, which is a sort of a more comprehensive platform for enterprises to allow their data scientists to communicate with the rest of the organization.
+And that has like very robust enterprise grade Shiny for Python hosting built in, and that is a paid product.
+- Okay, does it have like special ways to access like your SQL server on your enterprise, you know, like access more authenticated access to data or authentic off to the thing itself to protect it and so on?
+- Yeah, for sure off to the thing itself and it integrates with your LDAP or SSO type systems.
+And it helps with scaling your application.
+So it will sort of monitor how much load each of your Python processes is getting and then spawn, automatically scale up.
+It can hook up to Kubernetes in the back end so that your Shiny apps, the Python computation is happening in pods on the back end.
+So lots and lots of different ways that it sort of tries to make things easier.
+- Sure, okay, cool, very cool.
+So basically, short story is, Shiny for Python's open source.
+I could take the on-prem open source thing and just host it myself if I wanted.
+I presume that means I could also fire up a virtual machine in the server--
+in the cloud and install it up there and kind of--
+that's my on-prem if I wish.
+- Yeah, absolutely.
+And this is also--
+Shiny for Python is built on top of Starlet, which is the same underlying framework that FastAPI uses.
+So it's almost true that anywhere you can host FastAPI, You can host Shiny for Python.
+- Oh, interesting.
+Just put some G-Unicorn, UV-Corn workers in front of it.
+- Except G-Unicorn.
+Yeah, the only exception is that, because Shiny for Python is stateful and we can talk more about that.
+I'm assuming we're gonna talk a little bit about how we compare to some of the other things out there.
+We do need, if you're gonna load balance across multiple processes, it does have to be a stateful load balancer, which is normally quite easy to do, but G-Unicorn is not stateless.
+It's not a stateless.
+- Sorry, yeah.
+So you need a sticky load balancer.
+And oh, I should also mention that Hugging Face is another place that you can deploy Shiny for Python apps these days.
+- Yeah, excellent.
+Okay, well, I think that that's certainly a fair trade-off to the commercial side of your story, which we started talking about by a new company and going to work on that.
+And it's really about sort of Shiny as a service and a Shiny cloud.
+So it's easy to not worry about the deployment side, right?
+The app itself, the framework itself is about not worrying about writing web stuff, the deployment thing is still a deal, right?
+If you just say, and then you just get, dear data scientists, you fire up your Linux machines and you keep them up to date and secure, and that doesn't feel great to a lot of data scientists either, I'm sure.
+- Yeah, yeah, that's right.
+So I think with our open source on-prem hosting, it's like that, it's just a piece of software that you install on Linux.
+And with Connect, it's more like your IT department sets this up for you, And then you straight from your local machine, once you have your Shiny app working, you just type in a command like rsconnect deploy and point it at your server and everything gets taken care of for you, including getting all the right Python dependencies installed on the server and using the right version of Python.
+And hopefully the act of, you know, we have customers that are writing multiple new Shiny apps a day and deploying multiple new Shiny apps a day.
+And, you know, the usefulness of that app might be a day or it might be, you know, five years.
+And we want to serve both sides of that spectrum.
+I suspect that does make a lot of sense.
+If you're a data scientist exploring something, you can be like, "Hey, look, I came up with this today.
+What did you think?" And it may be the next day based on feedback, you do something completely different and it's become irrelevant, right?
+Yeah.
+And you know what?
+One interesting thing about this is, you know, you hear about something like Shiny for Python, like, you know, Streamlit or Dash, and you think that this is really about displacing, say, Power BI and Tableau, right?
+But actually, in our experience with Shiny for R, the first thing it displaced were gigantic PDFs that people were sending around.
+You know, like, I have generated all of this data for my analysis.
+I don't know what you want.
+So here is like a 500-page PDF filled with tables for you to go explore.
+And with Shiny, you can present something that's much more interactive.
+That makes it much easier for some domain expert on the other side to find a needle in the haystack that you happen to be working together.
+- You completely remove that cycle, that iteration cycle of, what if we used a different number for this constraint here?
+What if we only filtered, it's like, that's part of the UI, that's part of what you deliver is that interactivity.
+And as far as displacing things, it sounds like you're displacing SharePoint.
+If that could just be completely erased from the world, that would be awesome because every interaction I have with that software of sharing like corporate doc sharing is just like, oh boy, here we go.
+Okay, let's take it top to bottom maybe for here in this.
+Although I do have to point out, I could tell you still have that love for R because it's still 0.2% R.
+(laughing)
+I love it.
+It's 47% Python, 47% JavaScript, 0.2% R.
+- I just wanna make it clear, you do not have to install R to run Shiny for Python.
+I think that R is, there's a couple of scripts that we use that we grab resources from the Shiny for RP repo.
+And I think, you know, that was one of the first things that one of our programmers did and they didn't know Python yet.
+So they wrote it in R.
+- That's fine, that's fine.
+I just thought it was funny that it's there, but just a shade of it, okay.
+This portion of Talk Python to Me is brought to you by GlareDB.
+GlareDB is an open source database for querying distributed data.
+Here's how it works.
+First, you connect your data sources.
+GlareDB makes it easy to connect to your data, no matter where it's stored, with integrations into many popular databases, data warehouses, and more.
+This includes Snowflake, Postgres, MongoDB, BigQuery, and Object Storage.
+Now you can query everything.
+You use the full power of SQL to query your data across these many different data sources, join data across production databases and analytical warehouses without limits.
+Finally, you can use the tools you already know and love, Visualize and query your data using tools you know from Python's data science stack.
+With just a single import, you can query Pandas and Polars data frames using just SQL.
+You'll be asking questions, extracting insights, and driving decisions with your data without waiting for an ETL pipeline to move data around.
+So if you have distributed data and disparate data sources and you love open source, you owe it to yourself to give GlareDB a try.
+Visit talkpython.fm/glaredb to get started.
+The link is in your podcast player show notes, and please use the link to let them know that you came from us.
+Thank you to the team at Clarity Bee for sponsoring the show.
+So the first thing that you point out here is, how is Shiny different from some of the things I said that it was like, for example, Streamlit or Dash?
+- Yeah, absolutely.
+- Maybe touch on that a little.
+- Sure, and I think really the one that comes up the most is Streamlit.
+man, Streamlet really has taken the world by storm, it seems like, since they came out in, what was it, 2018, something like that?
+- Yeah, I think it was 2018, yeah.
+It's only been a few years.
+- Clearly, it really resonated with the Python world.
+I do have to say, I was very taken aback by the simplicity of their programming model when it first came out.
+And I pay a little bit of attention to new things that come out and purport to be high-level web frameworks.
+And most of the time, they were sort of like, okay, I recognize the trade offs that they're making here, but the Streamlet one was definitely a very bold choice that they made.
+Streamlet, I think it feels to me that they really prioritized ease of getting started and having the simplest possible mental model in a much higher level of priority than everything else, which is a bold stance and I really applaud them for being sort of clear about what their vision is.
+So Streamlet is unbelievably easy to get started with, I think primarily because, I don't know if you've done a lot of streamlit, but it has this top to bottom execution.
+A little, not a ton, but yeah.
+Yeah.
+Like if you were to start out with not a Jupyter notebook, but like a regular Python script that was doing a bunch of data analysis stuff, you know, reading data, maybe doing some transformations and then outputting some, you know, tables and plots.
+Streamlit lets you take that sort of straight up and down script and sprinkle in some streamlit inputs and outputs and boom, like you have now written an interactive streamlet app, you just say, you know, streamlet run and then the name of the file and it just works in that sense. It's quite incredible. It's very easy to get started with and the cost to spin up a new streamlet app is so low that I was actually talking to another to a YouTuber, Fanilo. I don't remember his last name. I think there's one Fanilo in the streamlet world and he was saying that he actually uses this instead of Jupyter Notebooks to do interactive, you know, exploratory data analysis, which I thought was interesting. The sort of drawback of having this simple of a model is that it really works well for the simplest apps. And then the model is a little bit too simple for even like moderately complex. It's not even complex, but just like you're you sooner or later, will often in a surprising way, smack into some surprising wall.
+This is not something that is theoretical.
+We definitely have talked to a lot of Streamlit users and even the happy ones will say, we really, this is just for prototypes and then we throw them out because you just cannot, you can't think of Streamlit apps as something that can grow with you as your, as your needs grow.
+So I think the sort of time from zero to value for Streamlit is almost zero.
+That's incredibly quick. But the time from value to the time of, okay, now we're going to throw this thing out and the last 20%. Yeah, and it's actually not the last 20%. I think it's more like the last 60%. And I mean, that might be uncharitable and I'm biased. But but honestly, like in my using this framework, which is it's not to take away from their achievements. It's in It clearly has resonated incredibly strongly with a lot of people in the Python world.
+But I think no one who uses Streamlit seriously will tell you that you can do most of the things that you want in this sort of top-to-bottom execution model. You will often, in surprisingly quick ways, run into limitations there. And I do want to say, Streamlit, they recognized this.
+And after some time, they added, "Try to give you ways to work around that top-to-bottom execution model. They introduced the notion of session state and they introduced multiple attempts at nice caching abstractions. And I think they make somewhat more complex apps possible. But I really, I mean, I'm happy to recommend Streamlet for those easy cases. I cannot recommend Streamlet once you start, you know, getting into session state. It really is quite a fragile paradigm to be coding in.
+And by the way, just to make it clear here, I don't have a huge financial like motivation to lie about this.
+Posit Connect, which is the way we make money in this area, it is designed to host Streamlit as well.
+And we have a lot of customers that do that. So it doesn't matter to us whether you use Shiny or Streamlit.
+I mean, it matters to me personally, like it makes me feel good when people use Shiny.
+But as a business, we 100% love when our customers use Streamlit.
+But it really is, I think, we'll talk more about reactive programming later, I hope.
+What it doesn't give you is a nice model for the complicated stuff.
+It only gives you a nice model for the very, very simplest stuff.
+Which serves an important role, but also means that Shiny might serve an important role too.
+Another question from the audience, I think maybe worth a diversion is, you've got real world examples of Shiny for Python that you could talk about.
+And let me take a step back since this is so brand new.
+Just Shiny, right?
+Because I feel like the feature set is pretty similar.
+It's just like the R people have been at it for a lot longer, you know?
+Yeah, absolutely.
+And just to make clear, so Shiny for R has been around since 2012.
+Shiny for Python has been in alpha since last year, and we just took the alpha tag off in the last, I don't know, six weeks or maybe less than that.
+Yeah, so I think, and I'm sorry, I didn't come prepared with any more links than what's on the website.
+Yeah, no worries.
+But we have a Discord where people are starting to gather and talk about some of the things that they're doing with Shiny for Python.
+So yeah, I think on the left here, if you select, say, orbit simulation.
+Yeah, the orbit simulation is cool.
+This is a demo written by one of our engineers.
+But this is using, well, first of all, we haven't talked about this, but this is actually using Wasm.
+So there is no Python running on the background here.
+Oh, no. Okay.
+This is using a feature of Shiny called Shiny Live.
+So this is using Pyodide, which is the same sort of Python in the browser technology that PyScript is currently using.
+And you still write your Shiny app using Python.
+You still don't have to write any HTML, CSS and JavaScript.
+But when you run it, you can run it straight out of a web browser, as you can see here.
+So that's why it took a little bit longer to get started, is because it's installing Python into your browser and installing Astropy.
+Well, you say a while. It took like two seconds the first time.
+Oh, sure.
+Oh, I forget that, yeah, for your listeners, they won't be able to see it.
+This is an example of a relatively simple set of inputs and one 3D output that I think in this case is being rendered with matplotlib. And you can choose some different parameters about the Earth, Moon, and Sun, and Planet X. And it has arbitrarily complicated calculations happening on the back end by AstroPi to determine how these bodies would move when they're affected by each other's gravity. There's a lot of Shiny apps that are like this, that there is one particular algorithm, one particular model that it's demonstrating, and then wanting to show what happens when you try different parameters. So I'd say this is sort of in the simplest category of Shiny apps in terms of what's easy to imagine here. And yeah, there's some other stuff on the left there. Some of the example apps show the use of different widgets. So there's one for Plotly there. You can use the plotly JavaScript based visualization library with Shiny for Python.
+If you want your scatter plots to have, you know, tool tips that show, you know, data, for example. I mean, this particular one seems not to do that much. And, you know, you can use -- yeah, there's a -- there's a Wordle clone.
+>> No, it looks like a -- it looks like a mobile phone keyboard. I mean, I have a whole keyboard right here. I was like, now you can type into the mobile phone keyboard.
+Yeah.
+Wordy? No, it didn't take it. Come on. No.
+Yeah.
+That's pretty funny. Yeah. Yeah. Those are just the beginning ones, right? You even have camera input. I don't know what that's going to do.
+Oh, this is designed for a phone.
+Yeah. Yeah.
+We have another example that's not on here that will use your webcam, but Yeah, it's okay.
+But it doesn't, I don't think it works on the Wasm mode.
+Yeah, there's probably security limitations and or other differences.
+Yeah, yeah.
+I will say one thing that you won't see as much here that you do see on shiny for our is like interactive dashboards or even non interactive real time streaming dashboards, not because the sort of underlying technology is not there, but because the actual like UI widgets for making something that looks like a dashboard is in shiny for our but not in shiny for Python, but that is coming within the next, I don't know, hopefully a week or two weeks.
+So we have a new release coming that adds a lot more UI stuff.
+And that is a very, very common use of Shiny is for people that are creating dashboards that show key performance indicators and time series plots and geographic data plotted on an interactive leaflet map.
+That's bread and butter for a lot of data scientists out there who are using Shiny.
+- Okay, that sounds very exciting.
+And the kind of stuff that no one wants to do on the web.
+A very few people want to do directly on the web.
+Maybe one of you will just grab a library.
+- Yeah. - All right.
+So I sent us a little bit on this diversion here over those, but maybe the next thing would be reactive programming.
+Tell us about that.
+- Yeah, so Shiny was really born out of this idea of reactive programming.
+That was the motivating concept.
+And for people who haven't heard that term before, maybe heard it, but never really were clear on what it means, reactive programming is a programming paradigm that can be applied to many different programming languages, where it's about making it easy to program against values that are changing over time.
+In a normal programming paradigm, if you have a value, X, say, X equals one, and then you have Y equals X plus one, and then you change the value of X, the value of Y does not change, right?
+It's not reactive in that way.
+Whereas if you were in Excel and you had, you know, one cell using another cell plus one, then you would expect that to change.
+So Excel is sort of the most common example of a reactive model that I'm familiar with.
+- And so you wire up the data to say, this number depends on these other numbers and this one depends on that formula.
+And it's the underlying reactive system just says, we're gonna do the minimum amount of recompute to keep them up to date.
+- That's exactly right.
+That's exactly right.
+So in this case, the values that are changing might be a slider that is in your user interface, right?
+And when the user drags that slider from zero to five, there might be all sorts of downstream calculations that need to recompute now because you've changed that value.
+And in a world prior to reactive programming, the dominant model was, and maybe in a lot of places still, is callback-based programming or event handling is the other name for it.
+And that's, if you've ever used a framework that had like something called an onclick or something like that, you're doing event handling, right?
+This button is pressed, I am going to execute this exact, you know, code in response to a button click.
+And in that world, which is a world that I inhabited for many years, doing full-time, very complicated UI programming using that model.
+- Sounds like some desktop programming, maybe some C#, Windows Forms, something like that.
+- That's right, that's right, exactly.
+I worked at Microsoft working on Windows Forms apps that we shipped, and RStudio was created in that paradigm as well.
+It's actually quite difficult to do that kind of programming well.
+It's very easy to understand how to code an event-driven sort of way or using callbacks, but to get your callback logic right as the number of events, the number of outputs, and the number of intermediate sort of calculations as they increase, it's really hard to, number one, keep it performant, and number two, keep it correct.
+And the idea for doing a web framework for data scientists actually predates me finding out about reactive programming.
+And I actually said no.
+Like, I actually-- JJ and I talked about it.
+And I was like, we could do it, and we should not, unless we come up with some way that is better than event handling.
+Because what I didn't want to do was make it easy to come up with answers that were incorrect, which is what I think callback-based programming makes it very easy for you to forget to update some aspect of your calculation.
+And now you have an answer.
+It's just not the right answer.
+Right.
+Maybe you update two graphs, but there's some number that has like a total in it.
+And you forget in your event handler, you got to update all three.
+And so then, yeah, you'd have to update all three in the correct order potentially.
+Right.
+Because one of those sub calculations might depend on the other.
+So the whole thing, it is certainly possible to create very complex or even, you know, simple to complex interactive stuff using callbacks.
+But I never felt like this was a great way to work.
+And when I was building these desktop apps, I often felt at the end of the day like I had been operating at the very edges of my mental capacity.
+And it's even worse when you go to modify existing code or, God forbid, have to help debug somebody else's UI code.
+I mean, it really is very, very difficult.
+And I heard about Reactive Programming via this JavaScript framework called Meteor.
+And I don't know if you've heard of Meteor.
+I've heard of it, but I haven't ever used it.
+Yeah, not a lot of people have. I think it was very influential in terms of its ideas, but it didn't catch on anything like React.
+But Meteor, I heard about it in 2012, and I can't really convey how awe-inspiring it was to see.
+I think I saw a five-minute demo that was on the front page of Hacker News, and I was just flabbergasted at what they were doing in this demo.
+And there were like no event handlers anywhere.
+And yet everything was just completely snappily updating.
+I was like so taken aback by this that it stuck in my brain for weeks.
+Like I was like, how do they do that?
+Like that doesn't make any sense to me.
+And I finally like did some Googling around and there was a Stack Overflow answer that indicated like this is sort of more or less how it works.
+You know, with that clue, I downloaded their source code and sort of found my way to how exactly it was implemented.
+And I actually was getting on a plane and I downloaded the repo before I got on the plane.
+I was like, by the time this plane lands, I'm gonna figure this out.
+And it actually is a beautifully elegant mechanism that I'll probably talk about someday.
+I mean, we could talk about it now, but I think it would probably be the rest of our time.
+But it's a beautifully elegant and ultimately quite simple mechanism that underlies all this magic.
+When I saw that and eventually it took me a couple of weeks to connect the dots, but when I realized, wait a minute, this could be how data scientists could create highly interactive things without fear, without worrying that they're gonna forget to update some intermediate thing and get the wrong answer, or worse, they wouldn't worry about it, they'd just get the wrong answer and then be angry after the fact, right?
+- We're gonna retract that paper, I'm sorry.
+- Yeah. (laughs)
+Yeah.
+On the R side, it really has, these ideas have proven themselves out year after year after year.
+I think people are building incredibly cool things in reactive programming with no background in software engineering, much less hardcore front-end web development.
+So I really do believe there are a lot of different ways people are solving this problem in Python.
+Streamlit and Dash each have their own takes, and Pinecone and Solara are all these different ones.
+And the ones that have thought carefully about this problem of how do you help people programming against what is inherently a dynamic system while staying safe, while making sure that you're getting the right answers every time and doing it in an efficient way.
+Those are the ones that I think are closest to the spirit of shiny.
+And, and that's really why I think shiny for Python needed to exist because I mean, I looked at dash and streamlit and I just felt like, you know, I'm glad that people are really getting a lot of value out of these, especially out of streamlit.
+But I really feel like this needs to exist as well.
+We really need like an industrial strength reactive framework for things that are not just top to bottom execution.
+Yeah.
+One thing that's standing out to me on the page here as you talk about there are a few utility functions to help manage or utility things to help manage reactivity.
+And one is context blocks, you know, with isolate and other ones are decorators for functions.
+And, you know, just those two things are pretty, pretty solid Pythonic constructs of the language.
+Right.
+And so it looks like you put some thought into not just writing R code in Python, but trying to embrace some of the Pythonic language capabilities.
+Yeah, that's absolutely right.
+It was really important to us when we were talking about the design philosophy for shiny for Python to really make it a Python first experience.
+That's not necessarily, like, I think the other choice is defensible too, which is let's make these two frameworks look as similar as possible so that you can seamlessly move from one to the other.
+And I was just not convinced that anyone would really enjoy writing R-style code in Python.
+Like, I wouldn't. I mean, that just feels, something feels hacky about that.
+Yeah.
+So yeah, we definitely spent some time, and I'm not new to Python.
+I think I learned Python originally in 2003, something like that.
+And I've spent some time with the language.
+So yeah, it felt to me like so much of Shiny is, this reactive programming is about creating independent units of either this is code that generates a plot or this is code that calculates a data frame and taking those little bits of code and deciding when is the right time for each of them to run because there are like dependencies between these different blocks.
+And the notion of these being functions that have decorators on them felt to me like a pretty spot on analogy, right?
+Like you're creating a chunk of code, which in Python is a function, and then you are annotating it with an indicator of your intent.
+So in Shiny, you would write, you know, for a plot output, you would say def plot one or whatever you named that plot, you would have your map plot libcode inside, and then as a decorator to that function, you would say, this is an output and the type of the output is a plot.
+Now, I will say that being said, I have been a little bit surprised how many data scientists in Python I've talked to have not worked with decorators.
+It's not, I mean, most of them are familiar enough, but like a non-zero amount of people have told me, like, I haven't done decorators before, and this is a little bit scary.
+So that was not something that I was anticipating going into this.
+So yeah, so I got a couple thoughts.
+One is, if you went with your alternate reality, where you said, let's make them as identical as possible.
+There's certainly a case to be made for that.
+I agree.
+But that would sort of say the primary audience is the people that flows between R and Python.
+Exactly.
+It's certainly non-zero, but it's not like, let's try to resonate most deeply with just the Python community full stop rather than the transit folks, you know?
+Yeah, that's right.
+So I would say, I mean, looking in from the outside that this looks like a good choice.
+Second, the with concepts and the decorators and data scientists is, I think one of the powers of Python, the reason a lot of data scientists use it is you can be really effective with a partial understanding, a highly partial understanding of what Python is and how it works.
+Right, like you might not know how to create a class, you might not even know how to create a function, but you can still pip install a few cool libraries or conda install them and then run top to bottom five lines that generate an amazing output, right?
+And so I think there's a, not talking about all data scientists, but I think there's a a slice of kind of pretty new to Python data science who are like came from somewhere else, like I heard this is awesome and I'm starting to get some traction with it.
+But even they haven't gone into, you know, crazy concepts of decorators that take functions and star arg wraps them and returns other functions.
+You know, like that said, from a syntactical perspective, I think it's pretty easy like, oh, this function, it has to be reactive.
+So I put @ReactiveEvent on it.
+>> Yeah, that's right. Yeah.
+Amir asks if there's any examples with user authentication.
+I know you guys have your gallery, which is what I skipped before, but the gallery I think is maybe easier to quickly browse, but there's more in the examples.
+>> Yeah. Honestly, we are a little behind on the examples.
+We spent a lot of the last six months working on features and not on examples.
+>> You've been busy building the thing, not talking about what you could do.
+>> Yeah. I think we need our examples to catch up a little bit.
+I will say that user authentication is something that we have as part of both hosted platform and for Posit Connect. So I think a lot of companies that are trying to sort of have a similar business model as us, and have a open source framework, and also some kind of enterprise hosting often draw the line that way that that authentication is one of the things that isn't in the framework, it wraps the framework. That being said, in Shiny for R, people definitely went ahead and wrote their own packages that put authentication into their framework and made it open source.
+And I'm sure those things are going to happen in Shiny for Python very quickly as well.
+>> Yeah. How similar is the execution model, like the internals, what's happening conceptually on the server stuff or even on the web side across those?
+>> Yeah. There's a couple ways to answer that. I would say right now it is surprisingly close, which is not really what we were anticipating.
+Shiny for Python is written in async I/O, and that async framework is quite different than how async works in R.
+I think after spending a lot of time on this implementation, the mental model for the Shiny app author is actually quite similar.
+So where we ended up, I think it does, for all intents and purposes, as an app author, it's a very similar execution model.
+So each user, if you were to launch a Shiny for Python app right now from your, not from Wasm, but like using a regular Shiny for Python, running it out of Python, and you connected three web browsers, they would all be running in the same process.
+Each one gets their own copy of their their own session, basically. So there's no confusing whose inputs are applying to whose outputs. Everybody has their own copies of inputs and outputs and they're wired together.
+together, but it's all running on the same process and it's all running.
+currently they all run on the same thread.
+We do that on purpose because you can also have shared reactives.
+So, you know, you could have global variables that essentially when one browser updates them, everybody gets an update and you could have some kind of shared scoreboard or a chat room or whatever.
+That being said, if you want, you can also do async.
+so your outputs and calculations can also be async functions.
+And therefore your session, if it's doing some kind of long running async calculation, can give up its control of the thread to some other session that can execute.
+Right, or it's doing some database thing where it's pulling in a bunch of data.
+It can say, "Wait on the database, you guys keep going." Yeah, that's right.
+Okay, so we're getting short on time here.
+Let me ask you two more questions.
+The first one is, I think from a community perspective, like what opens up now, right?
+So we have R, we have Python, and there are similarities between these, but there's really smart people doing creative and powerful stuff on both sides.
+Because of the chronology, I guess, mostly I imagine that there's more shiny work that's happened on the R side than on the Python side.
+But how much does this make it possible for people who maybe wrote a book with shiny for R, and they might want a Python version?
+It seems to me that having this as an option, if the whole UI is now kind of almost equivalent, if not syntactically identical, like, oh, all of a sudden we could have these two versions, or we could move from one side of that fence to the other and still stick with Shiny in the same reactive programming model.
+Yeah, I want to make sure I get your question right.
+Are you talking about people who are sort of in the Shiny ecosystem, who have like extension packages and things like that?
+Or are you talking about people who write Shiny apps?
+People who write Shiny apps.
+people who are like users creating these Shiny apps, maybe they created them in Shiny for R, and they're like, "I've always wanted to do a Python one, but I really like Shiny, so I'm not going anywhere." You know, but now there's Shiny for Python.
+You're like, "Oh, maybe this is a way to have that as an option," right?
+Or, "I'm a teacher teaching a class at a college, and I did it with Shiny and R, and they're telling me I have to move to Python.
+I thought I'd use Streamlit, but maybe now I can move over." Like, how much do you see that scenario coming into play now?
+- We absolutely are, yeah.
+And I think I underestimated this a little bit.
+I think what I was anticipating is that people who are very comfortable with Shiny for R and comfortable with R in general might see Shiny for Python as sort of a threat as, you know, the Shiny team has given up on R and all they care about is Python now and they're selling out to the Python, you know, crowd or whatever.
+And that really has not been the case at all.
+And then, Joe, you come on this podcast and oh my goodness.
+Yeah, that's right.
+Just kidding.
+In fact, it's almost been a sense of relief.
+And that applies as well to, you know, our company name was RStudio, we rebranded Deposit.
+And similarly, we announced both things at the same conference, that we were going from RStudio to Deposit, in terms of our company name, and Shiny for Python is now going to be a thing in addition to Shiny for R.
+And I almost feel like the predominant emotion that we got from our community was relief.
+Because I think unless you're in like very specific fields, there's nobody that doesn't have some Python around them, right?
+That maybe your team does R, but then you have this sibling team that, you know, maybe is more ML model heavy, and they definitely use Python, or your IT department really is a lot more comfortable deploying Python.
+And I think as much as people love R, knowing that they have the option, knowing that they can take these ideas that they really like from R and be able to reuse them in Python.
+I mean, yes, there will be some syntax to learn, but that's never the hard part, right?
+I mean, the hard part is everything that you express using the syntax.
+The libraries and the UIs and all that, yeah.
+Yeah, so that's really what we've heard is that people, even if they're like totally happy with Shiny for R, they're happy that Shiny for Python exists because they know that if the time comes where they have to add that to their toolkit, that it's an option and they don't have to now try to map everything that they know and take for granted from Shiny to have to map that to Dash or to Streamlet or Panel or something like that.
+>> Yeah. Another example is you work at a university where R is actually really has a good stronghold, especially in the math and statistics department.
+But maybe you're working with some astronomers and their whole research group does Python and you want to work with them.
+But you know, like, you also want to bring shiny, right? So yeah, that's what like that, all that conversation right there kind of encapsulates why I thought this would be a really cool topic to have you on the show is, you know, it kind of opens up this bridge. Yeah, a lot of people in a lot of directions.
+Yeah. And speaking of bridges, a member of my team pointed out that, you know, he's someone who in his previous job went from an R organization to like a more Python heavy organization. And as someone who's coming from the R world, it can be a little bit intimidating, you know, to sort of start at the, of the ladder again, especially if you're in some kind of, you know, a team situation where you're expected to be productive and to contribute to the team. And Shiny for Python, especially being new, that people are coming from the R world and sort of find themselves, whether by choice or involuntarily, you know, needing to do Python, that Shiny for Python might be an interesting, like you said, bridge for them to go from one ecosystem to the other, while maintaining a certain level of familiarity and to be able to deliver a lot of value.
+Because, I mean, one of the reasons I think Shiny resonated on the R side is because the the things that you build with Shiny, if they have value, they are extremely visible.
+They're extremely visible to your coworkers inside your organization.
+And it really, you're talking about how, you know, people coming up and saying how they've built impactful things with Shiny.
+Another common theme I heard was how much Shiny helped their careers.
+Going from doing work in a REPL or a notebook, and instead being able to deliver very dramatic interactive applications It's a really powerful way to have an impact in your organization.
+- It is.
+And I think data scientists, and especially this kind of like visual, let me turn the knobs and see what happens type of experience is the type of person that has the ear of pretty high up folks.
+And if you've got powerful tools like this to make a good impression, you're like, they asked me, I asked them if they could give us predictions of this, or if they could rethink this.
+And they came back with a new web app the next day.
+Are you kidding me?
+Took us six months to redesign our stupid website for the homepage, you know what I mean?
+Something like this, right?
+And so it lets you look good, right?
+To the right people.
+- That's right, 100%.
+- Yeah, cool.
+Joe, I'd say you're making a big impact here.
+We got Alan out there saying, I just started using Shiny during this live stream.
+- Yes.
+(laughing)
+- How hard is it to deploy this into an AWS EC2 instance, for example?
+- Yeah, you totally can.
+The easiest thing to do is to look up Shiny server.
+Most of the documentation talks about, you might find it on the R side of the website, but it's actually all the same.
+So if you're using Ubuntu, it's a simple install of a Debian package.
+If you're using Fedora, it's an RPM.
+And it should be pretty easy to get started with.
+But also don't forget that you can also just sling it into our free hosting, especially if you're just getting started.
+- Yeah, excellent, excellent.
+Roadmap, let's close it out with roadmap.
+- Yeah, so in the upcoming release, We have been focused a lot on UI components, and that's something that we're gonna continue to focus on for a while.
+We definitely wanna make the more dashboardy type applications very easy to write, and we also are wanting to beef up on the output side of some of our widgets.
+So we don't have a great table widget right now.
+It just kind of takes a pandas table and renders it to HTML using pandas styler, but we want to have fast scalable virtual grid basically.
+And also for more interactive type outputs like that, I should mention that we support IPy widgets natively.
+So most IPy widgets will just drop right in including Plotly and PyDeck.
+And well, you know, most of them work just fine.
+And we'll be doing more to sort of make some of those feel a little bit more native and the IPy widget stuff works great.
+But I think we also want to make it feel a little bit more functional in some cases than object-oriented.
+Yeah, and we have a lot of examples to write, a lot of documentation to write, and there are also quite a few features to port over from Shiny for R.
+And the last thing I'll say is that automated testing is something that we are working on as well, making it easier for you to write automated tests for your Shiny for Python apps.
+It's an approach that's based on Playwright that we use internally right now, but we're gonna have helper classes and functions to make it a little less boilerplatey to write these kinds of tests for Shiny for Python apps.
+- Nice, Playwright's really cool.
+- Yeah, yeah, very, very, yeah, very, very cool.
+- Like Selenium, but more Pythonic, so pretty neat.
+- Yeah, yeah.
+- Oh, well, it's a cool roadmap.
+People want, if they've got ideas, they wanna reach out to you.
+Is GitHub an option?
+Like, do they open an issue?
+Do they email you?
+How do they reach you guys?
+So we have a GitHub issue is always appreciated and we will absolutely read those and engage.
+We also have a Discord for things that are a little more, you know, if you want a little bit more of a back and forth and or do you just want to meet us? You just want to talk about, you know, any of the design decisions we've made or how we might be different than, you know, XYZ framework. We're happy to talk to anyone and everyone.
+And I think to get to the Discord is on our GitHub homepage, I believe.
+Excellent. Let's see if I can find it. Discord. There you have it. Join us on Discord right on the homepage and the readme of the GitHub. All right, Joe, thanks for being here. Thanks for creating this. This is cool. I think it's a nice contribution and really, like I said, it's a cool bridge between the R and Python communities.
+Thank you. If you don't mind me saying so, I really enjoy your podcast and I think that you're quite good at this and I just really appreciate all the conversations that you've had you seem like just a really generous interviewer and you do a really great job of sort of helping people really feel three-dimensional even when we're talking about like very technical stuff. So I appreciate that. I really appreciate that. That's super kind. Thank you for saying that. And thank you for being on the show. So yeah, my pleasure. All the links in the show notes for all these things. People can check them out there. And yeah, see you next time.
+All right. Thanks so much. This has been another episode of Talk Python to Me.
+Thank you to our sponsors. Be sure to check out what they're offering. It really helps support the show. InfluxData encourages you to try InfluxDB. InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics. Try it for free at talkpython.fm/influxdb. GlareDB is an open-source database for querying distributed and disparate data. Connect your data sources and use the Python tools you already know to ask questions and integrate data across data sources. Get started today at talkpython.fm/glaredb.
+Want to level up your Python? We have one of the largest catalogs of Python video courses over at Talk Python. Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight. Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+we should be right at the top. You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days. If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host Michael Kennedy. Thanks so much for listening. I really appreciate it.
+Now get out there and write some Python code.
+[Music]
+(upbeat music)

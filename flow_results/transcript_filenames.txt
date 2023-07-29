@@ -420,3 +420,5 @@
 420-isolation-and-consistency.txt
 421-python-at-netflix.txt
 422-how-data-scientists-use-python.txt
+423-solving-10-different-simulation-problems.txt
+424-shiny-for-python.txt

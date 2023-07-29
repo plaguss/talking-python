@@ -1,0 +1,848 @@
+Python is used for a wide variety of software projects.
+One area that's really gained a lot of momentum is in the computational space, including data science.
+On this episode, we welcome back Allan Downey to dive into a particular slice of this space, simulation problems in Python and physics and engineering in general.
+This is "Talk Python to Me," episode 423, recorded June 6th, 2023.
+(upbeat music)
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode of Talk Python to Me is brought to you by InfluxDB.
+InfluxDB is the database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try them for free at talkpython.fm/influxdb.
+And it's brought to you by the Pybites Developer Mindset Program.
+Pybites' core mission is to help you break the vicious cycle of tutorial paralysis through developing real-world applications.
+The Pybites Developer Mindset Program will help you build the confidence you need to become a highly effective developer.
+Check it out at talkpython.fm/pdm.
+Hey, Alan.
+Thank you.
+It's a pleasure to be here.
+Pleasure to have you back.
+talking just a little bit before the show, realizing it's only been six years since you were on the podcast.
+How about that?
+Last time we talked about Python and engineering way back in 2017, which was a lot of fun and has some interesting lead-ins to some of the things that are actually created now.
+You were hinting, "I'm working on this project "about simulating things with Python." Here we are talking about it.
+- Yeah, I was just getting started then and the book has come out very recently.
+So we've kind of bookended the project.
+>> Absolutely. Well, it's quite a project and it's a very interesting one.
+I think a lot of people out there, they hear maybe they should use Python instead of MATLAB or some other language for modeling their domain.
+With your book that you put together, which is available for purchase or you can read it online for free, that works for you.
+It has a bunch of different examples.
+How many examples? Maybe 30 or so?
+>> I think that's right.
+There are examples in the chapter and then case studies that get into more detail.
+Yeah, so there's a lot of different areas of specialization where you're bringing Python to answer problems.
+And we're going to have a lot of fun talking about that.
+But, you know, let's just do a quick catch up.
+It's been six years since we last spoke.
+What have you been up to?
+Well, I've changed jobs a couple of times.
+I was a professor at Olin College for 19 years.
+I left at the end of last May.
+And then I was at Driven Data for a little while, working on data competitions and machine learning.
+And then recently I've joined Brilliant, where I'm doing curriculum design.
+- That sounds very fun.
+First of all, leaving college, you were at for 19 years.
+That's a big deal.
+- Yeah, I've been an academic pretty much all the way through.
+I graduated from college, I went to grad school, I had my first job.
+I was a faculty member at Colby College and then Wellesley College.
+And then, as I said, I've been at Colby for 19 years.
+So it's a real change of career.
+How's it going?
+It's good. I'm learning a ton.
+You just, you know, whenever you start something new, you're always, you're on this, you know, the steep part of the learning curve, which is challenging, but it's also just exciting.
+You're getting exposed to different things, learning a ton.
+Yeah, absolutely.
+And working at Brilliant now, you know, Brilliant's a good company.
+There's, they've been past sponsor of the show, which is great.
+And, you know, maybe just talk a bit about how you think about curriculum and design, since that's what you're focused on there. How do you think about putting together small class, not semester wide classes for people to learn? Yeah, that's a big part of it. It's a different format. It's smaller, as you said, it's interactive, in the sense that the learner is interacting with these new graphical elements and other ways of communicating ideas visually.
+We use a lot of animation, and the text is deliberately very concise.
+We're trying to show, not tell.
+And that's a really different kind of curriculum design for me.
+I'm used to, you know, I have a semester-long course.
+I've got several hours a week.
+It's very different.
+And that's part of the challenge that was appealing to me, because I saw some of the courses and I was very impressed with the pedagogy and the opportunities that you have there with animation and sound and interactives.
+It's a very different kind of teaching.
+But it's not--
+Yeah.
+There's no-- I don't have any interaction with students.
+So that's a challenge as well.
+It's a big challenge.
+I went from teaching in person to teaching online as well.
+Not too brilliant.
+But I think there's a couple of really big differences.
+One is when you're either--
+you have a student for a semester Monday, Wednesday, Friday at 11 to 12, or if you're doing a week-long training class in person, those groups are captive, right?
+And so the constant need to keep their attention for every single minute is really different, right?
+Because it's not impossible, but it's rare that students just get up and walk out because there's a five minute section they weren't engaged with, but they could easily leave a website.
+- Yeah, it's particularly in a format like Brilliant, there's not a certificate at the end.
+The motivation to keep going is you're having a good time and you're intrinsically interested in the topic.
+So from my point of view as an instructor, the challenge there is to maintain that.
+It has to be interesting, engaging all the time.
+As you said, if you've got a five minute lull, you might lose your audience.
+- Yeah, the other part that is a big difference is when you have those folks in class, even in a Zoom meeting to a degree, you get immediate feedback of how does an idea land?
+If I present it this way, are they engaged?
+or they clearly not getting it.
+Whereas you put it out into the world at Brilliant or TalkByThon or wherever, and they've got to, you take a guess and you put it out there, right?
+You don't get that feedback.
+- Yeah, that's definitely challenging.
+We do have some signals where we can see if a learner is getting stuck in a particular place or if we see a lot of drop off on a particular lesson, we can go in and try to figure out what's happening.
+We get a little bit of explicit feedback.
+Sometimes the learners will tell us what's wrong.
+but most of the time, you're kind of, it's on you to make sure that that lesson works.
+And your colleagues were constantly reviewing each other's lessons and looking for those places where we think we might lose learners.
+- Excellent, well, I'm sure it's a lot of fun.
+Some nice comments in the live chat out here, people appreciating that as well.
+So one thing that you said you learned, which I haven't really learned before, is I don't even really know what it looks like, is Elm, tell us about Elm, what is this?
+This is a programming language, as it says, it's primarily for web applications.
+It is a functional programming language, and it's mostly a stateless computational model.
+So it's very different from Python.
+I've just been learning it.
+This is what we use for a lot of the interactive elements.
+And it was new to me.
+I had honestly, I had not even heard of it.
+But it's been great.
+I just, you know, it's been a little while since I learned a new language.
+It's been about 23 years since I learned a new language.
+And I've done functional programming, but I haven't used it, you know, really for applications.
+So this has been, you know, challenging, but fun.
+It looks a little bit like Lisp meets HTML.
+That's not bad.
+Yeah.
+Okay.
+Certainly the semantics is very Lisp-like.
+Syntax can be, although not too many parentheses.
+Not as many.
+You get that blister on your pinky or whatever finger you use for the phrase.
+- Maybe you're right, index figure.
+- Right. - Or ring figure.
+- Yeah, and then the syntax, it has a couple of nice features like pipes.
+So, you know, taking a value and piping it through a sequence of functions.
+And of course, you know, functional features like passing around functions as first class objects and partial function evaluation.
+- Is this a front end language like a JavaScript or is it a back end language more like Python?
+- Yeah, no front end, it's getting compiled into JavaScript.
+But it is strongly typed, like extremely strongly typed.
+like integer and float are incompatible types.
+So--
+- There we go.
+- So very strongly typed, but that along with a lot of error checking gives you some more confidence that if you put this on a webpage and a large number of people interact with it, there are maybe fewer errors that can get past a compiler.
+You know, a really dynamically typed language like Python, you're rolling the dice, you deploy that code.
+You know, some of those lines of code have never run.
+and the first time they do, you might be in trouble.
+- The type hints are helping.
+MyPy is helping, but that's not a runtime thing.
+Pydantic, for example, is a runtime version, that option that helps a lot.
+Before we move off this front end stuff, then we'll get to the modeling.
+Have you been tracking PyScript and the front end Python stuff?
+Is that interesting to you?
+- It definitely is, and especially from a teaching point of view, getting people into Python, one of the challenges from way back has always been, How do you get a new programmer to the point of executing their first line of code?
+That is definitely not as big a barrier as it used to be.
+It used to be, you had to install things and download things and all that.
+But yeah, the lower that barrier, the better.
+And yeah, I think PyScript is one of the things that can help to lower it.
+- Yeah, I do too.
+I'm very excited about PyScript.
+It had been interesting in the realm of kind of different ways to execute notebook style code and so on when it was based on Pyodide.
+And now that they're talking about moving to MicroPython, it starts to get into the realm of it.
+It could download the same size as Vue or Angular almost.
+And then it becomes, maybe you can make real apps with this thing.
+So I'm looking forward to see where that goes.
+- Oh, interesting.
+I had not heard about that.
+So that's exciting.
+- Yeah, yeah.
+One of the big things that they're trying out, I had a couple of the folks on from various projects four or five months ago, is they're trying to, instead of using full CPython as the foundation to use MicroPython, which means the download goes from like 10 megs to 100K.
+- Yeah.
+- And you're talking 100K downloads, you're like, you know, that's kind of like a big JavaScript and if it's over a CDN and it's cached, you know, maybe you could just make that part of your app in general, not as a specialized thing.
+- Yeah, that's interesting, particularly because I think one of the other challenges for Python right now is it takes a while before you're doing really interesting stuff.
+And JavaScript, for example, you can immediately start doing front end kinds of interactions and a beginner can start to write programs where it resembles the kind of apps that they're using.
+And I think that's a pretty important hook.
+For Python, that's a long path.
+And so it sounds like this could shorten that path quite a bit.
+- It sure could, that would be very interesting.
+I think your insight there comes in as a bit of a teacher as well, right?
+Like it's one thing as an engineer, Like I'm gonna build this thing, so I'm gonna choose this language for such and such.
+But as a teacher, you realize like, if you don't have a win early enough in the learning cycle, then you might just bail.
+And for a lot of people, a win is I have a UI.
+I have a thing that looks like an app that I could see on my phone, or I could see in my web browser or something like that.
+- Yeah, definitely.
+Or a robot or some interaction with the real world.
+But yeah, converting Fahrenheit to Celsius (laughs)
+is not gonna do it.
+- No, but Celsius to Fahrenheit, that one is the one.
+That's the one, no.
+- Please forget it.
+- But speaking of converting numbers and so on.
+This portion of Talk Python to Me is brought to you by Influx Data, the makers of InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Developers can ingest, store, and analyze all types of time series data, metrics, events, and traces in a single platform.
+So dear listener, let me ask you a question.
+How would boundless cardinality and lightning fast SQL queries impact the way that you develop real-time applications?
+InfluxDB processes large time series data sets and provides low latency SQL queries, making it the go-to choice for developers building real-time applications and seeking crucial insights.
+For developer efficiency, InfluxDB helps you create IoT, analytics, and cloud applications using timestamped data rapidly and at scale.
+It's designed to ingest billions of data points in real time with unlimited cardinality.
+InfluxDB streamlines building once and deploying across various products and environments from the edge, on-premise, and to the cloud.
+Try it for free at talkpython.fm/influxdb.
+The link is in your podcast player show notes.
+Thanks to InfluxData for supporting the show.
+Let's talk about your latest book.
+You have a lot of books over at Green Tea Press.
+This is your home for where your books go, right?
+- Yeah.
+- As well as links to other ones you've written at places like O'Reilly.
+- Right, yeah.
+So everything starts here and there's a free version of all of the books and you can get to it from here.
+You can see kind of the evolution of my process 'cause some of the earlier books, some of them look better than others.
+Let's put it that way.
+And then links there for the ones that have been published, There are hard copies available and electronic versions in convenient formats.
+- I think we might have spoken about this six years ago, but it was six years ago and I'm not sure, and I imagine a lot of people don't remember it.
+Did we talk about your textbook manifesto?
+What is this?
+- That was what really got me started.
+And it came from my frustration with existing programming books, but also just textbooks in general.
+The way they're used in a lot of classes, they are expensive, they are way too big.
+you know, if there are 700 pages or 1000 pages, nobody's gonna read that in a semester.
+And if you're assigning 50 pages a day, I think, you know, you're kidding yourself and the students are not getting much out of that.
+So this is the idea that you can write a book that your students can read and understand and that is at the size where you can do something like a flipped classroom, where they are actually gonna do some reading before class, not 50 pages, but 10 maybe.
+Come to class.
+Now, as an instructor, I can help to figure out, what are the problem spots?
+What should we cover in class?
+What can we do to practice those ideas in class to take advantage of the time when we're actually in a room together?
+So, read when you're on your own, come to class, let's do things that are more useful than me standing at the front of the room talking to you.
+- Yeah, sure.
+Okay, that makes a lot of sense.
+So let's dive into your book, modeling and simulation in Python.
+Now, as I'm going through this, I'm not sure what I would classify it as.
+Is this a science book?
+Is this an engineering book?
+Is it a programming book?
+It kind of feels like it's a little bit of all of those.
+How would you, what's your elevator pitch here?
+- Yeah, it's that.
+It is the solution to a chicken and egg problem, which is that in an engineering curriculum, a science curriculum, and maybe even more broadly, I think for teaching physics and math to almost anyone, a computational approach is really appealing.
+There are things that you can do with computation that are very difficult to do analytically.
+You can do more interesting things faster.
+So that's the appeal.
+The hard part is most people are not coming into college with programming experience.
+Some do, most don't.
+So whatever your curriculum is, but let me focus on engineering because that's where I was.
+You've got a cohort coming in who have programmed, a cohort who have never programmed, and then kind of maybe a middle, maybe they've done like HTML or something like that.
+And now I want to teach them physical modeling, but I have to do kind of three things at the same time.
+The modeling piece, the physical models, the domain knowledge, you know, if it's a scientific system or an engineering system, whatever it is, and programming.
+And there's no good sequence.
+Like, I can't send people out to take a computer science class, and then they come back and we do computational science.
+It just, there are a number of reasons that that doesn't work.
+And same thing, if they go, let's say they go take calculus or linear algebra, and then they come back, collecting that knowledge and then trying to synthesize it is really hard.
+And it means it's a sequence of courses instead of starting in right from the beginning.
+So those are some of the problems that we were working with.
+And the best solution, at least we think, is put it all together.
+We're going to teach people how to program using these physical models as examples.
+And so they're getting some mathematics, not a ton, kind of a gentle introduction to differential equations, some physics, but it's a bit more broad because it's not just mechanics, and then some programming, but it's really a subset of programming that's focused on those domains.
+So that was my best explanation.
+>> Oh, it's good. It's good.
+I can see how there's not a real great solution for that in a college curriculum.
+You send them off to take a CS class and they might come back of having done a introduction to programming course but still not really be able to do too much, or an algorithms course and like, I can really tell you about a doubly linked list.
+You're like, "All right, you're still not ready. I'm sorry." It's a challenge to bring these things together.
+I think that's generally a challenge in education a lot, us to cross these things over and why a lot of people feel like certain things are that's useless. I'll never use that. That doesn't have any value to me because it's taught in such an abstract, isolated silo.
+Yeah. And you never close the loop because we're making a promise. If, if, if we send a student to take a prerequisite class, the contract is you go do this thing. And then when you come back, we're going to make it pay off.
+You're going to see the benefit and we never do.
+It's tough, it's tough.
+So like we said, there's about 30 different problems in here like population growth, how long does it take for your coffee to cool?
+What's the optimal way to transfer it to work?
+Glucose, disease modeling, as well as vaccines.
+People can check out.
+So I thought it might be fun for us to just pick out however many we get through.
+Let's say we take a shot at 10, we'll see if we get there.
+10 of these and just kind of talk through what is the problem?
+What are some of the Python ideas at play here?
+or maybe what are some of the math or science ideas as well?
+So you wanna start with world population?
+- Sure, yeah, this one was interesting for me.
+It's something I didn't know very much about.
+So I got to learn.
+I think it's a sweet spot of, you don't need a lot of computational tools 'cause this one comes very early in the book.
+But you can study a real system that's happening right now and get to understand it.
+So it's a discrete system.
+So we're just counting the number of people and modeling population growth.
+And so the number of new people in any year is gonna be some function of the current population.
+And so we can introduce a couple of different models, you know, starting very simple.
+One of them says, what if we have the same number of births and deaths every year?
+Well, okay, the population would grow linearly or maybe shrink linearly, but it would be linear growth, constant slope.
+All right, what if it's proportional?
+What if we have a birth rate that's, you know, proportional to the current population.
+Some people might know you're gonna get exponential growth.
+And I think if you ask people what's going on in the world right now, they probably believe that we are experiencing exponential growth.
+- That was my thought when I read this.
+I thought, oh yeah, okay, so we're probably talking about geometric growth and those types of things, yeah.
+- Right, well, that's the model.
+And we try to fit that model to the data and it doesn't.
+And so that's where the first lesson comes from, which is you can do all the theory you want and eventually you will collide with data.
+And your theory may or may not survive the impact.
+And that's what happened here is, the population is currently not growing exponentially.
+Going back to about 1960, it's pretty close to linear.
+And that one's kind of weird because, okay, wait a minute, if it's linear, that means we have roughly the same number of births and deaths every year, but how?
+How do you get 7 billion people to coordinate and make that happen?
+So there are a couple of ways to think about what's happening.
+One of them is the logistic growth model, which starts out exponential, and then as you approach a carrying capacity, you approach this limit, it approaches that limit asymptotically at the high end.
+And in the middle, there's a piece that looks linear.
+So you could look at that model and you could, okay, maybe that's what's going on, except it turns out that's not quite right either.
+And that's where the domain knowledge comes in.
+'Cause so far, it's just been programming and looking at data.
+At some point, you have to talk to a demographer because they actually know what's going on.
+And what's going on turns out to be very interesting.
+It's the demographic transition.
+And this is a social and economic phenomenon, which is as societies, countries become more economically developed and have more personal freedom, fertility rates tend to go down.
+And they very often, it's often dramatic.
+It would be a shift from lifetime fertility of five, six, seven, or eight children down to very close to two.
+And 2.1 is the replacement level where population levels off.
+A lot of developed countries right now are at or below replacement in terms of birth rate.
+And so the populations are leveling off or starting to decline.
+- Yeah, there's gonna be some knock-on economic effects.
+Although I don't know that those were modeled in your book, but you know, like how does things like social security and support nets happen when the thing being supported is heavier or larger than the people doing the supporting, right?
+- Right.
+- Speaking of economies like Japan, for example, and so on.
+- Yes, yeah, they've been below replacement level for quite a while.
+So in some sense, they are the predictor of what a lot of other countries are looking like now.
+And as you said, you know, vast economic consequences.
+Now, that's where I stopped.
+It's not an economics book.
+(laughing)
+- Yep.
+- That's where it was, I think, fun for us to, you know, get to that point and say, look, okay, we have found some interesting things, and now, you know, go explore, 'cause there's a lot more, lot more to learn about this.
+- Yeah.
+I doubt it would surprise the listeners that the standard data science pieces are at play here.
+Jupyter Notebooks, Pandas, Matplotlib, those kinds of things, right?
+- Yeah, there it is.
+From Pandas, read HTML.
+Yes, whenever we can, we try to get real data.
+One of the goals of this class is to connect students to the real world, and that's one of the places where data science is a real opportunity because the availability of data is great and the computational tools for working with data are very good.
+Now, obviously in Python, Pandas is one of the popular libraries for data.
+There are others, more generally, there's R, Matlab.
+This is a real, I think, teaching opportunity.
+- One of the things I thought was interesting from a lot of these was the acquisition of the starter data for a lot of these.
+So for example, on this one, you have, you're getting the world population estimates from a table.
+And I think this table originally comes from Wikipedia, but you've saved it locally because you're smart.
+And in case they change the format of that page, you don't have to rewrite your book.
+But you know, it really highlights certain things that are just so easy if you know the way, but are not necessarily obvious.
+So for example, here you have from pandas import HTML, you can just go read HTML and you give it a, either a URL or just a HTML file in this case.
+And then you can say, well, we just want the second table that was in that HTML.
+And it literally grabs out of Wikipedia, it grabs the table and turns it into a Pandas data frame, which is pretty remarkable, honestly.
+- Yeah, well, I have mixed feelings about this 'cause it's great that we can get the data and it's easy with these tools.
+It's a little bit sketchy in the sense that, as you said, we have to, What if Wikipedia changes the format?
+This is not exactly data that anybody intended to export.
+So I think I would prefer to get this data from the original source in a format that was really intended.
+An HTML table is not exactly a data transport format.
+- No, an Elm table.
+No, just kidding.
+I mean, it's fragile in a lot of ways.
+Somebody could insert a column, delete a column, more likely than insert one, right?
+To add, oh, we found a new data source.
+we added it and all of a sudden all of your stuff breaks.
+But it could even be as simple as we added more information to the Wikipedia page and now there's a table that precedes this table in HTML.
+So when you say, get me the second table, you actually get some unrelated thing, right?
+So obviously, I mean, it's effectively web scraping behind the scenes, which is always fraught with instability.
+- But you're taking advantage of what Wikipedia did, which is to collate all of these sources.
+People have gathered this and curated this collection of data.
+So that's why I say mixed feelings, 'cause it is a great opportunity to take advantage of that, but web scraping might not be the best way to do it.
+- Yeah, quick question from Marwan.
+Does the book include attempts to visualize the simulations like modeling a bouncing ball becomes more rewarding if you can see it in action?
+- Definitely, and that comes up in the third part of the book, which is about mechanical systems.
+And those are the things where, yeah, we've got objects moving in space and that begs to be an animation.
+There's not a ton of it, because it's a little...
+The tools for animation in Jupyter Notebooks using Matplotlib are a little bit clumsy, so I didn't get deep into it.
+But definitely the point where you get to see the simulation and you see the objects moving in space, you, I think, appreciate it, for one thing.
+You also, I think, get to debug it, because your eye is really good at seeing physical errors.
+If your physical model is doing something incorrect, it's gonna, you're gonna see it instantly.
+It's gonna bother you.
+- Yeah, that does look right.
+And you know, it's probably not necessarily a problem with the animation, with the modeling, but even things like acceleration and deceleration.
+If a thing just goes over and stops, you're like, oh, it didn't.
+That's not right, it shouldn't do that.
+It should slow down and come to a stop.
+It didn't hit an imaginary wall.
+This portion of Talk Python to Me is brought to you by the PyBite Developer Mindset Program.
+It's run by my two friends and frequent guests, Bob Delderbos and Julian Sequeira.
+And instead of me telling you about it, let's hear them describe their program.
+Are you trying to code your way to a more flexible and impactful career, but aren't getting anywhere?
+If so, the Pybites Developer Mindset Coaching Program, PDM, can help get you unblocked.
+Imagine this, building and deploying your own applications, mastering Python, and getting personalized one-on-one coaching every step of the way. We know the struggle of tutorial paralysis all too well and that's why PDM focuses on real-world applications. Our mission is to help you build confidence as an effective developer. And remember, this isn't a boot camp. It's a highly personalized invite-only program. You won't be just another face in the crowd in some classroom, but a valued part of our inclusive community.
+And are you ready to give back to the open source world?
+With PDM, you'll gain the skills and the confidence to contribute meaningful code to the projects that matter to you.
+And it's not just about the coding.
+It's about joining a community of like-minded developers, fueling your intellectual curiosity and making a difference with your skills.
+So, are you ready to take your Python skills to new heights?
+We hope you are.
+So please apply now for the PDM program.
+With Pybites, you don't just learn to code, you code to learn, to grow, and to give back.
+See you on the inside.
+- Apply for the Python Developer Mindset today at talkpython.fm/pdm. It's quick and free to apply.
+The link is in your podcast player show notes. Thanks to Pybites for sponsoring the show.
+All right, next one to talk about is epidemiology. And in this one, we talk about the freshman plague. People maybe with regard to college have heard of the freshman 15, like a certain amount amount of weight a lot of people seem to put on from the stress of going to college.
+But the freshman plague is more about coming together in a big group from all over the place more than maybe people are used to coming from their hometown.
+Yeah.
+Well, we started this example.
+Well, let's see.
+I think we were working on this in 2017, but we were using this example previously.
+So before COVID is the point.
+And I guess at the time it was sort of a fun example.
+like, "Hey, everybody gets a cold "during the first few weeks of the semester, ha ha." And it's less funny now, but it's also definitely more relevant.
+We're thinking about modeling an epidemic and modeling interventions, and in particular, understanding a concept like herd immunity.
+So if you're talking about public health and what's our civic obligation, it's not just looking after yourself.
+there is a public consequence to your individual decisions.
+- Yeah, absolutely, there sure is.
+And yeah, this used to be somewhat of an interesting example and then it became one of the biggest stories, maybe of our lifetimes, who knows.
+Anyway, so this is the Kermack-McKendrick model.
+And there's a couple of interesting things that I thought were interesting models here.
+So in this model, you have the susceptible folks who are not yet infected, but potentially could be.
+You have the recovered people, and you assume they have some kind of immunity, at least for their freshman year, I guess.
+And then the people who are infected.
+And you talk about this idea of having, what's it called, stock?
+Yeah, stock and flow diagrams.
+Those are pretty interesting, 'cause you think of the freshman class as kind of a fixed set, right?
+- There are some different versions of the model.
+And right, Kermack-McKendrick, nobody calls it that.
+Everybody just calls it an SIR model, 'cause those are your three.
+- SIR, okay. - And you can extend it.
+There are additional groups.
+And what you're modeling is the flow of, in this case, it's people, from one stock to another.
+So someone who is susceptible, if they become infected, they move into the infectious stock, and when they recover, they move into the recovered.
+So this is the simplest model, and usually it's a fixed population.
+The reason that this is where we start is that this lends itself to a differential equation that we can do some work with.
+We can't solve it analytically, but there are some useful analytic methods.
+And we can also work with it computationally.
+So this is one of several examples in the book where we do both.
+And that gives us a chance to show the strengths and weaknesses of analysis and computation, and also to do some validation by comparing the results from one and the other.
+So yeah, that's why this is where it is in the book.
+It's kind of the transition from the discrete systems in part one to the first order continuous systems.
+Yeah.
+Okay.
+One of the things that, I don't know, maybe I should have just known this or not, but was interesting to me was thinking about applying differential equations to a discrete set, right?
+- I think of differential equations of being either applied to like maybe an interval, all of the real numbers or the complex numbers, or, but not to 90 things, you know?
+Which that was surprising, I thought.
+And then your ability to model that in Python was pretty cool.
+- Yeah, so I'm glad you mentioned that because it's a really useful modeling method and it's a good example of the kind of modeling decisions that you're making all the time.
+And it can go in both directions.
+You can take something that you know is actually discrete, like people, and treat it as if it were continuous.
+And that works pretty well if you have a large population.
+Obviously, if you get down to very small numbers of people, it starts to break down.
+And that's where we can have a conversation about modeling and say, look, this is an approximation, right?
+This isn't how the world really is, but I can pretend I can run the model and those results can be useful even if the model isn't perfectly realistic.
+'Cause that's how models work.
+None of them are perfectly realistic.
+So that's, I think one of the goals of the book is to engage the learner in those kinds of discussions about modeling decisions.
+'Cause I think that's missing in a lot of science classes.
+If you think about the traditional freshman physics class, you are told what the model is.
+So we're gonna do a block on a frictionless plane.
+We're gonna do a projectile moving in a vacuum.
+Well, the frictionless, that's a modeling decision.
+It says we're going to temporarily ignore friction in order to solve this problem.
+But you as the learner didn't get to make that decision.
+You're not required to figure out the consequences of it or think about when it doesn't apply.
+And that's what we really wanted to get at here.
+- Yeah, that's a really interesting point.
+And that's why a lot of people think math is just a bunch of formulas or science, hard sciences are often just a bunch of formulas.
+then you just got to remember to use the formula because it just goes from this sterilized version, final version, without understanding, going from observation to making your way through it till you end up with something like this, right?
+- Yeah, yeah.
+Now there's a scary version of this, which is that it's not objective.
+'Cause if there's one answer and your job is to figure out what's the right formula, apply the formula, get the answer at the back of the book, That's nice and objective.
+And, you know, we want our science to be objective, but regardless of what we want, it isn't.
+'Cause it's based on modeling decisions.
+All science is based on modeling decisions.
+And those are subjective decisions.
+It's deciding whether a particular model is suitable for purpose.
+Depends on what you're trying to do.
+If you want to make a general, qualitative description of a system, maybe you can use a simple model.
+maybe you can leave friction out of it.
+If you want to land an orbiter on Mars, or a rover on Mars, you might need a more detailed model.
+- Yeah, if you're off by 1% of one degree, it's gonna matter by the time you get there.
+- Yep.
+- Where's that plane in again?
+Yeah, so in this one, you talk through using this, a couple of types and ideas in here, with states and systems, and it sounds like in the book, it looks like in the book, you provided some foundational building blocks for modeling the mod-sim module, right?
+So in addition to just having the books, you've got a bunch of Jupyter notebooks that people can check out, and as well as some code to kind of help this modeling here.
+You want to talk a bit about that?
+- Sure.
+So this was my attempt to use some programming ideas to communicate modeling ideas by creating these objects.
+So one of them is a state object, and it represents the state of a system.
+So if you think about an object moving through space, it has position and velocity.
+And at any point in time, if I write down the position and velocity, that's the state of that object.
+So in object-oriented programming, that begs to be an object.
+It is a state object that contains position and velocity.
+Now, under the hood, it is a panda's series that is mapping from names to values.
+Similarly with a system object, that's actually a Python namespace.
+So there are a couple of different things, but this one's a namespace.
+And it represents everything that you need to know about a system in order to model it.
+So it'll be the parameters of the system.
+If it's, let's take that projectile moving in space again, it might be mass, cross-sectional area, coefficient of drag, density of air, temperature of air, all the things to model.
+One of the examples is like a baseball in flight.
+- Excellent.
+you go through, you model, you run the simulation over time and eventually end up with a graph that shows, you know, a little over half of the students got lucky and didn't get the plague, but about half of them did at some point throughout the year or the semester, whatever it was.
+- So that's, you can do a single run in order to simulate a hypothetical course of the disease.
+And now you can start to vary the parameters and say, you know, what if the disease is more infectious?
+What if the recovery time is longer or shorter?
+What if people start washing their hands?
+And what if we start vaccinating them?
+And so by varying the parameters now, you can see how the output of the model depends on the system parameters.
+And that's where another one of these objects comes in.
+We have a thing that's called a sweep series.
+It's a mapping from a hypothetical parameter to the output of the model using that parameter.
+- Yeah, when you hear people talking about COVID, I remember them talking about the infection rate, Is it bigger than one?
+Is it less than one?
+All of those things were very relevant here.
+>> Right. Yes. The R0 and R, the contact rate.
+That term comes straight out of this model.
+That is the ratio of the two parameters here.
+Beta is the rate of infection, depending on how many people are susceptible and how many are infected.
+Gamma is the rate of recovery, which is the fraction of infected people who recover in a unit of time.
+And the ratio of those two things is the contact rate, the R0.
+Yep. All right. Well, way more relevant these days than it was a few years ago.
+Oh, yeah. We all know a lot more about epidemiology than we used to.
+We sure do. My daughter was just enjoying going back and watching some of her favorite YouTubers videos from February and March of 2020, just laughing.
+They were saying, "Oh, it looks like we're gonna have to stay home for a week." And she's just like, "They have no idea.
+They have no idea." - Yeah. - Okay.
+All right, let's go on to something more fun.
+One of my favorite things, coffee.
+- Come on.
+- Yeah, awesome.
+And so tell us about the coffee cooling problem that you solve here.
+- This one's a classic.
+The source that I'm aware of is a Martin Gardner column in Scientific American.
+And it posed this question, which is if I get my coffee and I also have some milk and I'm planning to add the milk to the coffee, should I add it now and so that they cool down together or should I drive to my destination?
+Let's suppose you're commuting.
+Should I get to my destination and then mix them with the goal of getting the coffee down to a pleasantly drinkable temperature as quickly as possible?
+- Okay, yeah, you pick it up, maybe hit one of those drive-thru coffee shack things that's just stands on its own.
+You know, it's always too hot here.
+And like, how should I do this so that I can basically have a perfect coffee when I arrive where I'm going, right?
+Okay, excellent.
+So this one involves Newton's law of cooling, right?
+Did I get that right?
+- You got it.
+- And the heat transfer, there we go.
+Newton's law of cooling.
+Another differential equation here, as they want to be in simulation.
+- Yes, right.
+So this is another one, which is a first order differential equation.
+You can do it two ways, which is you can break it up into discrete steps in time.
+And so your differential equation becomes a difference equation.
+And that's a natural thing for a programming language because now it's a loop.
+And during each time step, you figure out the difference between the coffee and the environment.
+That tells you the rate of change.
+And then that lets you make a prediction for the next time step.
+And so if you repeat that process, that is Euler's method for solving differential equations.
+So there's kind of a natural transition there.
+And then I think for this problem, we don't yet use the ODE solver, but then later in the book we do.
+And that's trying to motivate, why are we using this library?
+Well, there are limits to Euler's method.
+At some point, it's not very accurate.
+- Yeah, it might not be accurate enough for sure.
+And ODE, ordinary differential equations for people out there listening.
+- You got it right, thank you.
+- Yeah, it's a very differential equation.
+And so, you know, Python has, you know, SciPy, SciPy has several functions that will solve differential equations for you.
+And so we're kind of, we're sneaking up on that.
+- Yeah, okay.
+It is interesting that you can say, yeah, sure, it's a differential equation and those might sound scary and hard to solve and all those kinds of things, but you can subtract two numbers.
+You can do a simple thing and looping is good.
+And so if you just make your loop have small enough increments, you're kind of doing the same thing that, you know, taking the limit to get to calculus does anyway, right?
+- Yeah, we're kind of, we're short circuiting what I think is a really unnecessary loop, which is there's a lot of physical modeling where you take a system, you write a differential equation, but then you can't actually do anything with that differential equation.
+You can't solve it.
+And so you're going to have to use numerical methods anyway.
+And if you look at what the numerical method is doing, it's basically Euler's method.
+It's, you know, they're more complicated versions, but it's the same idea.
+We're gonna take time, we're gonna break it up into discrete steps, and we're basically simulating the system.
+So what we do in the book is cut out the middle, and go straight to simulation.
+There's almost no reason to write a differential equation if you can't solve it.
+You might as well just start with a simulation.
+- Yeah.
+So what's the story with the coffee?
+How should I approach this?
+- I'm not gonna give it away.
+(laughing)
+People got to earn it.
+They got to come figure it out, huh?
+You do have at the end.
+So one of the big challenges here is not like, how soon in my trip should I get the coffee?
+How long should I let it sit or any, those kinds of things.
+It's one of the important parts is you have milk or cream you want to put into the coffee.
+You should decide if you put it into the hot coffee, the cold cream right away, that starts it somewhere.
+Other than if you maybe wait till you get to the office and then mix the cream.
+So people can come back and solve that about the milk.
+Here's a question.
+This came up, one of the people I chat with on Twitter posed this question, it's a variation of this.
+He said he was disagreeing with his wife about using an electric kettle.
+The question is, let's say that you heat up a kettle full of water, you use half of it, and now the other half is there.
+You have a stay warm feature where you can set the kettle so that it keeps the water at let's say tea making temperature for you, or you can shut it off, let it cool down, and then later on when you want to make tea, heat it up again.
+Now, let's leave out of it for now that the time that it would take to heat up again.
+Let's say you don't care about that.
+You just want to know about energy consumption.
+Is it better to keep the water hot or let it cool down and then you have to use all that energy to heat it up again?
+Do you want to get in on this?
+- Yeah, yeah, my guess is it's better to let it cool down because the wider temperature gradient you keep between the ambient air and the water, the higher rate of loss of temperature, which you actually had a really interesting piece, tidbit of information here.
+You said, okay, if the coffee cools from, you know, cooking temperature down to drinking temperature, that's a ton of energy.
+It says to give you a sense, if you're able to harness all of that heat to do work, which you can't because of inefficiencies of engines, But if somehow you had a magic levitating engine that converted a heat energy to potential energy, you could use this lost energy to lift the cup of coffee from sea level to 8,500 meters just under the height of Mount Everest.
+That's an insane amount of energy when you think about it.
+- That is, and honestly, I did this calculation 10 times and I'm still not sure.
+- It's gotta be wrong.
+No, it's awesome, I love it.
+- I believe that this is true, but if someone contradicts me, I would be grateful because I just wanna know.
+But at least according to the calculation I did, the difference between mechanical energy and heat energy is just, it defies your intuition.
+And it's really, it's thermodynamics that is the difference because to take something from sea level up to the top of Mount Everest is organized energy and heat is disorganized energy.
+And what that means is you can have quite a lot of heat and not be able to do much work with it because it's disorganized.
+- Yeah, okay, excellent.
+Before we move off this one, I remember you were, I can't remember who I saw, I think it might've also been Scientific American, but there was a debate about coffee of whether blowing on it, if it was the cool air hitting the water, that would cool it, or if it was just the evaporation.
+And someone did an experiment where they put a fan on it with cool background air, and they put a hairdryer with hot air blowing on it, And it's still, it's the evaporation.
+It's like these state changes and this energy of this heat loss.
+It's pretty powerful.
+- Yeah, the latent heat of vaporization is a huge number, which is good 'cause that's what keeps us cool.
+That's why sweat works.
+- That's right, that's right, it's good.
+We're coming up on summer, so we're gonna appreciate that, I'm sure.
+All right, on to the next one.
+Limits to growth.
+Tell me about this one.
+- Yeah, so this is related to the population growth that we were talking about earlier.
+and this is developing the logistic growth model, but then trying to figure out, is that really what's going on?
+Is human population leveling off because we are hitting resource limits?
+Like, are we running out of food or other resources?
+The answer for now is no.
+I mean, we can certainly look at places in the world where resources are scarce, but that's not what's limiting growth.
+Interestingly, it's almost the opposite.
+It is the places that are most economically developed where resources are most available, where fertility rates are-- - That's a good point, yeah.
+- The fastest. - Okay.
+- And it's not being driven by death rate.
+That's the other thing.
+I think the other reason that we know that what we're seeing is not a resource limit because that would drive up the death rate.
+And that's not the case.
+The death rate is dropping at all ages in all places.
+Well, with a few exceptions.
+- Yeah, yeah, of course.
+So this one's kind of about finding that equilibrium.
+Yeah, this is taking the model to its limit and saying, okay, if we use the logistic model, even though we think physically, this isn't exactly what's happening, can we make a prediction about where we think world population will level off and possibly even start to fall?
+And one thing that surprised me is that even though this model is very simple and not realistic, The predictions that come out of it are not wildly different from what we're getting from real demographers.
+So the UN and the US Census both have projections for world population out to about 2100.
+And they predict world population will probably level off around 2100 at somewhere between nine and 11 billion people.
+And this very simple model is not too far off from that.
+That's a pretty wide range.
+(laughing)
+You know, a lot of things can happen.
+- Yeah, sure.
+A lot of assumptions and current equilibrium might change.
+Right?
+Like, for example, climate change.
+Who knows what that does?
+- Yep.
+That's big, but right now, the biggest drivers are the indices of world development.
+If you look at things like health and especially child mortality.
+When child mortality is low, fertility goes down.
+That's counterintuitive, but to some extent, people are having, let's say, enough children.
+If your children have a very high chance of survival, enough is a smaller number.
+It's a funny way of looking at it, but that's, so health, economic opportunity, human rights is one of the other big driving forces.
+- Right, autonomy.
+- Yeah, freedom to make reproductive decisions and education, that's the other big one.
+- Yep, yep, okay, another one from the health area, glucose and insulin.
+- Yeah, what's the problem we're solving here?
+- So this is a model of the system in our bodies, and actually I think all mammals, to regulate blood sugar.
+And it's the interaction of glucose or blood sugar and the hormones that cause blood sugar to go up and down, the primary one being insulin.
+And there's a model that's called the minimal model.
+And it was proposed by researchers who were trying to describe, you know, what's the minimum set of interactions that we need in order to have a model that fits the data pretty well.
+This is an example that I liked partly because the discussion of modeling was so explicit that there are some quotes from these papers where they are more open about their thinking than usual.
+It seems like people kind of hide the models.
+And these guys were really thinking about what do we need to include and what can we leave out And how do we evaluate whether the model is good enough?
+And the way they did good enough is they actually had data from studies of blood sugar and diabetes where people have a challenge test.
+They are actually injected with glucose solution, and then they monitor their insulin levels and blood sugar levels over three hours with measurements every two minutes.
+And so you can see blood sugar goes up and then insulin goes up, and then glucose comes down, and then insulin comes down, and then you eventually get back, if everything works, to your steady state base levels where you started.
+- I see, so if you don't have diabetes, your body should react that way, but maybe if you do, it can't produce the insulin to counterbalance that or something like this, right?
+So I think I've heard of that as a test for seeing if you have, either have diabetes or maybe are pre-diabetic, right?
+- Yep, exactly.
+And there are two things.
+You might not be producing enough insulin or your cells might be insensitive to it.
+So there are kind of two ways that that can go wrong.
+- Okay, so I think, I don't remember which one that you did this on here.
+There's all, all these come with great plots over time and you're running the simulation and seeing how it evolves over time and those kinds of things.
+But at least one of these you used SymPy, right?
+- Yes.
+- SymPy is pretty interesting.
+- Yeah, so this is symbolic computation, and it allows you to solve systems of equations, nonlinear equations, differential equations, at least for the ones that have an analytic solution, SymPy will often find it for you.
+And when I say find a solution, it's not a numerical approximation, it's a symbolic representation of the function.
+- Right, that's why I thought it was so interesting as a thing, 'cause so everything we've been talking about so far are like these Euler type solutions, you're like, okay, well, if we just approximate, if the gap is small enough, it's like calculus, but it's a loop, you know?
+Whereas this says, actually the integral of this differential equation is this other formula, right?
+Like you would learn in calculus or something.
+- Yeah, and so what you get is this object that represents the function, and you can render it as LaTeX, so you can kind of see it, you know, with the nice integral symbols and infinity symbols and all that.
+And you can also from that generate Python code.
+So you could have, you know, solve your differential equation and then evaluate the result as a numerical computation.
+- Right, the answer instead of being 3.14, whatever is just the letter pi.
+- Right.
+- Right, it's like, you gave me a formula, here's the actual symbolic solution to it as a number, right?
+- Yep.
+- Yeah, pretty cool.
+So you did, I believe you used that in some of your simulations or some of your models, right?
+- There were a couple of examples where we did both.
+we would do the numerical solver and then the symbolic computation and then compare them.
+And then a couple of places where there's an analysis that you can do, like the SIR model, where you could do the analysis by hand, and certainly in lots of science and math classes, that's what you would do.
+But I really wanted to show people how to do this symbolically, because I think it separates two parts of the activity.
+there's the low level activity of actually, you know, writing all the symbols on paper and being very careful not to leave off the minus signs and the two, factor two and all that. And then there's the high level, keeping track of what am I doing? What's my goal? What are the steps I'm following to get there? And I think symbolic computation has a lot of potential to separate those two, where I think people could come away with a much better understanding of that high level stuff if they are freed from so much of their attention being on the low level stuff.
+Yeah. Yeah. Just the grind of factoring polynomials or taking the derivative or whatever, right?
+Yep. Yep. You see, you know, mechanical systems, if you're working with physical vectors, you just, you have a page that's just full of sines and cosines. And it's, in some sense, what that is is a failure of notation, because that page full of sines and cosines is really telling you that you have not represented the computation in an effective way. That the sines and cosines are a consequence of not using vector arithmetic.
+Right, which you do make a big use of with pandas and things like that, right?
+Right. We get to it, and this is, I think, where I started to reach the limits of the current tools, because ideally, if you have vector quantities, like position and velocity and acceleration, you should represent them as vectors.
+And so when you add two vectors, you're not converting them to their coordinates, adding the coordinates, and then putting the result back into a vector.
+You just think of vector addition as a fundamental operation.
+But in the same way, we would like to be able to do differentiation and numerical solution to these methods, also using vectors as primitive objects.
+And we're not quite there.
+The SciPy libraries don't really do that.
+So I end up doing a lot of packing and unpacking where I start with vectors, but then to do the computation, I have to break them down into coordinates.
+And then when I get the result, I have to stuff it back into vectors.
+I think the next generation of scientific computing, we need vectors as basic types, and we need computation with units.
+Yeah, right, which is something that's also often missing.
+To my knowledge, this does not exist in Python or any other programming language that's not, at least it is mainstream.
+There's probably some engineering ones, but we have things like Pint, right?
+Yeah.
+Which is a pretty neat library.
+It's very neat, and it's very close to what I want.
+Astropy is the other library I'm aware of that does a really good job with units.
+And I've played around with each of them enough to be excited for the potential, but also to have hit a wall of, "I still can't quite do what I want." Ideally, it should be end-to-end. I should be able to start with the parameters of my system and the initial state described using vectors with units, and then run the whole computation so that at the end, my result is in the form of vectors with units.
+- Yeah.
+(laughs)
+- And that's still, that's not easy yet.
+- Yeah, not yet.
+Okay.
+You know, the SymPy stuff is a little, a little like that in the sense that the thing you get back is like kind of a function in the mathematical sense, like f of x equals, you know, e to the x.
+And you can compose them and pass them around, right?
+And sort of use them a little bit more than just, well, I got an answer out of this and then I feed the answer there, right?
+Numerically.
+- Yes.
+So, SymPy is end to end in this way, that you start with symbols and you end with symbols.
+There's no like in between where you have to break it down into numerical methods and then build it up again.
+So yeah, I think SymPy has achieved this goal and we're still, I think, working on vectors and units and scientific computation.
+- Yeah, absolutely.
+All right, well, we're pretty close to out of time, but I think maybe let's just touch on one more kind of fun.
+And that is the, people can go and play with this.
+That's the bungee dunk.
+Do you want to tell people what kind of insanity a bungee dunk is?
+And then you can just talk about this modeling problem as a way to say some human being put their body in jeopardy to test this theory, right?
+Tell us about this.
+- Yes, okay.
+So this was partly prompted by this video, which shows a person doing a bungee jump.
+So they're jumping off a crane.
+They have a bungee cord attached to their ankles.
+And when the cord is stretched out and fully extended, They are about four feet from the ground and they can reach out and the person jumping has a cookie or a biscuit because they're in the UK.
+And they dunk the cookie into a cup of tea that is on a dock at the bottom of this.
+And I forget the number, was it 30 meters?
+But it was a world record.
+- Yeah, something like that, yeah.
+It was way too far for a person to do that with their body.
+- Now, and part of this is that the object--
+- No, the video shows them, literally they come to a complete stop because the way the springs work and they are right at where they literally do dunk this biscuit into the tee and then shoot back up for the back and forth oscillation by Hooke's law of the bungee, right?
+- You got it, right.
+Now the margin of error here is low.
+Most people want to do a bungee jump to not do this because if it just turns out that he had extended about two meters more than he expected to, he would have at least hit the plank And he was over a body of water, so maybe it's not a catastrophe, but it was a risky thing to do.
+- Yeah, at a minimum, it's gonna hurt.
+- Yes.
+(laughing)
+- Yeah, so you basically, you go through the idea of like, well, if you wanted to try, the record was 70 meters.
+- Oh, okay.
+- So that is way up there.
+So, (laughing)
+that's way up there.
+So if you wanted to say, you know what, guy with a cool beard that currently holds the Guinness Book of World Records, we have pandas, we have notebooks, we're going to beat this, right?
+You could go through and model all the details out.
+And you talked through some of the assumptions, like the bungee will not apply a slowing force to you until it fully extends the slack length of the bungee.
+And then it is a perfect spring and on and on, right?
+- Right.
+But here's where there is some interesting physics.
+So here was the other motivation for this problem.
+Remember, thinking about modeling decisions, what can you leave out and what do you have to include in order to get a precise answer.
+So in this scenario, air resistance is definitely a factor.
+And the stretch of the spring and its restoring force is definitely a factor.
+But here's the interesting part.
+During the first phase of the jump, while the bungee cord is not yet stretching, but it is uncoiling, because it starts out in a great big U shape, it's dangling down, and it has to unravel or unwrap itself as you are falling.
+The first model that you probably think of is that it's just free fall, that you are being pulled by the force of gravity and the bungee cord is being pulled by the force of gravity.
+And so there's no net interaction between the two.
+And so you would think it would be just, your acceleration would be equal to G, 9.8 meters per second squared.
+And that's what turns out not to be true.
+And it's not at all obvious, but there is an interaction with the cord.
+It is transferring momentum from the cord to you.
+It's an alias to a whip action.
+And the net effect is that you accelerate faster than gravity because the cord is actually pulling you down.
+It turns out that the difference you would be off by if you ignore this effect, you would be off by about two meters, which is.
+- And that's gonna be a problem.
+- That was your margin of error.
+Right.
+So there's a nice physics paper that explains this.
+And there's a really nice Veritasium video that explains the phenomenon and does a really compelling demonstration that shows that it's true.
+Veritasium is fantastic for this kind of stuff.
+It's a YouTube channel that does these kinds of experiments.
+A little bit like the Discovery Show, but way better.
+They're really good.
+Did you see the downwind sort of sailboat, but a sail car?
+No, I don't.
+Oh, maybe I did actually see that.
+Yeah, I think I did.
+That one's very good.
+It's been a while.
+Yeah.
+I'll see if I can find the channel and put it up in the show notes for people.
+All right, I think with that, we probably should call it for time, but very interesting.
+People don't actually recommend you go try to break the bungee dunk record.
+Yeah, no.
+Do something else.
+But if you do it...
+It is fun to watch.
+Yeah, make a good model.
+Exactly. Make a good model and let us know. We'll share it, but we don't recommend it.
+All right, final two questions before we get out of here, Alan.
+You're going to write some Python code. What editor do you use?
+I'm using mostly Jupyter notebooks, but also a little bit of VS code.
+Okay. For notebooks, is it straight Jupyter? Is it JupyterLab?
+Well, I just had JupyterLab 4.0 come out, which is a big update.
+I know. And every time JupyterLab gets better, I think, now's the time for me to make the switch. But I have not.
+And partly it's familiarity, and partly as a teaching environment, I prefer a simple environment with the minimum distraction.
+Sure. That's certainly valid.
+All right, and notable PyPI package, conda package if you prefer.
+Right. Well, I have to say the SciPy, NumPy, Pandas, those were the primary things I was using for this book.
+And then maybe a shout out to Pynt, which as I said, I think it's not quite doing everything I want, but I think it's a really great tool.
+Excellent. Yeah, I agree.
+All right. People are interested.
+They want to check out your book.
+I'll put the link in the show notes.
+There's Jupyter Notebooks up on Google Colab.
+If you're feeling brave, you can create your own virtual environment, install them locally and run them there as well.
+That works too.
+Anything else you want to say?
+How people get started with this book?
+- I, you know, the idea is to just get you into it.
+There are some case studies and a lot of chances to take whatever system you're interested in and apply these tools.
+So I hope people enjoy it.
+And if you do anything interesting with it, let me know.
+- Sounds good.
+Well, thank you for being here and thanks to everyone for listening.
+Thank you.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Influx Data encourages you to try InfluxDB.
+InfluxDB is a database purpose-built for handling time series data at a massive scale for real-time analytics.
+Try it for free at talkpython.fm/influxdb.
+Are you ready to level up your Python career?
+And could you use a little bit of personal and individualized guidance to do so, check out the PyBytes Python Developer Mindset Program at talkpython.fm/pdm.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+[Music]
+[BLANK_AUDIO]
