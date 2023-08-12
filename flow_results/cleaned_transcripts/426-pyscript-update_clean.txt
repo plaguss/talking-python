@@ -1,0 +1,788 @@
+One of the most exciting initiatives in the Python space these days is PyScript, which enables Python running natively in your browser.
+With consistent support from the folks at Anaconda, this project has been making solid strides since its initial release.
+On this episode, we catch up with Fabio Pleiger and Nicholas Tollervé to see where they are with the PyScript project.
+This is Talk Python to Me, episode 426, recorded June 22nd, 2023.
+[Music]
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org. Be careful with impersonating accounts on other instances, there are many. Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube. Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+Download your free trial of PyCharm Professional at talkpython.fm/done-with-pycharm.
+And it's brought to you by Sentry.
+Don't let those errors go unnoticed.
+Use Sentry.
+Get started at talkpython.fm/sentry.
+Nicolas, Fabio, welcome to Talk Python to Me.
+Hi, how are you, Michael?
+Doing well. I think I should say welcome back.
+You know, I've been on the show a couple of times for various things.
+Most recently, other than this, Also about PyScript and MicroPython, which we'll touch a little bit on as well.
+But yeah, excited to have you both here, excited as always to be talking about PyScript.
+One day I can just feel it, we're going to be living the dream, Python in the browser.
+It's going to be fantastic. Let's do it.
+I'm so, let's hope, yes.
+I mean, is the dream real now?
+That's part of the question.
+We'll see how it's to some degree real, and you all are making great progress on that.
+I'm going to spoiler alert, and that's the thing.
+(laughter)
+Yeah, and Nicholas and I are laughing for a reason, too, which we can't wait to talk about it.
+So that's going to be good.
+We can't wait to hear about it.
+But before we do, like I said, you both have been on the show for a couple of reasons, a couple of episodes previously.
+But quick introductions for folks that don't necessarily know you.
+You want to start, Nicholas?
+Okay, I'll go first.
+I'm Nicholas.
+I'm a principal engineer on the PyScript team at Anaconda.
+And my passion is Python and education, which is one of the other reasons why I was on the show earlier.
+And I've also been involved in all sorts of different aspects of the Python community as well.
+And other interesting things like, Oh, have I got one?
+I think I have BBC micro bits was something that I was involved in and stuff like that.
+So, yep, that's me.
+But right now, I'm doing PyScript.
+And I am joined by my esteemed colleague, Fabio.
+Thank you, Nicholas.
+Well, as you can tell, I work with Nicholas at Anaconda, creator of PyScript, been in the community for a long time as well.
+Probably not— let's not focus on numbers or years.
+But very interested in, just like Niklas, Python for education as well, and the whole community aspect of it, which is mostly why I am here, I would say.
+So I've been involved in a lot of community things, was chairman of EuroPython for, I think, five, six years, then chair of PyCon Italy, co-founder of Python Italia, et cetera.
+Always loved the community aspect of Python.
+And happy to be here. - Yeah, absolutely.
+- Thank you for having us.
+- Yeah, it's great to have you, as always.
+You both mentioned having an interest or background or both in education.
+And Nicholas, I think probably the high watermark is probably the BBC micro bit, which touched, you know, the lives of more students than, you know, almost any other regular school teacher, via massive, massive margin, millions of kids.
+That's amazing.
+But I think another angle here, teaching people to work with Python and getting them started in programming from going from, I have this idea, or I've learned what I got to do in programming until I can make it happen on a machine that is not set up for programming necessarily.
+that gap is pretty far with Python.
+And it's pretty far with most languages, right?
+Like you want to, you do Ruby, probably got to set up some kind of Ruby thing.
+You want to do Java, a bunch of stuff there, right?
+But being able to do it in your browser or something, you just open a page and run it.
+Like there's this educational empowering aspect to it.
+Absolutely.
+And you wouldn't believe the, the interesting situations that teachers have to work in at school and, you know, locked down computers and things like that, where their sysadmins won't install Python or any other kind of programming language.
+Despite here in the UK and all over the U S programming being part of the curriculum, it's mandated in the national curriculum here.
+And I was in a call yesterday with someone who just told me that, the Norwegians have now got programming mandatory in their national curriculum.
+And nobody seems to have told the school admins this.
+So what's the piece of software that was running on everybody's computer in the school?
+It's a, it's a browser.
+So I see where this compensation is going.
+Wouldn't it be great if you had Python that ran in the browser?
+It would solve all your installation problems if you're an educator.
+I mean, how much of JavaScript's rise to fame and continued, not quite dominance, but almost certainly in the front end side dominance has to do just with the fact that it's possible.
+Yes, yes, totally.
+It's not necessarily the best, it's not necessarily what people want, at least not in the early days, but it's possible.
+And that's just a lot of things.
+I think, you know, JavaScript has lots of really wonderful aspects to it.
+I've been using JavaScript for almost 20 years, but it's certainly not a beginner-friendly language.
+I think you can say that with some confidence.
+You could try teaching it to beginners, but with all the coercion rules and gotchas that make sense if you understand JavaScript, but it's quite a journey to get you to that understanding.
+With all of that, it's hard enough just to sort of concentrate on getting Hello World working and things like that. Just a simple proof of concept to show that your development environment is working. But if a language that you're using is the equivalent of trying to teach a five-year-old beginner violinist with a Stradivarius, they're not going to kind of get it, okay? You give them an instrument that helps them take the first steps into programming and Python as a programming language, and this is at the core of Guido's mission At the very beginning, ABC, the language that he based it off, was a teaching language.
+So education and learning and teaching and making sure that Python is teachable is a part of the DNA, which is a wonderful thing.
+It is. It's been around since 1989, I guess, if you put it that way, hasn't it?
+That is the striking difference, honestly, between Python and almost all languages today.
+Like, why BASIC was super popular, why JavaScript is super popular, etc., because it's your only option, right?
+It's the thing, or if not, it's the thing that you have right away there already installed for you.
+And you don't have to go through the pain of trying to download things, install on your system, and whatnot.
+Python, on the contrary, it's very interesting.
+It's the most popular language, but it's because people in specific domain areas chose Python because it was the easiest and the most expressive and, you know, tailored for education.
+And then he started competing with very specific languages that were born to do specific things.
+R is another example.
+R was born with that goal, and that's why it's so good at it.
+Python just happens to be very easy to understand, so data scientists and people adopt it, which is great.
+Python actually, just to close, Python actually is the most popular language, but it has a horrible story for mobile and browser and tablets, the most popular hardware and software on earth.
+And it's still the most popular, which is mind-blowing.
+Yeah, so you would agree if it were good on both, right?
+Yeah, quite. But what you say, Fabio, it reminds me of, was it a keynote?
+Maybe the pre-COVID keynote at PyCon US, where I think one of the keynoters said, "Python is the world's best second-best language." And I think that's kind of the essence of what you've just said.
+R is great for doing stats and maths and things, but so is Python.
+Might not be up there with R for very specialist niche mathematical things, but Python's good enough.
+And because it's easy to learn, folks are going to go fly with that.
+Yeah, I think, building on what you said, Fabio, I think one of the really unique aspects of Python, you know, compare this to like Visual Basic or the super simple programming languages like Scratch, or the super high-end ones like C++ and Rust.
+Python is a full spectrum language.
+Like you can start really easy with a super partial understanding.
+You don't even know what classes are, but you can put six lines together.
+And you can do cool stuff.
+That's like Scratch and Basic and stuff.
+But those languages run out of real programming ideas really soon, where you can just keep growing into Python till you get to the C++ and Rust style.
+Conversely, if you want to start with C++ or Rust, you don't want to teach a beginner what avoid *** is.
+You know, like that's down the road, but you're hit with that kind of stuff soon.
+So I think that's a little bit of its magic as well.
+And what you all are doing to bring that magic to front end of the web world, and kind of through the transitive property a little bit through progressive web apps, to things that run in really good ways on mobile and tablet as well.
+it really unlocks a lot and I'm super excited for it.
+So I know I've had you on before to talk about this, but I'm sure there's some folks out there like, "This sounds amazing. What is this angle bracket Python py-script in my HTML? What is this py-script stuff? Tell us about it." Cool, let me give you a minute, DLDR. So basically py-script is a platform that allows users to create applications or frameworks on top of it and supports Python as a language.
+And it basically uses the browser as technology as its vector, right?
+It treats the browser as almost like a virtual machine.
+It can move around.
+And then because of the current stack around Wasm, WebAssembly on the browser technology, we are now able to run Python inside, you know, either Wazzy or M scripting, which are just implementations of WebAssembly on the browser.
+And PyScript sits on top of interpreters.
+We have the browser, WebAssembly, M script and Wazy, and then a Python implementation, Pyodide or MicroPython or other things like this.
+And PyScript goes on top by providing a friendly interface, higher-level APIs that are Pythonic and friendly, allows extensibility with plugins and things like this to create an ecosystem.
+And basically what we want to do is reuse the ecosystem.
+As much as we can, we don't want to reinvent anything.
+Actually, that's one of the things that I'm most proud of it during this first year, which is I think we made really good progress in helping other projects that are developing and making Python happen on the browser.
+Long story short, PyScript allows you through those tags, PyScript or PyConfig or PyRapple to define what's my environment, what packages I want to install and whatnot.
+And then with the PyScript script, it can define scripts that run your application and then just use it.
+You don't need to install anything, to download anything.
+It just works on the browser.
+Yeah, excellent. I think maybe let me just give one more piece, one more resource for folks out there who might be interested.
+Have you all seen the birth and death of JavaScript by Gary Bernard?
+- Did you see that? - I was there when you gave it.
+Oh my gosh, what was the crowd's reaction like?
+Oh, we were just rolling around, laughing.
+It was great.
+It was great delivery as well.
+So this is a, let's see, 15 minutes, 30 minute presentation he gave at PyCon 2014.
+So quite, quite outdated in like web technology evolution speed.
+But I throw this out there because it's both an amazing comedy skit, but also super nice build up of how you got to places like now with M scritingand WebAssembly and how do you take C code like C Python and run it on top of the browser on the front end.
+So people are interested, they can, you know, they are like, what is all this magic?
+You can have both a really good laugh and watch that, that was good.
+So with PyScript, you can write, just like in JavaScript, You can write JavaScript or in this case, Python in the browser, right?
+Like you could just like, you could say angle bracket JavaScript and just start writing JavaScript code here.
+You can say Py-script, and then you can say print, you know, hello from Python or whatever, and it'll run.
+But you can also have more well-structured applications, right?
+Yes.
+Thinking I might even lean so far saying you should have more well-structured applications.
+Yeah.
+What do you all think?
+One thing about PyScript, and that we are actually trying to work a lot on it, about it, is that it gives a lot of freedom, as you said.
+You can put tags in it, it's just HTML.
+So everything you have access to in an HTML page, you should have access to in PyScript as well.
+So like your tags in the page, your scripts, if you loaded anything in your JavaScript scope, you can import those things in PyScript and say, from JavaScript import this and then just run.
+Actually, one of the things that we're working right now is actually going to explore that even more.
+And we're going to demo that later.
+We have currently a next branch where we are redesigning the core of PyScript and making it smaller, fully web-based, fixing most of the bugs and the very crappy code that I wrote at the beginning.
+And we had an amazing addition to the team from Andrea who's been in tech, in the web for a lifetime.
+And he's amazing.
+And he's bringing that aspect that we lacked and the team, you know, web native point of view.
+Well, Pythonists and Python geeks.
+So we missed that.
+This portion of Talk Python to Me is brought to you by JetBrains and PyCharm.
+Are you a data scientist or a web developer looking to take your projects to the next level?
+Well, I have the perfect tool for you.
+PyCharm is a powerful integrated development environment that empowers developers and data scientists like us to write clean and efficient code with ease.
+Whether you're analyzing complex datasets or building dynamic web applications, PyCharm has got you covered.
+With its intuitive interface and robust features, you can boost your productivity and bring your ideas to life faster than ever before.
+For data scientists, PyCharm offers seamless integration with popular libraries like NumPy, pandas, and matplotlib.
+You can explore, visualize, and manipulate data effortlessly, unlocking valuable insights with just a few lines of code.
+And for us web developers, PyCharm provides a rich set of tools to streamline your workflow.
+From intelligent code completion to advanced debugging capabilities, PyCharm helps you write clean, scalable code that powers stunning web applications.
+Plus, PyCharm's support for popular frameworks like Django, FastAPI, and React make it a breeze to build and deploy your web projects.
+It's time to say goodbye to tedious configuration and hello to rapid development.
+But wait, there's more.
+With PyCharm, you get even more advanced features like remote development, database integration, and version control, ensuring your projects stay organized and secure.
+So whether you're diving into data science or shaping the future of the web, PyCharm is your go-to tool.
+Join me and try PyCharm today.
+Just visit talkpython.fm/done-with-pycharm.
+links in your show notes and experience the power of PyCharm firsthand for three months free.
+PyCharm, it's how I get work done.
+Now we're going to allow also execution in workers or blocking calls, or actually we support other languages as well.
+Like we have demos with Lua or Ruby and things like this.
+And I think that's part of the vision where we want to PyScript to be a tool that allows you to almost do anything with any language and deploy anywhere, right?
+It's beyond Python, even if Python is the primary citizen there.
+We want to make sure that we are unlocking everything for all the users.
+Which is hard.
+Yeah, I'm sure it is.
+Do you see an analogy with Jupyter going from IPython notebooks to Jupyter notebooks and starting to bring on a broader view of the ecosystem, but still kind of being Python at heart.
+Yeah, I think so in a different way than Jupyter.
+Jupyter has always been very self-contained into the notebook itself.
+And the programming paradigm that the notebook brings with it, you know, it's a very, it's an exploration tool rather than editor or authoring tool.
+And then with JupyterLab, it evolved in different things as well.
+I think PyScript has maybe the opposite problem.
+We're too open, which is hard for actually our user base that we want to...
+We said PyScript is for the 99%.
+We need to do a lot of hard work to make it happen.
+-Nicholas. -Well, this is a really great point that Fabio is making.
+And you've got to remember the key word here is that PyScript is a platform.
+Now, it's a platform, you know, the layers of that platform were articulated by Fabio.
+You know, at the bottom is WebAssembly, which runs in your browser, and you can compile, you know, M scripting or other things can sort of work on top of that and blah, blah, blah, blah, blah.
+And then you get PyScript. Okay, so with PyScript, we hope, and we're doing this ourselves to build frameworks on top of that.
+So what's the difference between a framework and a platform? If the platform is like the foundational stuff that gives you the core verbs and nouns and things, okay, the framework is perhaps focused on a particular problem that you're trying to solve, like in the classic Python world, you know, Django and Flask are web frameworks. Okay, you have a matplotlib is a kind of like a framework for creating graphs and things like that. And so we expect people to reuse some of these things, because this is another aspect of having Python in the browser is that you also bring the whole of the Python ecosystem into the browser as well. And then all the modules and the things like that, and that Python brings. So we hope and we're building this sort of stuff.
+And we'll probably come on to that later in this conversation, but we hope the community, because this is an open source project as well, let's not forget.
+The community come along and they start building cool things on top of, of PyScript frameworks and, applications and things.
+So, so that they surprise us and delight us and make us go.
+And this is one of the ways that I would measure our success is that if somebody turns up and goes, I built this thing and I go, Oh man, I never thought anyone And we'll do that with PyScript.
+So when we get to that, then I know we're rocking.
+Yeah.
+You've queued up a nice comment from the audience here.
+Sarah says, I'm exploring Vue.js.
+Shall I wait and use PyScript in my app?
+Great question.
+I think we're coming close to a world where the two play well together, actually very well together.
+So we'll talk about later about PyScript.com, which is an additional thing on top of PyScript.
+And we're using Vue there, too.
+Vue is a great tool for building front-end apps and whatnot.
+But I hope in the future we will have Vue written in Python or something similar, which is more Pythonic.
+So I'd say the thing for Sarah to understand is that because Python's in the browser, it has access to the JavaScript context.
+So you could start to mix and match.
+You've got Vue stuff happening in JavaScript, and you've got Python stuff that could be working in concert with it as well.
+You know, mix it up a bit.
+I don't know, this is an early part of the journey.
+Sarah, you go away and check this out and tell us what you find.
+You know, knock yourself out.
+- Yeah, absolutely. - I'll keep repeating this.
+Anyone that has questions or specific use cases or want to contribute, reach out. We want to hear from you.
+And we are very welcoming, and so come be a contributor.
+Super.
+And just, you know, shout out to Anaconda, Anaconda Inc.
+for making this possible for you all to be working on this in a more dedicated way instead of just, I'm really passionate and I've got an hour a day I can spend on it, but like legitimately, you can be more responsive and put yourself a little more out there 'cause it's not like it, it takes away from that one hour you could add features with.
+- I agree, yeah.
+I will say like we're very lucky and very thankful to Anaconda to support this.
+It's a huge effort, so.
+I would add one more possibility out there for folks in Sarah's situation.
+I would love to see PyVue or something like really ready to work with it.
+And I know the MicroPython work I'm about to ask you all about for a follow-up on makes that really a possible case.
+But if you're really just like, "It's got to be some JavaScript framework," give HTMX a look. It's really, really nice.
+You can just keep writing Python.
+You got to do it on the server and it's kind of a little async type of thing, but that's how all the, a lot of the view stuff happens anyway.
+So if PyScript weren't the answer, maybe consider HTMX before you decide like it's all front end and React and just a bunch of APIs.
+That's really nice stuff.
+All right, back to PyScript.
+What's the story of the MicroPython thing that we spoke about last time?
+Okay, so let's just recap.
+What happened last time was I think I just finished doing the proof of concepts And we had micropython kind of running.
+Okay.
+And that was, that was late last year.
+Wasn't it?
+Yeah.
+It was like six months ago or so.
+Yeah.
+Just about.
+Yeah.
+Yeah.
+Yeah.
+If you can get, yeah.
+Cause we have Brett on the call as far.
+I remember now, if you can get micropython running by the middle of the next year, it's going to be kind of hallelujah moment.
+You know, the crowds will part, the angels will sing and the sun will shine and all of this, yeah.
+Cats and dogs living together.
+All that.
+Yeah, exactly.
+Exactly.
+Sharks with lasers, that sort of thing.
+And who wouldn't want that?
+And so what's happened in the intervening six months?
+So I think two important things have happened.
+The first one is the re-architecting of PyScript.
+And just to reinforce what Fabio said, maybe six months ago, when we said PyScript is Python in the browser, the emphasis was on Python and not so much in the browser.
+Okay.
+Because we've been joined, you know, our colleague, Andrea is very much of the web world. In fact, his nickname inside the team is Web Yoda for a very good reason.
+OK, it's now, you know, Python and we have in the browser has been kind of worked on and we've been looking at how that sort of works and how these two sort of things mesh together. Because Andrea is frankly incredible at this sort of stuff.
+And he's kind of of the web and he knows the idioms and he knows the APIs and he knows how the browsers work and things like that.
+The actual PyScript core that's coming next is very small and very flexible.
+So that's the first sort of pillar of this.
+Second pillar goes by the name of Damian, we all know and love in Melbourne.
+And Damian's a buddy, we worked on the micro bit together.
+That's how we first got to know each other.
+And clearly, I don't think in a million years, Damian imagined that a Python would be running on a browser.
+That's completely the opposite end of the computing spectrum.
+Watch MicroPython become the most popular base to run Python globally.
+It easily could if it goes out on the web.
+Exactly. Now here's the thing.
+Because Pyodide is CPython compiled to WebAssembly.
+And that's we started with Python.
+But depending on how you build it, it's around 11 megabytes if you had the whole, everything but the kitchen sink in there.
+Okay, that's a lot for a web page.
+Okay, I know everybody says the New York Times is however many megabytes it is, but still 11 megs is large.
+And it doesn't play well with these black mirrors that we carry around in our pocket.
+MicroPython, I noticed today, thanks to compression and other things, it's down to 170K to deliver into the browser.
+And with the 50 plus, 50 odd K for the core of PyScripts, the next thing we, we have an incredibly, it's around half a megabyte to get the thing into a browser, which I think it was Simon Willison said that's smaller than some hero images you get on websites.
+Okay, we get a development environment. So we reached out to Damien, and Damien's been working with us. He's been doing an awful lot of work, impeccable work, excellent work to make sure that the story of MicroPython in the browser is that it's kind of like a first class Python. Okay, so he has implemented the FFI, the foreign function interface between Python and the JavaScript context. Okay, it's the same sort of API as you get in Pyodide. Okay, so it's familiar.
+Okay, so you import JS, and then you're away. You're referencing things in the land of JavaScript.
+To be clear for people listening, that means you can hook button click events, you can hook document ready, mouse, like in Python.
+What API functions. Yep.
+I want to play some audio. There's an audio API built into the web, into the browser, I can import JS and then do JS.audio as a class to instantiate something to then play.
+It's just super easy and a real joy to use, but it starts like that.
+And this is, I think, the key aspect of the difference between MicroPython and Pyodide.
+Pyodide gives you all of Python, okay?
+So you want to do some data science or you want to bring in some CPython module to work in the browser, you use Pyodide.
+But if you want something Python-ish, and it's fast, and it goes like the clappers, and it's really quick to load, then MicroPython is the thing for you.
+If you want to start manipulating the DOM and working with what the browser makes available to you.
+And so, to answer Sarah's point, maybe MicroPython is the thing that you should be using to coordinate with that.
+I think it certainly is an alternative to Vue.
+- It would be, yeah. - Yes.
+I really want to chime in on one thing, just because I'm really proud of what we're doing there.
+what Nicholas highlighted, I think it's really great to see projects like MicroPython coming together with Pyodide and PyScript, all talking, "Hey, how can we make things be share the best parts of each project and have a common interface to interface JavaScript?
+How can we make this happen?
+How can we support MicroPython and PyScript?" And so it was, I really need to thank Damian, Hood, Roman from those projects to be so nice and so easy to work with and willing to just, "Yeah, let's talk about it. Let's see what's best for the community." And yeah, great, great work.
+Yeah, it's an absolute joy.
+And I'll tell you a funny story.
+Just after Christmas, we met up, the PyScript team, in real life for the first time.
+And because we were all in the same place, and we had Hood with us, Hood has since joined the team, and because of time zones, we were all able to drop onto a call with Damien.
+and having Hood and Damien talk together for the first time, you'd think, you know, these are exceptionally gifted engineers, okay?
+And after maybe, I don't know, two minutes of small talk, they were talking about, I don't know, the intricacies of garbage collection in the WebAssembly context, and, you know, the whole kind of conversation just went...
+They exploded off into the technical sort of ether, as it were.
+But what I want to highlight is that PyScript has sort of lit a fuse underneath and these projects working together.
+And it's so wonderful to see the open source community working in the way that it should, you know, people bringing the best themselves and being very humble and listening and being compassionate to other people when they, when there are differences of opinion and there are always differences of opinion.
+One of the things that I take away from this project is the amount of fun I have working on this, that people pay me to do this is incredible.
+So that's awesome.
+This portion of Talk Python to Me is brought to you by Sentry.
+You know Sentry for their error tracking service, but did you know you can take that all the way through your multi-tiered and distributed app with their distributed tracing feature?
+Distributed tracing is a debugging technique that involves tracking requests of your system, starting from the very beginning like a user action, all the way to the back end, database, and third-party services.
+This can help you identify if the cause of an error in one project is due to the error in another.
+Every system can benefit from distributed tracing, but they are especially useful for microservices.
+In this architecture, logs won't give you the full picture, so you can't debug every request in full just by reading the logs.
+Distributed tracing with a platform like Sentry gives you a visual overview about which services were called during the execution of certain requests.
+Aside from debugging and visualizing your architecture, distributed tracing also helps you identify performance bottlenecks.
+Through a visual like a Gantt chart, you can see if a particular span in your stack took longer than expected and how it could be causing slowdowns in other parts of your app.
+Learn more and see some examples in the tracing section at docs.sentry.io.
+To take advantage of all the features of the Sentry platform, just create your free account.
+And for all of you, talk Python listeners use the code talkpython, all one word, and you'll activate a free month of their premium paid features. Get started today at talkpython.fm/sentry-trace. That link is in your podcast player show notes in the episode page.
+Thank you to sentry for supporting talk Python to me.
+We kind of introduced the possibility and what we can do with PyScript pretty well, but I can't resist showing this this video here. So Nicholas, you have a one minute video, which I'm going to link to that shows Python running in the browser, which is great.
+And then very nicely, you have it running on a mobile phone, which is really nice.
+Tell people where it runs next.
+In a car.
+So Tesla is basically a computer on wheels, and it has a browser built in.
+This Lucy Goosey app, a colleague of mine, you know, clearly I'm British.
+And she said to me, you've got to be Lucy Goosey about this.
+She's from Boston.
+And I was like, "What on earth is Lucy Goosey?" And she explained.
+And since then, I've been getting Lucy Goosey into all of these kind of places, just to pull her leg a little bit.
+You click on the goose, and it uses the underlying browser's audio API to go honk, right?
+So it's just honking on demand.
+And the fact that you can get a car to honk like a goose kind of seems kind of appropriate in any sort of way.
+- It certainly is for Teslas.
+- Yeah, yeah, exactly, exactly, exactly.
+- They only make weird noises.
+This is MicroPython running on a Tesla, playing Goose.
+I love it.
+And on a mobile.
+Yeah, so maybe the next thing that we could do here is we could talk about one of the bigger announcements that you had recently.
+So there's probably two plus the shift in API and the changes there.
+But one, whoever wants to take this is PyScript.com.
+Yeah, I can talk real quick about it.
+It was the beginning.
+Part of the vision when we started was, okay, cool.
+PyScript needs to be open source and everything always.
+How can we make it it's on the browser, right?
+Like how can we make it even easier for people to just hop in somewhere, start a project and just share it with others.
+And that was, okay, we need a product or something like this.
+So we launched PyScript.com, which is a free service or a free service.
+Right now we actually, the only option for paid features or anything like this is, is really just through being a founder, which is basically in the Kickstarter model, you want to support the project.
+It really is what it is.
+And we're saying a little bit like a GitHub sponsor kind of.
+Yes.
+Yeah.
+And we will always have a free tier with unlimited projects, unlimited ways you can share it, et cetera.
+And we were probably gonna, we were going to have paid features for things that we were probably we're paying or things that are make it worth, you know, But we want to have a place where people can just drop a snippet or a Python application, then share with others.
+One thing that was super clear to me recently was, after also the video of Nicholas, was last keynote I gave in Colombia was, "Hey, how many of you," I asked the question, "How many of you think you can write a Hello World application and then share with 30 people, not technical, like your mom, your family, and others, and share with them within an hour, right?
+Hello World without complexity.
+And then what?
+10 people showed that raised their hands out of 450.
+Yeah, and it'll take a good chunk of that hour to do it, even for the ones who can do it.
+Yes, or even worse, like in a day, not many more raised their hands, right?
+The goal here is really like, you can just hop in, click, you know, start a new project.
+It's already conveniently already a Hello World application by default, right?
+So, and by default, it's shareable anywhere.
+So all of a sudden you come from, Hey, I'm not sure I can deploy the simplest app in the world to my audience.
+And effectively too, it's just a matter of seconds.
+I just need to share the link and then can see, you know, they can see on mobile and things like this.
+Yeah.
+That's the striking thing that messaging that I think to me was clear that we're not doing a good job, right?
+Like we're no, before PyScript, you could still deploy those things on mobile with Pyodide directly and stuff, but it wasn't that easy.
+Right now, like that's the key to Python adoption, Python and education, all of those use cases.
+That's why I really beg everyone talk about PyScript and that's the value sharing and spreading Python all over.
+Yeah.
+Let's look at one of these.
+So if you create an account, you log in, there's a trending in a featured set.
+So one of these is tic-tac-toe and I'll view the site that we can maybe talk about the code real quick.
+So I pulled this up in my browser, it's based on the Pyodide version.
+And down here you can, it does show the terminal just for people who are interested in the print statements, but you can just go play tic-tac-toe on yourself and, you know, end up, you just click crazy, I guess you'll win or something, right?
+The O's win this time.
+But it shows the JavaScript interaction, the click down, the changing the DOM from Python, all those good things, right?
+- Yep. - And so, you can go view the code for it.
+Maybe just we could use this as a chance to just talk through a little bit of like how you're structuring this because you've got a manifest, you've got a main.py, you've got an index.html.
+You come across an app that's written in with PyScript.com.
+You want to know how does it work? You know, the classic, you know, view source, the number of people who said I became a software engineer because in the 90s, when I was a teenager, I could right click view source and figure out what, okay, that's that.
+So I just wanted to highlight that that was there.
+Anypyscript.com app, you'll be able to see the source.
+- And you can copy the project. - Yeah, exactly, we're on the same page.
+There's a copy of the project, which is like a clone to my account, and I'll play with it, right?
+Yeah, exactly.
+That's actually one thing that we've been struggling with, terminology.
+Do we use the usual geek terminology, or are we user-friendly?
+Should we use copy or fork?
+That's a sort of thing. Yeah. Anyway. Yeah. Yes. Nice. Yeah. So tell people quickly about how what you can do with Anypyscript.com kind of how it works. It's a little bit like replete, but really Python focused, right? Yes, it's very similar to replete or, you know, code ban and other services like these that the idea is that you have your space where you host your project. We have an editor right now. We're working also on creating views that are more user friendly. And you don't need to know about HTML or anything like that.
+So just hop in.
+But the nice thing about this is with any project, you can just hop in, see the Python code, how it was done, implemented, and playing around it.
+And we always have the view of the files, then a preview with an iframe that you can see your app, why you develop and whatnot.
+- Yeah. - Mm-hmm.
+- Quickly about the geography of how the project is organized.
+- Mm-hmm, sure.
+- You have your index.html, which is the thing that is first served to the browser.
+And if we go look at that, We'll see that in there, it's just referencing basically all the other things.
+And it's just plain old HTML in there as well.
+So we've got PyScript being loaded as well.
+We've got some CSS.
+They've got the PyScript tag that tells us that main.py is where the application is going to be run from.
+And then we just have the HTML code for displaying the user interface.
+If we hop over to manifest.json, this is an old one.
+The others I have a PyScript.toml, right?
+Yes, I was just going to say, it's usually a PyScript.toml file.
+I can pull that out for us here.
+That's great.
+In the toml file, it's going to be empty because there's nothing there.
+But this is where you start to define characteristics of the environment in which this app is going to run.
+So you might say packages equals and then a list of packages that you want installed as if it were a requirements.txt file.
+Give me a sense of what I can put in that list.
+I know of anything that is pure Python.
+Almost everything.
+There are complicated caveats, which we could go into.
+Overall, the differentiator is really if you're using anything that does multiprocessing or threading or sockets.
+Those on the browser don't really exist.
+Right, so I couldn't use PyMongo or PgMosaico or requests per se, because those are basically violating some...
+- Yes. - ...browser sandboxing rule.
+- Yeah. - Yeah, right.
+A request specifically, there is a package that patches requests.
+So you can actually...
+It's called, for Pyodide, it's Pyodide HTTP, I think.
+And it basically just patches everything.
+After you do that, then you can just import requests and use it normally.
+So it does work right now.
+Yes.
+But so the important thing is, is that you remember that your tab is the conceptually equivalent to your virtualenv.
+Okay.
+And so the PyScript.toml file is just the way PyScript learns about how do you want to configure your environment for this?
+Okay.
+And then if we look in main.py, there we go.
+It's the classic Python.
+This is where you start.
+This is where you just type your Python code.
+just go ahead, import JS and then js.document.whatever to get yourself into the DOM, that sort of stuff.
+- Yep, and from that moment, you have a link that you can share with anyone, right?
+Like it just works.
+Yeah, that's the power of it.
+- Right, excellent.
+So yeah, just got to share or copy it or whatever.
+Okay, so this is a way for people to play with PyScript.
+I saw here in the index that you specifically refer to certain releases of PyScript here.
+So I guess, presumably it's kind of however much you want to stay on the cutting edge of PyScript or kind of just take some version in time and stick with it.
+Yeah.
+Yeah.
+That's actually a great question because we've been discussing that a lot and Hey, just we should actually, should we remove latest and or unstable?
+Those are always linked to the latest stable release and the latest merged commit in the repo.
+And I think ultimately we're leaning towards yes, and always spin the version, mostly because that guarantees that, you know, we're not going to change things under the rug for you and your app.
+It just works.
+It's been courtesy to the user, isn't it?
+I mean, we don't want to do something that breaks their code.
+Okay, so if you pin it to, you know, PyScript version 0.0.1 alpha 1, you know, from way back when dinosaurs ruled the world, but your code still works, it might not be the most up-to-date PyScript, But it's your code, it's your responsibility.
+If you want to update the runtime, you go knock yourself out.
+- Nice. - Or you can use a--
+That's a good idea.
+So that brings up a bit of a comment from ToonArmy out there, who says, "So we're just about out of alpha.
+Do not use in production?" - Yeah, that's a very good question. - What's the status?
+[LAUGHTER]
+YOLO/latest, let's go.
+[LAUGHTER]
+So even with very stable things, I would always recommend pinning all your versions anyway, right?
+I can, and even the secondary versions and whatnot.
+Like when you deploy, pin the thing, pin the thing down.
+And that's what with PyScript.com, we're trying to basically put all those small details baked in so that you don't need to think about those.
+And, you know, just use best practices.
+For instance, we are using config and PyConfig and PyScript with source and not having code in line, right?
+because coding in line is great to get going, but it's really hard to read.
+Editors don't play well with it.
+It's hard to test your code, all of this.
+So we're saying just, let's just use templates that are encouraging best practices and pinning the versions is one of them.
+Could I write unit tests?
+Could I have a page that is like test.html, then import pytest and I do that in the browser.
+Yeah.
+Actually.
+Yeah.
+Yeah.
+So, okay.
+Here's the thing.
+And we've not mentioned Pypercard or Invent that we've renamed it.
+But when I was writing that before, or the kind of proof of concept before PyCon, I had pytest running in the browser.
+I mean, why wouldn't you run it in the browser?
+That's the context literally in which this code is supposed to run.
+So let's run the test suite in the browser.
+And it just works.
+It's lovely.
+Yeah, it'll be 10 minutes to go, hmm, that'd be a good idea to actually seeing the thing.
+A real kind of woohoo, kind of fist pump moment.
+Yeah, that's fantastic. So speaking of...
+Avi, why don't you jump in?
+Yeah, I just want to mention one aspect, which is...
+we don't always think about this.
+Because PyScript runs in your browser, in your client, like, there's no server-side logic or anything like this.
+So scalability comes for free.
+You can scale your Hello World app to a billion users and not notice.
+Because all the computation is going to run on their end, which is another really cool aspect of the whole thing.
+We don't give enough credit to it, but it's important.
+>> Yeah, it absolutely is.
+Unless you have some server sync type of thing, there's no effort other than delivering the WASM bits.
+All right, somewhere buried in here, we have PyperCard. There we go.
+>> Okay.
+>> So you had mentioned that you were working on this.
+Tell us about this, Nick.
+>> Okay. So Peter, when he announced PyScripts the world at PyCon last year, he said, this is going to be for the 99%. And for that, he meant that not developers. Okay. And I'm old enough because I'm dinosaur really in internet time.
+You were on the internet before the web existed.
+I was actually, I was, I remember getting NCSA mosaic onto a 386 machine in my computing lab at university and going, Oh my gosh, this is incredible.
+It was mind blowing.
+That's the first graphical just in two minutes.
+I'll be able to download this picture.
+It'll be so remarkable.
+Yeah.
+There was Archie.
+There was gopher.
+There was telling all before the web.
+Okay.
+That's a whole different podcast for old fellows who were on the web back in the day, we should stop that now we're turning into the internet.
+The internet used to have a sound, Nicholas.
+It had a sound.
+Yes.
+Oh yeah.
+Oh yes.
+Yes.
+Anyway, worry young people, anyone under the age of 40.
+Back then when dinosaurs ruled the world, there was an incredible framework for writing GUI based apps on the early versions of the Mac.
+Okay.
+And it's called HyperCard.
+And, the, the concept is very easy to explain.
+the user interface is just made of a stack of cards.
+Okay.
+And there is always one card being displayed at once and you interact with that card.
+So there might be a button or there might be some text or a link or a picture or a movie, but when you interact with that, it transitions you to another card.
+So it's a little bit like, you know, again, from a similar vintage that those choose your own adventure games where, you know, if you want to kill troll, turn to page 291.
+You want to run away, turn to page 32.
+So you transition to a new state.
+That's a new card or a new piece of text in the adventure game as it were, and so on and so.
+Okay.
+It's really easy to explain that to 11 year olds.
+Okay.
+And so we took that Piper card model and we created something that we demoed at PyCon that allows you to essentially build apps on top of PyScript using these concepts.
+Okay.
+I'm not sure whether these will work still.
+The auto-advance one works.
+You just have to have patience because it takes 10 seconds to auto-advance.
+Yeah.
+Okay.
+So these demos allow me to exercise different aspects of the underlying browser and how that interacts with Python and things.
+But what we've done is we've renamed it from a Pyper card because that has a legacy.
+People think it's going to be HyperCard when in fact it's not HyperCard, it's actually Python in the browser, but we use that card-like metaphor.
+But there are other things that we want to build into that.
+So right now, literally, this is what I do in my day, is I'm thinking very hard and writing first draft of what Invent, this framework, will be so that it makes it easy for people to create user interface led applications using Python and PyScript in the browser, wherever the browser may be, on your Tesla, on your mobile phone, on your tablet, on your desktop, it'll all look the same.
+Now, I've been working at perhaps the Python end of things, but another aspect of this is that we want to make sure that we create a development environment that will probably be end up in PyScript.com that will allow beginner coders in the same way that, you know, my work on Vue tries to give you a code editor that's not as complicated as a Visual Studio code, but it lets you get to the good stuff as quickly as possible.
+So it is a similar sort of philosophy will allow you to draw your user interface, allow you to create the logic that you need to make your app run without actually even realizing that under the hood, you've got Python running as well.
+Very cool. So we should see Pyper card is kind of a proof of concept. And then you're coming out with this, you called it invent, invent. So you literally import, invent, and then import .app or import . whatever. Yeah. Yeah, yeah, yeah. Yeah. Yeah. Yeah.
+I agree in the UK.
+I'll say one thing to you, Nicholas, actually, I'm a little disappointed, to be honest, that I'm the only one that actually is dogfooding Pype Invent and writing my talks with Invent and all of those.
+Yeah.
+You should please.
+For Pype.
+Hey, it's great. I've been using actually Visual PyScript and Invent, etc. for my talk and I was expecting you would say like, yeah, me too.
+You're like, oh, really?
+Really brave of you.
+Just left you hanging dry.
+Yeah, he's got me banged to the right.
+But honestly, one thing that I didn't think before, while in the Uber to the conference, the day before, actually the day of my talk, the ability to actually check my slides and change them on the backseat of a car, on my phone, was mind-blowing and really cool.
+Which helps the power of the framework itself.
+Yeah, kudos.
+So you've told a really good story here because now imagine that you are in a classroom in, I don't know, I'm just picking random country, in Mexico, okay, and you've got a class where there are kids with Chromebooks, okay, getting Python on there, getting any app to be built on those is difficult enough.
+Like with PyScripts, it's going to be so much easier, sort of story to do, that sort of thing.
+So that's, we're working hard on that and it's going to be a long journey, but we're confident that it'll, it'll produce good results.
+Do you have some dreams or have you thought about Git and GitHub integration into pyscript.com?
+Like if I had a pyscript.com thing and a GitHub repo, could I have one mirror the other so that I could do GitHub like things to it?
+Yeah, go ahead, Nicholas.
+I was going to say, I look forward to the feature request on our repository.
+Well, we're listening to the community.
+If that's something that you want, tell us about it.
+Yeah, actually, I would love to hear more about how people would envision it.
+So we already kind of already have it in the sense that people working on both pycript.com, but also the open source project, we have a CLI for both, right?
+The CLI on the open source side allows you to create new projects with a template, to run them locally and those type of things.
+we have a plugin for that CLI that is a PyScript.com plugin that allows you to log in, log out, and then basically have a local copy version of your project that is in .com.
+And one of the first scenarios that we're thinking was, as a developer, probably not as a non-technical user, but as a developer, I want to use GitHub for my version control things, and I want to use PyScript.com to deploy and change things.
+So we do have a minimal integration we're going to be announcing and properly announcing and releasing those things in a month time frame.
+- Nice. - That is one of the most important use cases that we have.
+Yeah.
+Take my thoughts for what they are, is very loosely informed.
+Not a lot of skin in the game, but with my website, my personal website, I use Hugo and then I just push to a branch that triggers a deploy on Netlify.
+you know, there's kind of the Heroku type thing, right?
+It'd be cool if it kind of just like, it goes to this branch, that's what's on PyScript.com.
+That's what I would love if I were doing that integration and using it, but...
+Yeah, that's one use case.
+Interesting that you mentioned, we've been looking at Heroku as well, et cetera.
+The kind of difficulty here is we're often used to a one repo, one app type of separation.
+But you may have like a one repo where let's say you collect all your talks over that you give around conferences.
+You may want to have a folder and each folder is one app on PyScript.com.
+And how do we support those different workflows?
+That's the type of thing I'm thinking right now.
+And that's the thing.
+Sure. Well, people who are using it, reach out to these guys and give me your thoughts here.
+Thank you.
+We're getting, of course, yeah, we're getting short on time.
+So maybe the last thing we should talk about is kind of a PyScript next.
+Where are we going from here folks?
+Yes.
+So let me use this real quick.
+And I think, I think you should have like a link to a bunch of tabs open.
+That one.
+Perfect.
+So what's my script next?
+It's as I said, like we're rewriting py scripts with a smaller core, more flexible, web native, et cetera, to allow different things.
+So this tech preview that we are formally launching next week.
+So, you all listening, it was saw first, and it all happened.
+Awesome. I'm sure the release was amazing, and it went really well.
+So, perfect. Yes, congratulations.
+That's very Doctor Who of you to say that.
+Yeah, it is.
+But the gist of it is that we rethought a lot of the core concepts, and now we're able to allow multiple interpreters.
+We have MicroPython by default, supported by default.
+All of the interpreters support execution on the main thread, just like the previous version of PyScript.
+But now also we support on a worker, a web worker, which means you can run Python while the web is loading or while the page is doing other things.
+It's like there's another process or other processes in your page.
+That's one place to get web workers.
+That's been a big part of WebAssembly for quite a while, but you all haven't leveraged that previously, right?
+Yes. And it was very painful for us because, you know, for instance, panel an internal project of Anaconda, like they have all the examples ported to the web with Pyodide.
+And because we didn't support the workers yet, it was better for them to just use Pyodide directly.
+Now we can allow them to use PyScript and, you know, do all those things.
+We saw actually a type preview of even Django or FastAPI running on PyScript with workers, right? Like, which is extremely cool. And you can think of – That is cool.
+It's hard to actually imagine, but even just the educational purpose of this, you can have live running examples in your docs, and you can just play with it, which is interesting.
+Well, I don't know how well PyScript plugs into this world, but there is an entire ecosystem that I don't operate very much in, but where if you had a, if you have WebAssembly, you can run it kind of like Node can run JavaScript on a server, you can run WebAssembly stuff in the cloud on a server in a container, you can run it directly.
+So in those scenarios, it makes tons of sense to say, we're going to use PyScript to host fast API, and it has a meaning, right?
+It's not just browsers all the way down or something, right?
+It has a purpose for being there.
+Yeah, yeah. And well, I wish we had more time.
+There's a lot going on in WebAssembly ecosystem as well to support this as well, which is cool.
+But just in the interest of time, this next branch as well, it also supports communication between workers and the main thread and vice versa.
+So, and we can have multiple interpreters, maybe one is Pyodide, another is Python, another is Lua, and we have examples of those that can communicate between each other.
+If you click on all together, okay, so you've got JavaScript starting MicroPython in a WebWorker, Okay, and then micropython saying hello back to JavaScript.
+But at the same time, micropython on the main thread has actually started in a web worker a Lua interpreter.
+And Lua is saying back to the main thread to micropython, hi micropython.
+And then you've got micropython starting CPython on a web worker.
+And then when CPython has loaded and everything, back to the micropython context, you know, hello micropython.
+This, you know, can you imagine?
+Well, I can actually, because I used to do some work for the UK government, and I was on a data platform, and the civil servants who were doing all the stats work in the Ministry of Justice were using our platform, and they would want data where they wanted to grab data, then run it through some R thing, and then run it through some Python thing, and then stick it on a website somewhere so some minister or a highfalutin civil servant can and go and have a look at the graph of, I don't know, COVID, the spread of COVID through the UK prison system or something like that.
+Well, you can do that all in a single browser.
+The amount of standing on one leg, stick your finger in your ear, and whistle, "God save the king," backwards, you needed to get that to work.
+It took them weeks to just get their development environment set up.
+With WebWorkers and the multiple runtimes, we kind of got that as a solution here now as well.
+Actually, the speed of loading speed, Like you didn't, we didn't have a loading screen.
+We didn't have like, actually, if you check the network.
+Let me try the, the matplotlib.
+Yeah.
+Oh, just try my Python.
+See how fast that brings you up.
+This one.
+Yeah.
+There we go.
+I mean, it's like instant.
+Yeah, it is instant.
+It's amazing.
+Yeah.
+And once it's cached, it's, you know, yeah, it's this kind of stuff that I'm thinking, like, then the front end framework type of story starts to become completely realistic.
+Yeah.
+Yeah.
+Actually, the last one that I wanted to show actually is the next tab that you have, I think, which is--there you go.
+Can you open the console as well?
+Thank you.
+I should use my little hotkey thing here.
+My little--is it like a hotkey you can do to open those?
+Anyway, yeah, okay.
+If you go to console, actually, just to show the results.
+- Yeah. - Perfect.
+So this example is actually having--
+it's a Python input keyword stopping its execution, waiting for an answer.
+- Oh. - I like it.
+So it's actually blocking calls.
+- You're good at it, Matt.
+Seven.
+- Right, and so if you add in...
+- No, no, no, no, no.
+That's the JavaScript console.
+You want to type seven into the input.
+- The input.
+- Ah, okay.
+- So basically what's happening is it's blocking and then waiting for its call while the page is still responsive and everything else.
+And then when you answer, it executes.
+- Mm-hmm.
+- Okay.
+- 'Cause that unlocks a lot of use cases.
+A debugger, for instance, like we can have breakpoints somewhere and you can go and debug your code And a lot of scenarios that were not working before can work now.
+So this is very exciting.
+Yeah, there's a lot of under the hood stuff that has changed that enables us to do some really cool things now.
+Yeah, excellent. So with the web workers, do I get async and await?
+Yes, and proper async and await. Yes.
+- Yes. - That's fantastic.
+Okay, I love it.
+All right, guys, what else?
+What final things do you want to tell people before we wrap up this PyScript update episode.
+I've got two things.
+First one is, if you want to play, if you want to have a look around, PyScript.com is the place to just get your hands dirty.
+And our colleagues who work on that have done an amazing job.
+And the feedback that you can give them through the form that you'll find on the website is read.
+And we care very deeply about, you know, the experience that users have and suggestions and things.
+So knock yourself out, go and do that.
+And the second thing I want to say is that PyScript is open source software.
+So I know Fabio and myself are employed by Anaconda, but we have contributors who are not Anaconda employees.
+And, you know, we would love the community to come with us on this journey.
+Tell us what you want.
+Build a framework on top of PyScript.
+Build plugins on top of PyScript.
+Create a goofy app on top of PyScript.
+You know, put it on your Tesla or whatever.
+You know, I don't know.
+I would love, it would make my day if before the end of the year, somebody's gone, "Hey, I've built a Death Star using PyScript or some ridiculous project or whatever." And I go, "Wow." Like I said, I never thought someone would do that.
+Be playful, explore, be creative, have fun.
+That's what I want to see.
+Fabio, how about you?
+Yeah, I would actually just double down what you said and actually encourage everyone to reach out.
+We're trying to make it a good tool for anyone to learn programming or to share your things, et cetera.
+And a lot of the difficulties we have all the time is trying to think with new users' brain or students' brain and people with different backgrounds, because unfortunately or fortunately, we've been in this game for 20 years, right?
+So it's really hard.
+So when we say, "Reach out, we need you," we really mean it.
+Like, I think I strongly believe that all open source projects are about people and benefit from diversity, right?
+Like good docs are made by non-developers.
+Good content is made by people that have passion for hopping on a video and talking about stuff.
+Like I'm trying to convince my daughter to have like a PyScript channel on TikTok.
+Just to talk--
+- Oh, that'd be cool, yeah.
+- Right, to talk the lingo.
+So we really value you reaching out and coming and helping us be more, you know, human as a project.
+And the second thing is really help us spread the word and make it popular so that we can make Python even more popular and help people.
+Which I think in this age where we have AI and big tech companies and algorithms and all of that, giving power to people to just run programming language on their machines and the distributed nature of PyScript, I think it's important today.
+So, yeah, that's all I wanted to say.
+Yeah, excellent. Maybe a quick final question.
+Marwan says, "Any work on the HTML canvas for your PyScript?" Thinking of simple stuff like creating a snake game.
+Okay, Marwan, import JS.
+Now you have global this, okay?
+Now you have access to your canvas.
+And it's the same API because we're proxying the JavaScript objects as you'll find on the Mozilla developer docs.
+- So go knock yourself out. - Awesome.
+Yeah, that's what I imagine.
+MDN network, W3Schools, if you can choose.
+Yes, MDN.
+I'm also working on a higher level web API for PyScript, which will help with that as well, make the API more Pythonic.
+But what they've got is available today, and you can just...
+Yeah, and you get to reuse your JavaScript skills if you have them. Yeah, it's the same API. It's the same API Yeah. All right guys. Thank you for being here. Thank you for this project It's really really exciting and I look forward to catching up again and seeing what else  built in six months or a year whenever it turns out to be. Yes, and This and running the show this is this is always a great fun. Thank you. Yes. Thank you. Yeah, you bet. Bye. Bye This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+The folks over at JetBrains encourage you to get work done with PyCharm.
+PyCharm professional understands complex projects across multiple languages and technologies, so you can stay productive while you're writing Python code and other code like HTML or SQL.
+Download your free trial at talkpython.fm/done-with-pycharm.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm/sentry and get started for free.
+And be sure to use the promo code talkpython, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+(upbeat music)
+(upbeat music)
+[Music]
