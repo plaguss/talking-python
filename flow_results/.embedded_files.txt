@@ -1600,3 +1600,17 @@
 426-pyscript-update.txt703
 426-pyscript-update.txt767
 426-pyscript-update.txt787
+427-tips-for-journey.txt127
+427-tips-for-journey.txt191
+427-tips-for-journey.txt255
+427-tips-for-journey.txt319
+427-tips-for-journey.txt383
+427-tips-for-journey.txt447
+427-tips-for-journey.txt511
+427-tips-for-journey.txt575
+427-tips-for-journey.txt63
+427-tips-for-journey.txt639
+427-tips-for-journey.txt703
+427-tips-for-journey.txt767
+427-tips-for-journey.txt831
+427-tips-for-journey.txt842
