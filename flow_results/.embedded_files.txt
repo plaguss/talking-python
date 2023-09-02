@@ -1614,3 +1614,14 @@
 427-tips-for-journey.txt767
 427-tips-for-journey.txt831
 427-tips-for-journey.txt842
+428-django-turns-18.txt127
+428-django-turns-18.txt191
+428-django-turns-18.txt255
+428-django-turns-18.txt319
+428-django-turns-18.txt383
+428-django-turns-18.txt447
+428-django-turns-18.txt511
+428-django-turns-18.txt575
+428-django-turns-18.txt63
+428-django-turns-18.txt639
+428-django-turns-18.txt661
