@@ -1,0 +1,1235 @@
+You've got this amazing machine learning model you created, and you want to share it and let your colleagues and users experiment with it on the web.
+How do you get started?
+Learning Flask or Django?
+Great frameworks, but you might consider Gradio, which is a rapid development UI framework for ML models.
+On this episode, we have Freddie Bolton to introduce us all to Gradio.
+This is "Talk Python to Me," episode 430, recorded August 10th, 2023.
+(upbeat music)
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org.
+Be careful with impersonating accounts on other instances.
+There are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+your free trial of PyCharm Professional at talkpython.fm/done-with-pycharm.
+And it's brought to you by Sentry. Don't let those errors go unnoticed. Use Sentry.
+Get started at talkpython.fm/sentry. Brady, welcome to Talk Python to Me.
+Thanks for having me, Michael.
+Yeah, it's great to have you here. I think people are going to learn a lot about some machine learning on this episode. And you've got this really cool visual way, this visual tool with working with machine learning projects.
+And oftentimes people ask me, I'm not really a web developer, but I have some machine learning stuff, or I'm a data scientist, and I want to share with people, how do I do that?
+So your project might be a good answer to that for some folks, right?
+- Yeah, absolutely.
+I think that, yeah, Gradio is built for that use case.
+I think you can build like lots of complex stuff with Gradio, web apps and stuff, but you could, it's optimized for the ML use case.
+Like how do you get like an ML workflow, like on the web and share it with people as quickly as possible.
+That's kind of what Gradio is built for.
+Awesome.
+I've got it running on my computer.
+How do I take it from a notebook to something that other people who are not programmers can use, right?
+Yeah, exactly.
+That's kind of it.
+And it's what Gradio is one line.
+You can get a shareable link directly from your Colab notebook, Jupyter notebook, SageMaker, local, whatever.
+Yeah.
+So it's really easy to share with people.
+Excellent.
+All right.
+Before we dive into that, let's start with you.
+A quick story, quick introduction about you and how you got into programming Python.
+Yeah, absolutely.
+So I, all the way from the beginning, I, I graduated with a degree in statistics and my first job was working as a data scientist in Chicago.
+And that was doing more like bread and butter data science-y stuff.
+Like you pull data from like database and like you train a model and then you like try to communicate the results with someone.
+And then at the time, yeah, I mean, it wasn't that long ago, but to me, it feels like it was like a millennia ago.
+Technologically speaking, it's so different.
+Yeah.
+Yeah.
+It was like a really long time ago.
+Yeah.
+But then basically like what happens or what happened to me a lot was just just like, okay, like we need to like, we're training this model.
+Like, how do we share, like share with the relevant, like stakeholders, right.
+There's like a PM or like someone that's interested in this, like, how do you, how do we, how do you make them care?
+And then there really wasn't a good answer.
+Like you would have to like, you'd like compute like some metrics and then try to explain what they mean.
+And you like draw like a bar plot or something.
+And it just wasn't really that useful.
+Right.
+And I think it really was to be fair, it was like a skill gap.
+I didn't even know how to build like an interactive website to share with people.
+Cause at the end of the day, what really, what people really care about or how to make someone really care about it is that they can play with it, right?
+Cause if you show them these plots and these metrics, it's like a machine learning models, like very abstract, right?
+It's like just this thing that's somewhere else.
+And then this is like the output of it, but it's not really even like the actual output, it's just like some sort of summary statistics of it.
+Right.
+But if you give someone like, this is what the model is and you can let them like manually play with the inputs and see how the outputs change, they get a sensible, well, like what the model is and how it works and stuff like that.
+Right.
+And I think that's where I learned about this problem and why this problem is important.
+And then ever since then, I've been sort of devoting to devoting myself to working on like open source tools to like make data science like more efficient.
+And like my, my, the latest product that I worked on is called radio, which kind of does this.
+It basically lets you turn a machine learning function into a web app in one line of code.
+And from there you can jump off and build like as complex of a web as you want.
+But from the beginning, you can get up and running with this, like basically two lines of code.
+So, yeah, it's kind of a little bit of a bummer.
+You talked about letting people play with the machine learning model and you change the inputs and stuff.
+It just completely changes the round trip speed because the alternative might be, I'll make, I'll get you a PDF and you can read the report and then what if we change this, all right, at tomorrow's meeting, I'll bring the new PDF.
+No, no, no, no, no, no, no. Just empower people and give them these tools.
+And yet at the same time, data scientists are not web developers, certainly not in the super dynamic, front-end, Ajax callback way of programming, right.
+That's a different skill to be sure.
+And so it's not like their data science skills by default make them.
+Able to build these.
+And even if you could, is it a good use of your time?
+Right?
+Yeah, absolutely.
+And yeah, so it's like the PDF report is definitely like one, one way of doing it.
+The other way that we tried to do sometimes is we'll just hand it off to someone and We'll have them build the web, but then that just takes longer.
+You have to like explain everything to them.
+Right.
+I think like the make it really impactful as if the person who made the model convey themselves, they can just create the web app, the demo, like immediately.
+a lot of these, a lot of data scientists are in Python, right?
+So that kind of means you need like a Python based tool to get you up and running really quickly.
+And a lot of them, yeah, like you said, don't know about web programming.
+So you've got to like abstract that away as much as you can, like as much as it makes sense, so that they're not like daunted or it's not like, okay, now I'm Like I'm really good at high torch and training, like all these things that like now I need to learn about what it's like servers and all that stuff.
+It's like, it's like almost a different skill set for a lot of people.
+It really is.
+And the handed off to somebody else.
+It's also it's slow, but also it only works for certain situations, right?
+Like a lot of data scientists, I spec don't have a whole software team supporting them as they need.
+Right.
+They're the sole person at their company.
+So you said you had gone into statistics and found your way over to this side of that world.
+You feel like it's a golden age for statisticians now, because when I went to college, it's like, well, you could be an actuary or you could work at an insurance company, or maybe some other company might be interested in hiring somebody who does stats.
+You work at the U S bureau of statistics.
+Yeah, exactly.
+And that was, and now with the kind of blending into data science, there's just so in demand.
+So when it was like, the world is so open for that now.
+It definitely became a much sexier career.
+And I think I got lucky that I got into it like right before, right.
+As it was starting to take off, like at that point, like data science wasn't really like a term yet.
+So not that old, but yeah, at that time it wasn't really, there were like, I think at that point, like they were called it's like research scientists was more like the term, right.
+Which still sounds a little bit dry, but then it got rebranded as data science.
+Yeah.
+I mean, I think it's a group.
+I mean, I would say it's always a good time to study statistics.
+I think like a lot of people, if someone were to come back to me and say, I have I have no idea what I want to major in, but I have some aptitude for math.
+I would say like major in statistics, I think it's like really useful.
+It has like a lot of applications.
+But I think now also in terms of tech, I feel like definitely like it's sort of like the, it's the era of the Renaissance person, right?
+Like you have to know a little bit of everything now, right?
+Because it's like stats, programming, math, like all these things are starting to like blend it, blend together.
+And yeah, I think it's like a lot of people I really respect pull from all these disciplines like seamlessly, right?
+And I think it's, yeah, I think that's where we are now.
+Yeah.
+It's a super fun time.
+If you're excited about always learning new things and sort of bettering yourself and bringing in this thing and mixing it that way, if you'd rather just be done learning, maybe not so much.
+Absolutely.
+Can't just show up for 20 years.
+It'd be okay.
+I guess if you were like maintaining code, well, the code, it would be okay, but not in the machine learning space.
+And machine learning also is just crazy.
+We've got large language models just running loose everywhere now.
+What do you think about all that?
+It's definitely like a very exciting time to be alive.
+I think pretty crazy that when I got started in ML six years ago, it was, it definitely was like very niche, right.
+And like the tools that people use and like the language about it definitely did not penetrate the mainstream.
+But now it seems like, like the technologies and the algorithms, the models, the data sets are all things that people talk about now.
+Right.
+And I think we've all had an older relative ask us about ChatGPT or like the Like the latest trend or stable diffusion with the image, the AI image generation.
+I think it has penetrated every part of this.
+I think like part of the reason why that is, is one, because one, like the technology is like way more impressive now, right?
+Like these algorithms are able to do things that were unimaginable, like 2017, right, when I graduated college.
+But also it's just, these models are much easier to share and use now.
+Right.
+And I think part of the reason why tech PT is so, which took off so quickly, which was like the interface is so intuitive.
+It is.
+We've been chatting with each other for like decades, like over the internet.
+Right.
+And the user interface is so simple and it works so fits our mental models so quickly or so easily.
+But you know, under the hood, it's like this incredibly complex process.
+Right.
+Right.
+Right.
+Yeah.
+Right.
+And I think that's like where tools like radio come into play.
+Right.
+It's just, there's a bunch of like incredible, like amazing research happening, but unless other people can use it, play with it, evaluate it, like it's almost as if it doesn't exist.
+Right.
+And I think radio really helps you create like a demo, an app that other people can use and play with and evaluate your model.
+And then, and then just like that, anyone can use it, right?
+Like, you don't, you no longer have to be like a technical person and you don't have to like Python some script or something and then go to a website, right?
+You can just go to a website, right?
+You can just send someone a link and then they can play with the state of the art.
+It's pretty, pretty cool.
+Can you control a combo box and a button?
+Yeah.
+Something like that.
+Right.
+Yeah.
+Then you're qualified.
+It's wild.
+One of the things that surprises me is for such insane technology that leverages so many servers to ChatGPT and friends, the user interface for it is so mundane, not, I don't mean that as a derogatory term, but it's just like, well, you just talk to it in this text box and it just talks, there's not like a crazy new UI where you put on 3d glasses and where it's just a chat box.
+But what it does is incredible.
+Similar for mid journey and other things you just slash imagine.
+Just chat with it.
+But so there's this sort of weird paradox of this incredible, simple way to interact with it.
+And yet what it does is I guess it's a natural way to interact with it, which is what's surprising.
+Yeah.
+Part of the reason I think it's just like the natural language.
+Like interface.
+I think a lot of people like resonate with that.
+I think you'd have to explain that, right?
+Like you just type something and then it'll respond, right?
+Like it won't, it won't error.
+Right.
+And I think even like stuff that isn't just purely chat based, I think like stable diffusion, like the web UI, right?
+I think it's, it has a lot of controls.
+Right.
+But at the end of the day, it's like a Photoshop S interface, right?
+Where it's like someone who's used to that kind of software, like it's what they expect, right?
+You like upload an image and then you like, you can like get a tool to blur something out and then you can obtain it or obtain it and stuff like that.
+So I forget who said it, but I think some, someone said that MLs, it's not really like the product.
+It's like the, like in the background, right?
+Like the most successful ML products, they don't really feel like they're ML.
+Right.
+It's like the MLs like abstracted away and it just makes your experience like that much better.
+Right.
+And I think that's what all these different tools are showing.
+Amazing.
+All right.
+So let's talk about Gradio and I'm going to ask you to do something a little bit funky to kick this off, but let's talk about what just, what other apps are like Gradio.
+So things that come to mind for me are like StreamYard, for example.
+Streamlet.
+Sorry, that's what I mean.
+Stream, yeah.
+Streamlet.
+I'm reading the words of our app that we're using.
+Streamlet, not Streamyard.
+Streamlit and other, just give people a sense of what are the categories of apps that's in the same space so they can get a mental model for what Gradio is.
+For sure.
+Yeah.
+So I think like Streamlit is a good comparison.
+Like Plotly, Dash, I think is also in the same ecosystem.
+Shiny, I think.
+Yeah.
+I think like the first programming language.
+Yeah.
+I just had Joe on to talk about Shiny for Python recently.
+Yeah.
+They're all definitely in the same ecosystem.
+If you go to the Gradio homepage, Gradio.app, you can see some of the apps that you can build with Gradio really quickly.
+Absolutely.
+Yeah.
+But that doesn't necessarily limit, like what you see on the landing page is not all that you can build with Gradio.
+I think those are just like the eye-catching quick examples, just because.
+Like I said, like Gradio is built to get these kinds of examples up and running really quickly, but you can do like lots of complex stuff with Gradio.
+Excellent.
+Yeah.
+So we'll let's dive into it.
+So you've already given it a bit of a introduction for us.
+Maybe we could work, just start by discussing how you might take, you've got some different types of problems you can solve on your homepage and it shows you the code, the entire code and then the UI that comes out of it.
+So maybe we can, you could just talk us through the sketch recognition.
+It's one of the types of UIs you could build here.
+So with the sketch recognition, you just, what you draw, it's definitely a bird I drew there or a mountain.
+I'm not sure.
+How do you think about Gradio?
+Right.
+So Gradio is a, the Python library, right?
+Python is the main language used to interface or to build Gradio apps.
+pip install Gradio.
+Yeah.
+You pip install Gradio, right?
+And then what does Gradio do at the highest level?
+Gradio turns a Python function, any Python function into a interactive web app.
+Right.
+So when you think of function, right, function has inputs and outputs.
+So these inputs correspond, these inputs and outputs correspond to things that will be drawn on the page, right?
+And, and Gradio comes with a standard set of inputs, right?
+There's like text boxes, dropdowns, number fields, data frames, plots, anything like that, but also like drawing tools, like a sketch pad.
+And then the output, it can be, it can be any of these other components, but that could also be like a label, right.
+To show like a machine learning prediction.
+So all you need to do is take, write a plain Python function that takes in a drawing and returns a set of probabilities or competences, and then Gradio can wrap that in one line of code and turned it into an interactive web app, like we see here, if you're on the YouTube stream, you can see what Michael is doing.
+There's like a sketch pad area and then he can scribble on it and then immediately he'll get a prediction out.
+Yeah.
+Let's see if I can draw an owl.
+Maybe.
+Right.
+So it's like, okay, let's see how I do.
+I don't know.
+Yeah.
+Syringe.
+We've got to make the model better.
+Right.
+So it could be a cat.
+It definitely could be a cat.
+I can see cat.
+I can see it.
+I think I got to make my drawing better.
+But so the idea is you have a regular function that takes the inputs and outputs.
+There's no UI whatsoever.
+And there's also no reactive programming.
+You're not like hooking events where I redraw and it just reruns.
+Right.
+That's not part of my code.
+I write as a Python person.
+- Right. - And then you just say, gr.interface, give it the function, and then you say the inputs are, in this case you say it's just a sketchpad.
+And so I get this UI that I can draw on, that I've been attempting to draw an owl on.
+It's probably missing the eyes.
+I think it's the eyes that are missing.
+- The latter. (laughs)
+- It's not about testing the underlying model, is it?
+And then you say the outputs that are labeled.
+Now a lot of UIs, people might think a label is just a non-interactive piece of text.
+But here there's more of a machine learning label, right?
+You've got like a cool horizontal bar graph that has percentages and talks about its guesses.
+So it's like a machine learning labeled response report.
+Just a machine learning person would, when they see label, they think that's right.
+They don't think of the standard web, like just like a text box.
+Right.
+So yeah, like label four type of thing.
+And then HTML.
+Yeah.
+Right.
+So that's one of the things that are one of the ways that kind of radio is built for that kind of audience.
+Right.
+it's like the high level parameters match that mental model.
+- This portion of Talk Python to Me is brought to you by JetBrains and PyCharm.
+Are you a data scientist or a web developer looking to take your projects to the next level?
+Well, I have the perfect tool for you, PyCharm.
+PyCharm is a powerful integrated development environment that empowers developers and data scientists like us to write clean and efficient code with ease.
+Whether you're analyzing complex data sets or building dynamic web applications, PyCharm has got you covered.
+With its intuitive interface and robust features, you can boost your productivity and bring your ideas to life faster than ever before.
+For data scientists, PyCharm offers seamless integration with popular libraries like NumPy, Pandas, and Matplotlib.
+You can explore, visualize, and manipulate data effortlessly, unlocking valuable insights with just a few lines of code.
+And for us web developers, PyCharm provides a rich set of tools to streamline your workflow.
+From intelligent code completion to advanced debugging capabilities, PyCharm helps you write clean, scalable code that powers stunning web applications.
+Plus, PyCharm's support for popular frameworks like Django, FastAPI, and React make it a breeze to build and deploy your web projects.
+It's time to say goodbye to tedious configuration and hello to rapid development.
+But wait, there's more.
+With PyCharm, you get even more advanced features like remote development, database integration, and version control, ensuring your projects stay organized and secure.
+So whether you're diving into data science or shaping the future of the web, PyCharm is your go-to tool.
+Join me and try PyCharm today.
+Just visit talkpython.fm/done-with-pycharm, links in your show notes, and experience the power of PyCharm firsthand for three months free.
+PyCharm, it's how I get work done.
+- One thing you mentioned earlier that there's no like explicit reactivity that you as a programmer have to write.
+That's definitely true in the GR dot interface case.
+GR dot interface, like abstracts all that away from you, but Gradio also offers.
+So this is your simple case.
+Like I just want.
+Just run this function with these inputs and outputs, and I want a real basic variant.
+Okay.
+Gradle also offers like a lower level API, where you can explicitly control the layout.
+Right.
+So right now everything is like side by side.
+You can put them horizontally across columns, rows.
+You can add components, right.
+And then you can also be more explicit and saying, okay, when this input changes, run this function and then that will populate this and stuff like that.
+And you can change these things together.
+So.
+That makes sense.
+It may be, it's expensive to, it's expensive to generate some portion.
+Do you want to cache it as much as possible?
+Yeah.
+You just want to be, have like more control over like exactly what happens when things change, right?
+You could, Gradle gives you that, that control, but for a lot of use cases, you can get, you can get really far with GR that interface.
+And then the other companion piece, which isn't on the landing page.
+Cause we just released it maybe two weeks ago, it's dr.chat interface, right?
+So you could build like .
+Oh, interesting to an LLM or something.
+Yeah.
+You can build a chat UI for yeah.
+Like an LLM just in one line of code.
+And I think I can try to maybe find an example of that real quick.
+Yeah.
+While you're looking, do you offer any guidance or any opinionated stuff on which LLM to choose?
+Or do you just say it's just a chat interface and you write the code to make it happen?
+You just write the code to, yeah, just given the message, what's what should the response be?
+And then that's the interface.
+Yeah.
+And then there's some interesting options people might want to pick.
+Obviously you could pick open AI as and use their API, but there's things like private GPT, which allows you to ask questions about your documents, but a hundred percent private, right?
+You could just give it hundreds of docs and say, learn these and we're going to talk to you about it or something along those lines.
+There's the Ling chain.
+Right.
+Yeah.
+Which is a pretty interesting option for building these things.
+Llama.
+Like the new Llama 2.
+Yeah.
+So I think in the chat, I just posted like a Gradio Llama 2 UI that we can show.
+It's on Hugging Face.
+So I think we can talk about the hosting on Hugging Face as well.
+Okay.
+Yeah.
+So this is the chat UI.
+So it's if you were to scroll down a little bit.
+The UI says chat bot.
+You can type a message.
+Yeah.
+I'll ask it what the podcast says.
+Hey, I'm here to help you.
+Puck Python is a podcast and community dedicated to helping developers improve their skills, interviews and experts in the field.
+That's you, Freddie.
+Resources.
+Yeah.
+What do you want to know?
+Under the hood, this is using a LLAMA 2, 70 billion LLM.
+Nice.
+I can ask you what the latest episode is.
+So it gives me a sense how far back it goes.
+That's about two years old.
+So, okay.
+Interesting.
+There you go.
+Yeah.
+Makes sense.
+Oh wait, no, this is not so sure about that.
+It says, yeah, I think there's a little bit of a mismatch, but this is really cool.
+And so you basically plug in whatever LLM you want to into this and they, they put the, or you put the LL, the llama too.
+If you scroll up a little bit in the website, if you, when you see those like three bars, yeah, the hamburger deal.
+No, sorry.
+That's not it.
+Other hamburger.
+Where is it?
+There are three dots.
+Maybe.
+I guess maybe because you don't have an account.
+You can't see the file.
+Oh yeah.
+If you go to files there, if you go to files, I'm going to app.py.
+This is the source code of the, oh, interesting.
+Okay.
+If you scroll down the helper tags, and then this is the actual prediction function. It's about 20 lines of code. But if you scroll down, you see the chat interface code with gr blocks as demo, create a tab, a batch.
+Okay, the important thing is that your chat interface is just, it's just like a one line way to create a chatbot. It works similarly to the interface case, right? There's just a function in this case that it's an LMS, it handles like the responding to the each user message. And then you just call that and then you can call launch and then you get a UI. Nice. You get like a chat to BTS UI And in this case, it's a hundred lines of code, but you know, yeah, pretty simple.
+That is simple.
+And one of the things that's pretty cool here is section.
+You hook it to the type you set up is a streaming type versus the place I type as a batch.
+And then the function you give it is a generator with yield keywords.
+So it just, as you go through it, it makes choices and sends them back.
+Pretty advanced interaction for the UI to be, to run in like that.
+That's cool.
+In order to get streaming, there's no special syntax.
+You can just use the normal Python yield and then Grado knows how to feed that iteratively, feed that to the front end.
+And then you get like this responsive streaming UI.
+That's a really good call out.
+It's just like the, Grado tries to use like the core Python syntax and the core Python data types as much as possible.
+Just so to make it easy for people to get up and running.
+I just blew through this really quickly here, but basically from what I can tell is the amount of code here to actually implement this, that is not the, just the details of given this text, make the LLM do the thing.
+Five lines of code.
+Yeah.
+Yeah.
+Definitely true.
+Yeah.
+That should make people pretty excited about, Hey, I can write five lines of code, especially with an example to work from exactly.
+Yeah.
+So yeah, definitely.
+We need to get chat interface up and the landing page, but yeah, I think it's super easy to get complex demos running.
+I think it's just a handful lines of code.
+We mentioned shiny a little bit.
+Umar asks, how does it compare to shiny?
+How familiar with shiny?
+Can you not super familiar?
+I'm not going to say not familiar.
+I'm familiar with shiny, but not well enough to compare it directly to Gradio either.
+I mean, they live in the same general world of trying to create a UI.
+That's you don't have to write web apps for, but I don't think they're, I don't think they're totally the same, but they're similar.
+Okay.
+So we talked about setting up pip install.
+That's easy.
+You say you can choose from a variety of interface types.
+These are the widgets that you're talking about, right?
+You could like, in terms of the inputs and the outputs, we call them components.
+But yeah, there's, if you go to the docs pages about, we have about 30 something components.
+Wow.
+Okay.
+Yeah.
+So code, buttons, data frames, plots, files, pretty much like you name it.
+And we're adding components all the time.
+And we're also, one of the things that we're going to work on is letting the community create their own components.
+So if you have your own particular demo, your own particular web app, and you want to, you want this new component that we don't support, like how do you, we're working to make it easy for you to do that without having to merge something into 3DO upstream, right?
+And then other people can play with it.
+So we're working on that as well.
+But for the time being, it's yeah, about these like 30 something components.
+And then, yeah, you can mix and match them however you want.
+You've got quite a bit of them.
+Many of my people expect people would imagine.
+So you've got button.
+Yeah.
+Let's see, you've got data frame, which is pretty cool.
+And then the gallery image, the plots, like the line plots, scatter plot.
+Those are all pretty cool, but you've also got things like audio.
+What's the story with audio?
+You, this is how you, yeah, you can upload like a, an MP3 or a, or a a wave file directly or maybe for transcripts or sentiment analysis or something.
+Exactly.
+Like whisper essentially audio to transcription or also just a synthetic audio.
+Right.
+So there's like a bark and there's all these like machine learning demos that they go text to text to speech basically.
+And they're really advanced.
+So if you want it to display that, right.
+Like you ingest text, come out with audio.
+Like you can use like an audio output component and then you get, yeah, you get like a, you can play the audio directly in the browser.
+It's just like an audio tag in HTML.
+Obviously it does more from the UI, I'm sure, but it's to not just, I guess you would just do file if you really wanted to drop an MP3, but if you wanted to generate audio and let people see the results, then this audio thing would be the way to go.
+Yeah.
+And then you could also, the audio could also be like the input, right?
+You could just drag a drop, but you know, if you click on that box, it'll let you upload an audio if you have it and then you can play it.
+I have some audio.
+Yeah.
+I know that I have some, but let's see if I can find something to upload here.
+Here I'll upload a sponsor.
+Yeah, this is super short, so I can upload.
+Yeah.
+Look at that.
+And it just becomes a player.
+Excellent.
+You can play it and then you can also edit it as well.
+So you see that little pencil and you could like trim it.
+I like trim, trim it to make it shorter.
+Okay.
+Yeah.
+So yeah, lots of cool components like that, that we have.
+Yeah.
+All the standard form stuff like sliders and dropdowns and yeah.
+Highlighted text.
+And yeah, so the standard like form stuff, but then there's also complex, not complex, but more maybe domain specific ML stuff.
+So highlighted text, for example, like really big and like part of speech tagging, like NLP, right.
+So you can get a highlighted.
+it's like, depending on the tag that you apply to each word in the text, you'd get like different coloring and stuff like that.
+Yeah.
+So it's for MLP, like model 3d.
+So there's a lot of ML demos that come out that you can generate model 3d assets directly.
+So this lets you display them as well.
+So, yeah, so everywhere where we have everything from the most kind of basic general like web app stuff, domain specific machine learning components as well.
+Yeah.
+Let's see what else jumps out here.
+We have video as well, which is pretty cool.
+JSON.
+Yeah.
+There's a lot of what you can type in JSON.
+I guess it probably validates it and auto formats it something rather than just plain text.
+Yeah.
+When you return the JSON, it highlights it for you.
+You can copy it directly as well.
+So, okay.
+So when we were talking about the Gradio dot interface, it had, well, here's an input and here's an output.
+plural.
+So could you have, I say there's a sketch pad and a text box as the input and then the outputs are, I don't know, three other things.
+And yeah, that's a really good observation.
+Yeah.
+So you can have more than one input, more than one output for sure.
+Right.
+So if you go to the, I think the time series forecasting demo, I think that one has two, that's also on the homepage.
+Yeah.
+Also on the homepage.
+Right.
+So you can pick, I see it's like a toy example, like forecasting by installs, but you could pick here has two, two inputs, right?
+Like the time horizon and the library itself, both of them are, are dropdowns.
+Right.
+And then when either updates the plot updates, right.
+So there's also like how you can do plotting and think radio.
+And then also this is interesting.
+This is, this demo is built with the lower level API.
+You could build it with interface if you wanted to, just as an example, it's built with the lower level.
+API.
+Yeah.
+So I guess there's probably a library and time span, two arguments to the function that you write.
+And then just as you interact with these widgets, it just recalls it with whatever the values are.
+Exactly.
+And then the function itself returns a plot.
+So in this case, it's a plot, we plot, right?
+So by default, or, you know, we ship with support for a map, plot, lib, plotly, Bokeh, and Altair.
+So if I would create like a map, plot, lib object, do all the stuff to it that I would do in a notebook, instead of calling show, I just return it from my function and then it becomes part of the UI.
+Okay.
+Yeah.
+That seems pretty straightforward.
+Yeah.
+This one happens to be done with profit.
+A time series library.
+Yeah.
+You've got integration with a bunch of cool machine learning libraries here as well.
+Yeah.
+So the cool thing is pretty much if you can write a Python function for it, like it'll work with radio.
+It really doesn't need to be like us as a development team don't really need to build that many integrations to get anything that you're working with to work with radio, pretty much.
+If you can call a bread, a Python function to do it, and we have a supported output types and stuff like that, and you can, you can display it with, with great.
+Yeah.
+Nice.
+Yeah.
+So yeah, there's a couple of demos, for example, like connecting to like databases and stuff.
+You can connect to us three if you wanted to, right?
+Like you're not, I don't know exactly where they are now, but yeah.
+It's gotta be one.
+It just looks like it might be one potentially.
+I'll click, find some S3 stuff.
+Here's just gotta be something here somewhere.
+Yeah.
+Very cool.
+So one of the things people may be wondering, and the fact that I don't see a pricing up at the top, it might be a big hint here.
+What's the business model?
+What's the story with this?
+Is this just straight open source?
+Is it a open core?
+What's the story around your project here?
+Gradio is completely open source and you can host it anywhere.
+So you're not tied into any platform.
+Gradio did get acquired by Hugging Face maybe like almost two years ago.
+Right.
+So Gradio integrates really tightly with the Hugging Face ecosystem, but okay.
+I see.
+Those integrations are normally free.
+Right.
+So for example, you could host radio demos on Hugging Face spaces or something.
+Yeah.
+On Hugging Face spaces.
+Right.
+And then if you, if your demo needs special like hardware or stuff like that, Like you, you could pay Hugging Face to provision that for you, but you're not paying for the Gradio, you could use whatever you want on Hugging Face spaces.
+Now, right.
+So it doesn't have a radio.
+Yeah.
+So it's freely available.
+So it's completely open source with a kind of a Gradio as a service via Hugging Space.
+Hugging Face.
+Hugging Face.
+Yeah.
+Yeah.
+On their spaces.
+Say that fast bunch of times.
+So yeah, really cool.
+One of the things people might not know if they haven't heard of Gradio before is you go to your GitHub repo for it.
+20, almost 21,000 GitHub stars, a serious bit of a attention that it's gotten.
+We've seen a lot of growth in the last, yeah, about a year and a half.
+Like ever since the hugging face acquisition, that's really helped us put the library in front of a new audience.
+Yeah.
+The recent advances in ML, like a lot of people want to build demos for ML models now, right?
+So I think that's definitely helping Gradio as well.
+Yeah.
+Trying to give people a sense of scale, right?
+This is like third of fast API, third of last, like that's a lot of people using this.
+So the reason I'm bringing that up is it's not some brand new thing that you came up that came up with that maybe people could try, but it's got a lot of users, right?
+Month to month.
+We're seeing like hundreds of thousands of people building these Gradio demos repeatedly.
+So yeah, definitely a lot of growth and yeah, Gradio is about five years old now.
+So it's not awesome.
+Congrats.
+That's, that's really cool.
+Yeah.
+3.9, almost 4 million monthly downloads.
+That's a decent chunk.
+This portion of talk Python to me is brought to you by Sentry.
+You know that Sentry captures the errors that would otherwise go unnoticed.
+Of course, they have incredible support for basically any Python framework.
+They have direct integrations with Flask, Django, FastAPI, and even things like AWS Lambda and Celery.
+But did you know they also have native integrations with mobile app frameworks?
+Whether you're building an Android or iOS app or both, you can gain complete visibility into your applications correctness, both on the mobile side and server side. We just completely rewrote talk pythons mobile apps for taking our courses. And we massively benefited from having century integration right from the start. We use Flutter for our native mobile framework. And with century, it was literally just two lines of code to start capturing errors as soon as they happen.
+Of course, we don't love errors, but we do love making our users happy.
+Solving problems as soon as possible with Sentry on the mobile Flutter code and the Python server-side code together made understanding error reports a breeze.
+So whether you're building Python server-side apps or mobile apps or both, give Sentry a try to get a complete view of your app's correctness.
+Thank you to Sentry for sponsoring the show and helping us ship more reliable mobile apps to all of you.
+What do we think about, I don't want to do an image in one.
+You can do other demos you got here is you've got time series forecasting.
+We talked about that as the multiple inputs, XG boost with explainability.
+Want to tell us about this a little bit?
+Yeah.
+This one also, I think it has like, this one has 12 inputs, right?
+And the idea is it's one of these like kind of Kaggle-esque things where you like predict income based on a slew of predictors, right?
+And then the cool thing is that this isn't explicitly built into Gradio or yeah, this isn't explicitly built into Gradio, but you could hook into the SHAP really easily.
+Right.
+So if you hit explain, it'll try to explain the prediction of the model and display it in a plot for you.
+Wow.
+Okay.
+Right.
+So for those of you don't know, Shap is like this algorithm for explaining the predictions of any machine learning model.
+I see.
+It's hooking into XGBoost.
+Right.
+But there isn't like an explicit, in this demo, there isn't like an explicit radio feature that's being used.
+It's just calling Shap directly from this Python function and then displaying the results as a plot.
+The thing does is it's got a bunch of different sliders and dropdowns.
+It says given an age, your education level, years of school, whether you're married or not, all those male, female, how many hours a week you work.
+And then it predicts what is this?
+Yeah.
+Predicts your, your yearly income.
+And then the senior talking about is with that model, you can ask it, okay, well, of all these different things we could put into it, what features, what aspects of that are more important and what are less important, right?
+Right.
+Okay.
+The use cases, let's say like you are a data scientist that is charged with building this kind of model.
+The first question after someone seeing the prediction is someone might have was like, why, like, why is it predicting this?
+Right.
+And then you ideally want to be able to explain exactly what element of the predictors contributed to the prediction the most.
+And there's a lot of tools that you can use for that, right?
+Shab is I think the most well known to my understanding.
+And then, yeah.
+And then you can just with Gradio really easily just call that algorithm and then just display it in a plot.
+Right.
+And then in this example, like one of the inputs is like the capital gain.
+So like how much you make on your investments, right.
+So, and I think in this particular case, like the capital gain is like really big, right.
+So obviously because the capital gain is so big in this particular case, we predict that the income will be, will be really big, right.
+Cause capital gain is pretty much synonymous with income really.
+So yeah.
+Yeah.
+So that's what this is showing.
+Yeah.
+And I suspect this is important for a lot of reasons.
+If you were, you're building this for your company or for some kind of project, people want to know, well, we have all these different inputs.
+What ones actually matter in making a prediction?
+Maybe only the top three are the ones that really matter.
+And you can throw out things like marital status.
+Like it actually doesn't make much of a difference.
+Right.
+Or if you're a policy person and you're this model actually matches real data.
+You could say, well, we're trying to improve the policy for a certain group of people.
+We could focus on any of these aspects, which one or two would make the biggest return for our effort to make a change.
+Right.
+A lot.
+There's a lot of cool stuff that comes out of this, I think.
+Absolutely.
+And then you as a developer, I think it's, as like the data scientist, right.
+It's really easy to make this kind of thing, right.
+This is like a jarred interface, I believe.
+Right.
+So this is just one line of code to build this.
+So yeah, that's okay.
+Not GR that interfaces.
+The other API that we can talk about now is called blocks.
+Yeah.
+Tell us about that.
+It's, it's cool.
+Yeah.
+The, the way that it works is that you declaratively define your UI, right?
+So it's like this input is going to go in this column and say, well, this input is like a dropdown for example.
+Right.
+So in this example, there's lots of dropdown components, lots of sliders for the age and stuff like that.
+And then you define all these components and then you can define the reactivity separately.
+So if you were to scroll down, there should be like a button dot click, right?
+So whenever the predict button gets clicked, yeah.
+So you're called this function with these inputs and then return this one thing.
+Yeah.
+So that that's like the model, right?
+Like right now it looks like a lot of code just because there's a lot of like inputs and stuff, but at the end of the day, it's like pretty simple.
+you're just defining a UI and then you define like what happens when, and then Gradle handles the rest.
+Yeah, it's pretty straightforward.
+So people listen, basically the UI for the more advanced version is you use context managers, create with blocks.
+So then you'd say, here's something that goes for us and with another row, put some columns in there with another row, and then that's how you build it up.
+So it's pretty straightforward.
+What it reminds me of a little bit is it reminds me a little of Flutter.
+Are you familiar with how Flutter looks?
+No.
+And the code.
+It's, I don't know if I can find a quick example about an example Flutter.
+Come on.
+It's really sort of hierarchical.
+So that the thing that I think is interesting is the, the code hierarchy matches the sort of UI hierarchy, right?
+So it's a code driven UI where as it gets more indented, that's talks about, okay, well that's a row or then you pop off and stuff and they've got, it's real similar in that sense that all right there in the code, there's not a designer or a markup language or something like that.
+But yeah, pretty cool.
+Yeah, exactly.
+Yeah.
+So like the UI, it's all declarative, right?
+So you, yeah, like you said, you just say this is this row and then yeah, there's ways to control like the relative width of each of these columns, for example.
+So if you wanted that, you could, and then.
+Another thing I saw, I can't remember what you demoed it.
+So I'm not going to pull it up, but I saw that there's, there's a way to pass like CSS and styling over as well.
+Is that right?
+That was maybe the very first thing.
+There's a Python API for like defining the theme, right?
+So like every UI element has certain CSS variables and you can control their value via like the values of this Python class that you then pass to your Gradle instance, but at the same time, there's like a top level CSS parameter that you could do whatever you want in that case, right?
+You don't have to use like the Python API.
+If you don't want to, if there's something different that you want to change, you can change the CSS variables.
+You're saying I could do something in Python.
+I could say, well, the style is button.
+Order width is three and the color of the borders is blue.
+But if I just want to have arbitrary CSS, I can just go, here's your arbitrary CSS string, go with that.
+You could pass it a file and then it'll, we'll read that file and then use that CSS in the demo.
+Yeah.
+And then with that, you can also add IDs to each of the UI elements, and then you could write your CSS to target the IDs that you add, right?
+So let's say you only wanted to modify one button, you could do it that way.
+Right.
+You just want to control one of the plots or something.
+I guess if you're writing arbitrary code to return things like matplotlib plots, do things like the XK CD matplotlib.
+Oh yeah, for sure.
+Right.
+Like you could control joking, but it's also awesome.
+There's an XKCD Gradio theme, right?
+So let me show you this.
+There is.
+Yes.
+Okay.
+Well that takes it to another level.
+That's pretty excellent.
+That's the cool thing about the theming is that it's shareable, right?
+So someone built this XKCD theme.
+Wow.
+It's amazing.
+Anyone can use this in their Gradio demo, right?
+All you have to do is pass theme equals Gstaff/XKCD and then your demo will look like the XKCD theme.
+It's so good.
+I love it.
+Oh my gosh, this is really.
+- Yeah, completely community driven.
+- Yeah, well done to whoever did this one.
+That's really cool.
+- It goes beyond the plot, right?
+You can for sure return a plot in the XKCD theme, but you could also have the whole demo in the XKCD theme.
+- I often pull this example up, this theme, this XKCD thing for Matplotlib, 'cause it's fun, but also I think there's genuine value in putting together something that looks like this.
+Because if you show this to decision makers, bosses, managers, types, And they see that they look at something that looks like it's working and they're like, Oh, well, we're done then.
+No, we have two months more work.
+We're not done.
+But I click the button and it's giving me answers.
+We're really not done.
+It's not scalable.
+It's not this, it's not that right.
+It's only an estimate, just an XKCD front end on it.
+You're like, look, you see, it's not done.
+It's just, it's got squiggly lines.
+It's hand drawn.
+It's clearly a prototype.
+You're like, Oh yeah.
+Okay.
+But I can see where this is going.
+I think actually psychologically it may have a big impact, even though it's silly.
+Yeah.
+That's a super interesting point.
+I never thought about it that way, but yeah, I mean, I think it definitely gives it a little bit more sketch vibe.
+Like this is like in the.
+Yeah.
+Like a wireframe vibe.
+Yeah.
+Yeah.
+Wireframe like straight from the workshop.
+Exactly.
+Yeah.
+That's what I was thinking.
+Cause I presented projects to various stakeholders when I used to do that kind of stuff and they'd be like, Oh, well that looks like it's done.
+No, we're going to need some time.
+Cause it's really not done.
+I know it looks good, but it's not.
+Yeah.
+Yeah.
+Yeah.
+You made it look too good.
+Basically.
+Yeah, exactly.
+That was a serious mistake.
+Yeah.
+Okay.
+So we've got a little bit more time to talk about a couple of things.
+I want to talk about how people actually share this.
+Like we're still talking about a thing.
+I pip install locally and it has a UI, but what do I do?
+I still don't want to set up a Linux machine and Nginx and domains and all that.
+So what are the options?
+But before we get to that, tell us a bit about the internals.
+Like when you guys work on Gradio and I pip install it, like what's running.
+What is this project?
+The backend is a fast API server.
+So what Graded will do, it'll spin up a server for you.
+And then that server will serve like the front end assets.
+The front end is built in Svelte.
+Basically whenever you, whenever these reactivity events happen, what that'll happen is that, or what will happen is that the front end will just call the backend API and then run your function.
+And then make sure that all the necessary processing that needs to happen to get your data ready happens.
+But at the end of the day, it's a simple model in that sense, right?
+Obviously there's some more complications with like the streaming, for example.
+So that's like a whole kind of different code path almost.
+But at the end of the day, it's like a rest server that's talking with a JavaScript client.
+So it's like the standard developer tools story for Python people is it's not some of it is Python, but you probably end up writing a lot of JavaScript or TypeScript to build this tool for other people.
+Right.
+So they don't have to, I'm not a huge Svelte expert.
+Like thankfully there's some of the people I work with are like really good at the really knowledgeable and that stuff.
+And yeah, like the front end code, I think it's, I think there's more Svelte code than Python code.
+Actually, I'm curious.
+I put the.
+What's the code breakdown.
+Let's break it down.
+Yeah.
+65% Python, 16% Svelte, 13% TypeScript.
+Well, so I think the reason might be that we have a lot of like demos and stuff.
+Yeah.
+I think there might be some stuff like that.
+Yeah.
+The demos are in there.
+Yeah.
+There's a lot of demos.
+You know what feature GitHub needs as you navigate the source tree, right?
+When I click on like client or demo or Gradio, it would be awesome if those stats would also be repeated.
+But just for that section of code, wouldn't that be great?
+Like how much of the demos are Python?
+I don't know.
+Maybe I just want to know that, but that'd be cool.
+Anyway.
+Yeah.
+So I suspect that is.
+There's probably a lot of code and you've got a lot of notebooks and stuff in there too, that probably puts a big change on it there.
+A lot of the code is actually, yeah.
+Yeah.
+JavaScript's felt right.
+It's the take one for the team.
+So the rest of us don't have to write JavaScript.
+Exactly.
+Yeah.
+Cool.
+Interesting.
+Very nice.
+And it says it can be embedded in a notebook, which is interesting, or it can be presented as a webpage.
+Tell us about this part.
+If you were to run this on any notebook, like Google Colab, for example, I think this might be an example, right?
+So if you call like the way that Gradio works, right.
+Once you create your Gradio interface or blocks, once you call launch, that's how you start up the server.
+That's like, you've kicked off the whole process of serving this.
+That'll create the server locally, right?
+So no data is like leaving your machine.
+Right.
+And then if you click, if you call launch on like a Jupyter notebook, Colab SageMaker, like the UI will display like in the notebook.
+Right.
+Right.
+And then you could, if you're doing locally as well, you can go to the local host URL and go to the server that way.
+And then the really cool thing is that yeah, there you go.
+There's a UI.
+Okay.
+That's what we mean that it's embedded locally.
+It's a little, it feels good.
+Like a little bit like the I widgets sort of thing.
+It's similar to that, right?
+Like it'll display right underneath the cell.
+Right.
+And then if you run the cell again, like you'll get like a new, like a new server basically. Right. So you can, you can iteratively build these things.
+Right.
+Is it running fast API somewhere in the background when you do that?
+Yeah. Crazy. Yeah. That's pretty, pretty nuts. Turtles all the way down.
+And then what we mean that they can be embedded in a notebook and then you could also like host it anywhere. Right. So you could, if your machine is exposed to the internet, right. You have like a fixed IP address. You could just give people that URL. You could also share it another way. Right. So every gradio interface is like a launch method. That's what kicks off the server. And that takes a parameter called share, right?
+So if you hit share equals through true, that'll create like a temporary link for 72 hours that you could share with someone, right?
+So you don't have to, you can host it right on your laptop if you want it to.
+As long as your laptop, as long as you leave it on.
+Yeah.
+Yeah.
+As long as you leave it on, it's like not sleeping and stuff.
+Like people can access here.
+If you go back to that Colab notebook, I think we might be able to like demo that.
+Oh, interesting.
+If I just say here and say, share equals true and rerun it.
+Equals true.
+See what we get.
+So you see greater dot live, right?
+So if you click that, it totally works.
+Yeah, you can select that to wherever you want them.
+They can just use this.
+Right.
+So that, yeah, no install needed, right.
+If you're sharing this with your collaborator, your PM, your manager, your friend or whatever, you could just give them this link, right?
+So you don't have to do anything.
+To get, I guess it's probably worth emphasizing.
+You should never try to host like production over this.
+It sounds like, cause it's only for a limited time and it's going to, it's just a good looking URL.
+But so often you'll be in meetings over zoom or something else.
+And they'll be like, Hey, what have you done?
+Can you show me?
+And then you're like, all right, well, let me do screen share.
+Oh, I don't have, I'm not a host.
+Can you make me a host now?
+Can I, you're sharing, can I share?
+And then finally you get it up and it's blocky and they're like, Oh, zoom in.
+It's too small.
+I'm on my phone this way.
+You just take that and you give it to them in the meeting.
+Right.
+And they, they have a full fidelity thing they can play with, which is awesome.
+They have the demo itself that's running on your machine.
+Right.
+So they don't have to, yeah, like no, you don't have to install anything.
+Right.
+Just go to your point, your browser at this URL and then yeah, it'll work for that quick demo.
+Yeah, exactly.
+Use case as well.
+Yeah.
+Definitely don't use it for production.
+Yeah.
+If you want it to use for production, I think like the easiest, the absolute easiest way to use hugging face spaces.
+So if you go to hugging face spaces, it's basically like a drag and drop, right?
+Like all you have to do is just drag your Gradio script into like their UI and then that'll upload it and then Gradio will already be installed and then the server will, will start and then you have, you have your permanent hosting.
+And then it's also like a, it has like a get interface, right?
+So like your demo has several files, like directory, there's some assets, some images that you need that you want to upload as well, like you could just get pushed to your hugging face space.
+And then you'll, you can do it like that as well.
+Okay.
+So you add it as an origin or something and then just push to it.
+Yeah.
+I can try to show it.
+I don't know if you can have a, can I share my screen?
+I wonder.
+Yeah, sure.
+Click at the bottom and share.
+It's easier if you share an app.
+Yeah.
+If I go to my Hugging Face account and go here and then new space, and then this is talk Python demo, then MIT.
+Oh yeah.
+We can do whatever we want with this.
+Right.
+So you could write, you could host stream like radio, Docker, yeah, anything you want.
+Right.
+So for free, very generous free tier, you have two CPUs.
+That is a generous free tier, two CPUs, 16 gigs.
+Yeah, that is good.
+The only caveat is that this will go to sleep after 72 hours if no one uses it.
+Right.
+So, but you could also upgrade it.
+You have a machine learning model, you need to pay for the GPU per hour.
+And then yeah, you can set public or private and then you just create space.
+And then yeah, this is how the Git interface works, right?
+So you could just Git clone this and then add your code and then just Git push.
+Or you could just copy this.
+- Copy the code and just paste it into a file, yeah.
+- Add file, create new file.
+- It does feel a very Git, right?
+Even has the similar look and feel of like when you go to Git and you say add new file.
+Yeah.
+True.
+A perfect commit message.
+No, no comment.
+Just blank.
+I love it.
+Yeah.
+And then, so over here, they run in Docker containers or Kubernetes or something like that.
+The Docker container.
+Right.
+So what this is doing, it's at it's, it has like a pre configured Gradio Docker image, right.
+That comes with, there we go.
+I've already built, but it comes with radio and like a bunch of standard like data science libraries, and then you, I ran them in, and then it, it adds your code to the container and then it starts to container, right.
+But you could also just use your own Docker file if you wanted to.
+Okay.
+You can host whatever you want.
+Right.
+So here, yeah, you got to put your name in a present.
+Wow.
+Look at that.
+A little Michael.
+Yeah.
+And the time that we've been talking about this, you've created a space and I was creating a new UI and hosted it.
+That's, that's pretty ridiculous.
+Yeah.
+And then you can just share this, share the URL or whatever.
+Yeah.
+Yeah.
+You can just share the URL there.
+And then they have like a machine learning app that they can share.
+It can be used with, with, they can share with anyone and it'll stay up.
+It's just get right.
+So if you have get locally, if you know how to use get, you can very seamlessly use push to the hugging face platform.
+There's no, no special magic.
+What if I'm not a hugger?
+What if I, for some reason, don't want to use hugging face.
+Can I post this on behind engine X or somewhere?
+If I like infrastructure, I'd like to do my infrastructure as a service.
+It's that app, that PY file, Python that app, that PY from your cloud.
+And then just make sure that the URL is the port is accessible for the internet.
+And then you just give that to anyone or front that with engine X and put some.
+Yeah, exactly.
+Let's encrypt and then just point it over to that URL and let it go.
+It'd be pretty straightforward.
+You could host it wherever you want.
+That's just, it's all open source type under the hood, right?
+It's just fast API belts and then some Python libraries, right?
+There's no, there's no lock in anywhere.
+Yeah.
+Cool.
+So it's probably running uvicorn would guess as the server, which is production ish, I guess if you did like really large scale, you might want to do Genicorn with the uvicorn workers or other than just uvicorn itself, but you know, for the failover and whatnot.
+But that sounds like, if these words sound familiar to you, it should sound really familiar.
+If they don't, then don't worry about it.
+Exactly.
+That's the standard Python web infrastructure stack type of stuff.
+And in that model, it's completely free, right?
+It's open source.
+I can do, I can just run it there, right?
+Yeah.
+Just run it wherever you want.
+Very nice.
+Well, Freddy, let's wrap up our conversation, give a short on time with just where things are going.
+We'll talk about where we are, where it came from, where are we going?
+Thanks for that.
+So I think like where we are.
+So I think we're trying to get Gradio into like as many platforms as possible.
+Right.
+So, and like as many kind of like deployment modes as possible.
+So one of the cool projects that we're working on is Gradio Wawesome.
+Right.
+So like running Gradio entirely in the browser.
+Wow.
+Okay.
+So yeah, so that's, it's not ready.
+It's not released yet, but it's something that we're actively working on.
+Right.
+So you can, yeah.
+So if you want to just build your machine learning demo, running everything directly in the browser, right?
+There's like the ML for the web space is growing a lot.
+It's advancing really quickly.
+Like we're getting ready.
+We're getting ready for that.
+- So what's that look like in terms of foundations?
+Is that Iodide?
+Is that PyScript?
+Is that something else?
+- It's using Pyodide right now.
+- Okay.
+- Yeah, so yeah, that's how.
+- Yeah, that's a pretty good choice because one of the selling points of Pyodide, not just that it has Python in the browser, but that it has the ability, it has a bunch of the machine learning libraries either available or compiled over to Wasm WebAssembly.
+And so you can actually do machine learning stuff, not just like, hi, my name is plus name, you know what I mean?
+That's one of the cool projects we're working on this year.
+The other cool project that we're working on is, yeah, like the custom components.
+Right.
+So let's say that you wanted to build your, your own custom machine learning demo, your own custom web app, right.
+But you need something that we don't have.
+Giving you the API to build that component locally and then just hook it into the app without having to like merge anything into a Gradio upstream.
+We're working on that actively.
+So that, that'd be really exciting.
+And then, yeah, really excited just cause it'll enable like a lot of people, like integrated community to collaborate with each other and build like really impressive stuff, kind of like on their own.
+Right.
+Like they don't need, like, they don't need like the core development team necessarily.
+Sure.
+Like pytest plugins rather than trying to change pytest.
+So that, yeah.
+Really excited about that.
+And then yeah, they, like the other cool stuff is that we're, one thing that we didn't talk about that I would want to talk about if we have time is that all these demos that we've built are sort of available via API, right?
+So if you click on any of these demos, like if you click on that first one, if you scroll to the bottom and you see it says use via API, right?
+So this gives you like a little code snippet as to how you can call this demo from Python or JavaScript.
+Okay.
+What does that mean?
+Right.
+That means that basically all these ML apps that are available on a huggy face or just anywhere on the internet, like they now become like building blocks that you can use in your own workflow.
+Right.
+So, and actually this demo itself, it's I'm familiar with it.
+is actually really cool because it's calling to other Gradio demos via API.
+So this is an example of someone building their Gradio app by calling other Gradio apps.
+- Wow, okay.
+- We're creating this ecosystem where--
+- It's like Gradio microservices.
+- Exactly, right?
+So it's like all these Gradio apps or building blocks that you can then connect together via API.
+And that's really cool, right?
+'Cause it basically means that machine learning is available.
+You don't need to use the GUI to get state of the art machine learning, right?
+like use an API, and that means that you could put these models like pretty much anywhere, right. So like one of the cool things that we launched two weeks ago, I believe, or like a week and a half ago is that you can deploy like a Gradio chatbot to Discord, like just one line of code, right. So if you, let's say if you have a Gradio app that talks with OpenAI, like GPT-3, or LLAMA, or any of these like open source LLMs, if you can build a Gradio app for it, you can like seamlessly hook it into your Discord server, right. So Then that's all built via this like API functionality.
+Right.
+So this is something like, okay.
+Yeah.
+Cool.
+I'm personally super excited about it.
+Like we want to push this further just because it's like, Grado is that you like Grado historically has been built for the UI, but it can also be used to get these machine learning models into more places.
+One of the things that I'm really excited about in the coming years, making this a little bit more, a little bit more visible and getting, yeah, you could integrate some really cool LLMs and other types of chat into your, right.
+That you discord.
+I imagine you could probably do it with a Slack as well.
+And if somebody asks in your company, how do I, whatever, you could think it go, Hey, I've already, I'm private GPT.
+I've already ingested all of our docs.
+So you want me to take a shot at answering that?
+Like, sure.
+Why not?
+That's one of the pet projects I want to do is just do that for the radio discord.
+Right.
+So there's a radio discord where you could have the radio community and there's like people ask questions in it, but it'd be really cool if we had a radio chat bot that like knew a lot about radio that then you could just ask.
+Exactly.
+at bot slash radio chat, like, like, how do I, whatever, how do I just flip plot right in the middle?
+I'll tell you, just return a map.
+I'll live.
+People could think, well, why don't I just use ChatGPT or something, but these are the things that you teach it like deeply about, you've given all the docs and you say, study this.
+And then I want to ask you about it.
+Right.
+And a lot of times the docs and other things go beyond the token level.
+That the standard models can take.
+Like I've tried to get ChatGPT to tell me about transcripts on talk Python and it can't even adjust like one transcript before it runs out of space.
+Like I can't quite load all that.
+Well, that's, I wanted to ask you about all of them.
+You can't even do one.
+So this is not working for me.
+Yeah.
+So you could fine tune like an open source LLM and then host it wherever you want, right?
+So yes, exactly.
+More control.
+Yeah, that's cool.
+So you could teach all about radio.
+Real quick question.
+Mr.
+Magnetic in the audience asks, what about a hug and face desktop app instead of the browser app?
+Yeah.
+So that's something that there's an open issue for that.
+It's something that we've been kicking around as well.
+It's just like, how do we get like a great deal of desktop app as well.
+So yes, stay tuned.
+I think, let me try to find that issue and then comment in the YouTube.
+But yeah, I would love your thoughts on that.
+If anyone has thoughts on that, but yeah, we, it's something we're thinking about, it's not, I don't think it'll happen maybe in the next like month or two, but maybe before the end of the year or next year, it could happen.
+Excellent.
+All right.
+Well, I think that pretty well covers it.
+It's a super exciting project.
+So good luck with it.
+I mean, already you've had a lot of luck with it, so you don't need my wishes, but further good luck on that.
+And yeah, before we get out of here, let me ask you a final question here.
+If you're always asked, like to ask the guests or like some cool IPI project they've run across.
+That's been really awesome.
+It may be not super popular, but has made a difference or you've.
+Wow.
+How did I not know about this?
+Any come to mind for you?
+Python project?
+Yeah.
+On something I can pip install like fast API, but not fast API.
+Cause everyone knows that.
+I think when I was just starting out, I think I, I was like a really big noob.
+And like, I always ran into like environment issues.
+And then a friend of mine showed me about like PipDevTree.
+It shows you exactly like why things get installed and yeah, I think it's really, I think it's really magical, honestly.
+Yeah.
+I think it's really helpful just to like figure out, like, especially like when someone files an issue and like, we don't know what's wrong with them.
+Like sometimes I'll just like, where did this thing even come from?
+And then just use like PipDevTree.
+I think that's, it's really cool.
+It's like really simple.
+But yeah, I think it definitely has saved me a couple hours of time.
+So.
+It's cool.
+I've used it for my own stuff.
+I hadn't thought about using it for tech support, but yeah, of course, because then people run into problems because their environments are screwed up and they say they have a thing or they don't, or they say they have a version of a thing, but they don't, and with this, you can just to say, run this one command and it'll give you like a really cool, they have all these things installed and this is installed because it's required.
+Yeah, exactly.
+It's really nice.
+Yeah.
+Cool.
+Excellent recommendation.
+All right.
+Final call to action.
+People want to get started with Gradio.
+What'd you tell them?
+>> Hit the install Gradio and then go to gradioapp.com and then just see the demos there.
+In our website, there's a link to our discord server.
+So yeah.
+Join the discord and say hi.
+And then yeah, there's lots of people there.
+We're willing to help.
+And then I, yeah, never hesitate to file an issue.
+What's really cool about this is like seeing that the demos that people build and like people build stuff that I frankly push the limits of what I thought people could build with radio.
+And it's really cool seeing that.
+Yeah, that's awesome.
+Don't be afraid to, or don't hesitate to build really cool stuff with radio and think, well, we're really good about amplifying that.
+So if you have something really cool, just like tag the radio Twitter account or reach out to us on discord or something.
+We'll amplify it for you.
+Well, excellent project.
+And thank you for being on the show.
+Thank you for having me, Michael.
+I had a lot of fun.
+Yeah, same.
+This has been another episode of talk Python to me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+The folks over at JetBrains encourage you to get work done with PyCharm.
+PyCharm professional understands complex projects across multiple languages and technologies so you can stay productive while you're writing Python code and other code like HTML or SQL. Download your free trial at talkpython.fm/donewithpycharm.
+Take some stress out of your life. Get notified immediately about errors and performance issues in your web or mobile applications with Sentry. Just visit talkpython.fm/sentry and get started for free. And be sure to use the promo code "talkpython" all one word.
+Want to level up your Python? We have one of the largest catalogs of Python video courses over at Talk Python. Our content ranges from true beginners to deeply advanced topics like memory and async. And best of all, there's not a subscription in sight. Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show, open your favorite podcast app, and search for Python.
+we should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+(upbeat music)
+[Music]
+(upbeat music)
+[BLANK_AUDIO]
