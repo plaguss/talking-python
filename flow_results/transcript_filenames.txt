@@ -308,8 +308,8 @@
 309-life-lessons.txt
 310-ama.txt
 311-get-inside-the-git-folder.txt
-312-scaling.txt
 312.-Python Apps that Scale to Billions of Users.txt
+312-scaling.txt
 313-pydantic.txt
 314-modern-python-projects-ama .txt
 315-awesome-fastapi-list.txt
@@ -428,3 +428,4 @@
 428-django-turns-18.txt
 429-flaky-tests.txt
 430-gradio.txt
+431-visualizing-cpython-release.txt

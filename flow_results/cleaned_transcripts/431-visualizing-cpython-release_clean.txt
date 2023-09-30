@@ -1,0 +1,832 @@
+Every year Python has a new major release. This year it's Python 3.12 and it'll come out on October 2nd, 2023. That's four days from when this episode was published. There is quite a process involved to test build and ship Python across the many platforms and channels. We have Seth Michael Larson here to give us a detailed rundown on exactly what is involved in releasing CPython.
+This is Talk Python to Me, episode 431, recorded September 28th, 2023.
+Follow me on Mastodon, where I'm @mkennedy, and follow the podcast using @talkpython, both on fosstodon.org. Be careful with impersonating accounts on other instances, there are many.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube. Subscribe to our YouTube channel over at talkpython.fm/youtube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by JetBrains, who encourage you to get work done with PyCharm.
+Download your free trial of PyCharm professional at talkbython.fm/done-with-pycharm.
+Hey there, before we jump into talking about building CPython, I have a new course to tell you about HTML plus Django full web apps hold the JavaScript. This is an excellent new Django course written by Christopher Trudeau. In just a few hours, you'll learn how to make your app much more interactive in the code even a little cleaner than pure Django.
+You may be familiar with our HTMX plus Flask course I released a while ago, and this one is its Django sister course. And it is out now at talkpython.fm/htmx-django. The link is in your show notes. If you Django and have been wanting to adopt HTMX, you should definitely give this course a look. And a heartfelt thank you to everyone who has purchased one of our courses or library bundles. It truly makes this show possible. Now on to that interview.
+Hey all.
+Hey Seth.
+Hello.
+Awesome to have you here on the show.
+Yeah.
+Thanks for having me.
+Absolutely.
+I'm looking forward to talking about the details, the steps of releasing CPython.
+And for those of you who have not been watching and paying attention by the time this comes out, it'll probably have already happened.
+I'm sure it's already happened by the time this video is up, though, it's not quite happening.
+So as of the recording next Monday, this whole process that we're going to going to talk about goes into action, right?
+Releasing Python 3.11.
+Yeah.
+This, or not 3.12.
+This will have happened.
+3.12.
+I got to get used to it.
+It's like the, you know, in January, all you always write the, the, the year wrong out, so 3.12, the new version, the still faster, faster C Python 3.12 with lots of cool features is going to be out and how does that happen?
+Right?
+There's, there's a lot going on behind the scenes and you wrote a really cool blog post called visualizing the CPython release process or something like that.
+I'm getting off memory and has a great diagram with a whole bunch of boxes.
+And so we're going to go through and kind of just talk about how that happens and so on, but before we get into it, maybe a quick intro for folks who don't know you yet.
+Yeah.
+So I'm, I'm Seth Larson, online everywhere.
+I am Seth M Larson.
+That's my handle.
+And I am the security developer in residence at the Python software foundation, the inaugural security developer in residence.
+but hopeful for more, obviously.
+But yeah, this whole role is funded through the OpenSSF Alpha Omega project specifically, and it's kind of a project that's focusing on Alpha being really, really important projects that everyone agrees, yep, that's a really important project to secure.
+So among them is Python and PyPI.
+And then Omega is kind of like the long tail, right?
+Like all the other projects, 'cause there's open source is huge, there's millions of different projects.
+How can we secure those?
+And so, yeah, this role exists because of them.
+So I'm very thankful.
+And it's mostly-- - As are we all, right?
+Speaking for the community.
+This has been something-- - Yeah.
+- There's been a lot of places where it's like, well, why doesn't someone take care of this?
+Like, well, there's nobody's whose sole job it is.
+But like Python has been slowly rolling in these new roles, which is fantastic.
+Like Lukas Lange at the developer in residence, you're the security developer in residence.
+We have Mike Fiedler, who I spoke to about on PyPI security.
+Like there's people, there's developers working on stuff.
+awesome.
+There's something to be said, like having having someone working on stuff full time, like you can, you can get a lot done.
+It's, it's, it's quite nice.
+Like, cause we're so used to, you know, how, how the speed of open source, right.
+Which is not, I guess when someone says the speed of open source, they don't immediately think, oh yeah, that's going to be, that's going to be fast and snappy because people have lives.
+Yeah.
+Well, sometimes it is when, when things are brand new, they, they, they can have a lot of momentum.
+But I know my personal view is like on all these software projects, there's these little gnarly edges that is just as fun for no one.
+Right.
+And like, I want to add this new feature or I want to add async to this thing so people can do this and like, you can get so inspired, even if it's not your job and it's just your project and really go on it, but like, you know, really polishing out that little bit of documentation or, or updating that detour, like it's, it's all the, the fine polish, I guess, that I think you all are bringing to Python, which is awesome.
+Yeah.
+there's tons of work that's like, it really does need that amount of time investment and like a sustained time investment.
+So like when you're working with external groups or like, you know, developing processes and stuff like that, like you just need, you just need to be there a lot more than, you know, weekends.
+So it's good to have that full time presence.
+Yeah.
+Yeah.
+I think it is too, although it's absolutely mind blowing how much stuff gets done in traditional pure open source.
+It really is.
+Honestly, it gives a whole new perspective to it, right?
+-It's like, okay, you know, all of this is happening, -Yeah.
+but, you know, almost all of the people that I interact with on a day-to-day basis are volunteers.
+And so, like, I kind of wrote about this a little bit in my opening when I announced myself as a security developer in Resonance, but it's like, you need to, you can't have expectations and, like, assign people work, you know what I mean?
+Like, this is not a traditional work environment where you can just tell people what to do And, you know, it's a certain way of working.
+And I'm used to it because I am an open source maintainer myself.
+So it makes a lot of sense to me and I feel very comfortable with it.
+But it's very different than a regular security developer job would be.
+Would you say fewer TPS reports?
+Yeah, a few fewer. Yeah, yeah.
+Just a couple fewer.
+Hey, since you brought it up, maybe we'll come back to this if we have time at the end.
+But, you know, you've got some pretty notable projects that you're working on here.
+Like give a quick shout out to some of your open source work that predates.
+Yeah.
+So I am the lead maintainer of your lib three, which is one of the most downloaded Python packages on PyPI.
+I also help maintain requests.
+It's a user of your lib three.
+And then in addition to that, I have a library, which I quite love, which is called trustor, which is being adopted by a lot of package managers right now, like pip and conda and and PDM, which allows those packages to use system certificates as opposed to something like certify, so that you can take advantage of all of the benefits that you get for using a system trust store for HTTPS, as opposed to like a static bundle of certificates, because operating systems are actually constantly checking, updating all of these things.
+It's just a little bit better.
+>> Some certificate store or some certificate authority turns out to be shady and they get revoked and...
+Yeah, or just not have the best practices.
+And so, yeah, just like, okay, we're going to pull that one.
+But pulling a certain...
+Yeah, they even get stolen, right?
+Sometimes these certificates get stolen.
+They get stolen, you know, there's all sorts of things that can go wrong.
+Thankfully, it doesn't go wrong very often.
+Otherwise, it would be a lot bigger of a problem.
+But yeah, it does happen every once in a while.
+Yeah, that's cool.
+Yeah, and you were on Python Bytes, my other podcast I do with Brian, to talk about Trust Store, which is cool.
+All right, but back to this.
+So tell us a bit about this developer, security developer in residence role.
+Like people were like, Oh, this maybe they've heard of it or is maybe even new to them.
+But like, what is your, what is your job here in the PSF space?
+Yeah, it's, it's, it's kind of funny talking about my role too, because people see security through so many different lenses.
+And this is even like outside of talking to people online that are in the open source space.
+So whenever I talk about this job, people will say, Oh, so you do it security for the PSF? I'm like, Well, no, I don't do that. And then they'll say, Oh, so you secure? Yeah, right? I'm in.
+Right? No, no, no. So I don't do that. I don't do it security for the PSF. And then they the next question they usually ask is like, Oh, so you make it so that Python is more secure, like the code of Python is more secure. And I'm like, not really, honestly, I don't do that either.
+And what I really do is try my best to make it so that bad stuff doesn't happen to Python users.
+And so, you know, obviously those things are important, like securing Python, the actual code itself. But on, like, the scale factor, maybe those are a little bit less important than some things like making sure that when you download something from Python.org, it is the correct thing. Making sure that when a release is happening for Python, nothing can subvert that release and get injected in and then distributed to everyone. And then it goes beyond Python when you start thinking about the packaging space. So making sure that hip release process is good. Making sure that all of these tools and stuff that are using all of these binary libraries, how can you be sure that those libraries that are bundled along with them don't don't have vulnerabilities. And then a lot of things around process. So vulnerability management and making sure that vulnerabilities that are discovered in Python and reported to us, they actually get to the end of the process where they're fixed and released.
+There's just a whole bunch of things like that where it's more of a scale and safety and making sure that my effort goes towards things that are going to keep on churning as opposed to things that are like spot fixes. Because spot fixes, they're important, but they don't have the scale and they don't have that, like, keep on giving you the value aspect of them.
+Yeah.
+And the consequence of a lot of what you described sounds like supply chain type issues.
+The consequence of that is so bad.
+It doesn't matter how patched your computer is or how good your firewall is.
+If CPython itself ships with a virus, right?
+Right.
+Yeah.
+Or somebody snuck it in right at the builds.
+Yeah.
+Yeah.
+Right.
+Right.
+Nobody wants that.
+Well, almost nobody wants that.
+- Very few people want this, so.
+- Those are not good people.
+We don't want them to want this.
+- Yeah, we don't take them into consideration for their use cases.
+- We sure don't.
+Awesome.
+And let's see, I believe you're on, well, when I read the article, you're on week nine.
+So you're on week 10.
+Is that where we are?
+- I think I'm on week 12 at this point.
+- Oh man, time flies.
+- Yeah, I know.
+I'm actually drafting up like a quarterly review and it's a big thing, so yeah.
+- Okay.
+A quick question from the audience here on the live stream, you know, Louis asks, is there a visibility or will there be a public visibility for CVEs in packages?
+That is an excellent question.
+It is a good question.
+And I bring this up because didn't the PSF just get certified as like a CVE authority or whatever that is like ability to create CVEs.
+I don't know.
+Yeah, I can, I can talk so much about this, right?
+So there, there's a whole bunch of stuff happening in that space.
+So the, the, I'll start off with stuff that I did not personally do, but I'm helping maintain now.
+which is there is an advisory database called, if you go on GitHub, it's github.com/pypa/advisorydatabase with a dash in between advisory and database.
+And that database is essentially trying to categorize all of the CVEs and what versions they affect for every single package on the Python package index, which is an impossible task, but so we're trying our best there.
+But yeah, so one of the packages, no problem.
+No problem, right? Like that's a manual task right there.
+Yeah, no. So what this actually does is for the bulk of it, what it will do is it'll go out and it'll pull the CVE feed from NBD and Miter, and it will parse it and try to find references to Python packages and versions inside of CVEs.
+So obviously that's sometimes there's false positives, but a lot of the times there's just, it just works out okay.
+And there's a little bit of triage involved.
+There's a little bit of manual submission of this too.
+But yeah, so tools like pip audit, which is a tool that I love so much, uses this database in addition to other scanning tools.
+Like any scanning tool can use this database.
+But yeah, this is the canonical location for vulnerabilities affecting Python packages.
+So for Python itself, the Python Software Foundation just recently, like a few weeks ago announced that we are now a CVE numbering authority, which means that we are, we kind of have like a scope of just Python and pip right now. So those are the only two projects that we're emitting CVEs for. And what that means we can do is it means that people have to submit reports to us, which is good, because then they can't submit them to other places and get CVS that way can be kind of frustrating, because in the past, sometimes that would happen. And then And we wouldn't know about the vulnerability until it got published as a CVE.
+And we'd be like, what just happened?
+>> We have a CVE?
+Like, what?
+>> Yeah, right.
+>> Like, one of the big deals is you're supposed to be told, in an ideal world, you're supposed to be given like a, come knock on the back door, like, that WebP code.
+We need to talk about the WebP code before.
+>> Yeah.
+Oh, gosh.
+Don't get me started on WebP.
+Don't get me started on WebP.
+>> This portion of Talk Python to Me is brought to you by JetBrains and PyCharm.
+Are you a data scientist or a web developer looking to take your projects to the next level?
+Well, I have the perfect tool for you.
+PyCharm.
+PyCharm is a powerful integrated development environment that empowers developers and data scientists like us to write clean and efficient code with ease.
+Whether you're analyzing complex data sets or building dynamic web applications, PyCharm has got you covered.
+With its intuitive interface and robust features, you can boost your productivity and bring your ideas to life faster than ever before.
+For data scientists, PyCharm offers seamless integration with popular libraries like NumPy, Pandas, and Matplotlib.
+You can explore, visualize, and manipulate data effortlessly, unlocking valuable insights with just a few lines of code.
+And for us web developers, PyCharm provides a rich set of tools to streamline your workflow.
+From intelligent code completion to advanced debugging capabilities, PyCharm helps you you write clean, scalable code that powers stunning web applications.
+Plus, PyCharm's support for popular frameworks like Django, FastAPI, and React make it a breeze to build and deploy your web projects.
+It's time to say goodbye to tedious configuration and hello to rapid development.
+But wait, there's more.
+With PyCharm, you get even more advanced features like remote development, database integration, and version control, ensuring your projects stay organized and secure.
+So whether you're diving into data science or shaping the future of the web, PyCharm is your go-to tool.
+Join me and try PyCharm today.
+Just visit talkpython.fm/done-with-pycharm, links in your show notes, and experience the power of PyCharm firsthand for three months free.
+PyCharm, it's how I get work done.
+- The real, like the ideal process is someone would Google like Python and security or like Python and report a vulnerability.
+And then they would find these like really lovely instructions that someone else wrote up to say, just send an email to security@python.org with whatever information you have.
+And then we triage that.
+And if we decided it's a vulnerability, we would ask for a CVE on your behalf and like credit you and all this stuff and then fix it.
+And then the release and publication of the CVE would happen at the same time.
+So that's what we call coordinated vulnerability disclosure.
+And so instead of like, oh, there's a vulnerability, but there's no fix available for that vulnerability.
+Like that's what you want to avoid because it causes panic.
+And in theory, it could cause exposure, right?
+Where there's some dwell time in between when people, or it doesn't minimize the dwell time between when people are able to patch and when the vulnerability is known to potential attackers.
+- Right, there's already a latency from when it's announced to somebody actually fixing it.
+But if when you hear it, you can't actually fix it for two more weeks 'cause it's not released.
+That just gives people two weeks to try to dissect like what exactly do they mean by there's this image problem?
+Exactly. Yeah. Oh, yeah. Yeah We're gonna start talking about libwebp actually. Yeah, the no, i'm just using it like it's the most recent example because last night there was a And really relevant to cvs because there was some drama that apple patched Some of their code when google announced it It looked like it was only applied to chrome but it actually applied to anything that used WebP, which looking at the updates is like everything on my computer needs to be updated because of it. You know, like that, that mismatch was like caused a lot of drama. I definitely agree. Yeah. There was like a week of time in between, when that CVE just mentioned Chrome and Apple. And then when it actually ended up mentioning LibWebP and then right when it mentioned LibWebP, I'm like, Oh, I know a lot of Python packages use And so I then went out and go and talk to those people.
+Okay.
+And they fixed those things now.
+So, yeah, that's great.
+Another good reason to stay on top of dependency management and stuff, right?
+Like tools.
+One of the things I think we're coming to sort of understand and manage better in the Python space is not your dependencies, but the transitive closure of your dependencies.
+Right.
+So I might use, let me just say, I guess, what if I use pillow to work with images, images, but Pillow itself uses some other library that it pip installs that itself might have some kind of image code.
+If I say I use Pillow, oh, I need to update it.
+pip install dash dash upgrade Pillow doesn't upgrade its, its dependencies and those dependencies of the right.
+So like, but that could be where a lot of silence issues live.
+And so things like Poetry, Flit, pip-tools, there's a lot of tools coming on that I think are gaining popularity that treat not just what you directly wanted a pip install, but it's friends and it's dependencies.
+- Yeah, definitely.
+- What's your thought about that from a security perspective?
+- Yes, so having the most important thing from like a kind of dependency management side of things is having those lock files and having them have hashes.
+Like it's less of a problem now.
+Like it likely won't come to fruition that those hashes end up being important, but luckily lots of lock file formats do generate hashes anyways, which is great.
+So that subverts attacks against PyPI partially.
+- Right in the middle, DNS madness.
+- Right, yeah.
+Like if somehow you've been tricked into using a bad certificate or something, right?
+Like it saves you from a lot of stuff like that.
+So having hashes, they're basically free.
+They're great, just use those.
+The other side of it is running a vulnerability checker against those dependencies.
+'Cause then you'll, or either that or having a tool that's doing that for you.
+So like Dependabot is a tool that does that for you.
+It will check vulnerability databases and then give you like a security notification or a PR to say, hey, this is affected by a medium severity vulnerability or you can run them your own via pip audit with it can either check an already installed environment or it can check like a requirements file.
+I don't know the full extent of all the different file types that it can check.
+I know that it works on requirements.txt, but yeah, it'll check those files for known vulnerabilities all of the transitive dependencies, just everything that's available. And then from there, it'll tell you, hey, these are the things that you need to fix here, the fixed versions, like try upgrading to at least this doesn't mean that it's easy. It does go back to that advisory database you talked about? It does go back to that advisory database. Yeah. And it also can hook into osv.dev, which is kind of like this global aggregation of tons of different vulnerability databases.
+So for example, we have one for Python that I pointed out, but then like Rust has one, Debian has one, what is it?
+Rocky Linux, I think has one, like there's just a whole bunch of them.
+And you can kind of interface with this database using the same API.
+And it's kind of nice.
+- Yeah.
+So making this the security show, we just talked to Mike Fiedler a little while ago about that as well, diving into it.
+I mean, we'll come back to the release process, but I do want to ask you about this is One of the challenges I see is like, I got to depend about a warning.
+Luckily, it was for basically the requirements-dev side, not the true requirement.
+You know, like I'm going to use a bunch more tools to do like Jupyter stuff on my data, but I'm really just running a website and there's like a much smaller, well, a smaller set of things on there.
+But there was a vulnerability report for something, some package that was in my requirements for the dev verge, the dev setup.
+However, when I tried to go update it, one other package that is the reason that was there said, no, it has to be less than something.
+And that something was less than the fix.
+And I'm like, how do I square these two things?
+Like I can pip install it, but then it keeps complaining that you're, you're running the wrong version.
+Like, no, I'm not.
+The other one has our remote CVE in it, you know, a remote code execution in it.
+And I'm like, I really don't want that.
+I mean, not a server.
+So it's probably fine, but I really don't want that.
+No, I'm I don't care if it's slightly more unstable. I want the new one. Give it to me.
+Right. And that's that's a bit of a challenge. I think when you say like, I've got 50 dependencies and I've got to somehow square, I need to get a brand new one right away. What are your thoughts on that? Yeah, this this is a super tough problem. And I think it's one that open source will be coming to reckon with even more now. Right. Because we're kind of in a place now where there's a few really important libraries which are kind of moving something that is very extensively and widely used to be not maintained anymore. For example, OpenSSL. OpenSSL 1, or 1.1.1, which is extremely widely used, is no longer maintained. There's going to be no more security patches for that. And it's going to be tough, because my guess is that there's also just a lot of software that's not built for OpenSSL 3 being the OpenSSL of choice, right? Luckily, Python is not in that situation, but it's certainly a thing that other pieces of software might have to deal with. In terms of Python packaging, this is kind of why the guidance on don't specify an upper bound unless you know that that upper bound makes sense. And so, backwards incompatibility, Yeah, maybe you want to say, okay, if this is version 2.1.whatever, and it's semper, you can say, okay, anything less than three is probably fine.
+But even that, right, if that package goes unmaintained.
+>> Yeah, this went from two to three in its main version, right?
+It's major version, so.
+>> Right.
+Yeah, so this is a difficulty.
+>> There's a lot of packages.
+Yeah, there's a lot of packages that set hard upper bounds.
+And I just, I don't know why, because maybe it's going to break it, but I feel like it's speculative.
+we should probably not let a major version run. But you know that that leads into trouble, right?
+Like, even if you just want to use some other library that says greater than or equal to three, and this one says less than three, like, great. Now, what do I do?
+Yeah, I think that the toughest thing is that you can't go back and then like amend it.
+Yeah, that's the hardest part is because so I will speak very, very highly of all of these, anything that can make pip automatically get the right thing is just magical is so good. And so People like that and I totally get why people are doing these upper bound sorts of things but yeah it does have the issues that you that you talked about but yeah there's something to say about how great the uh those bound checks are I wish there was a way that you could add something like some sort of guidance to pip to say after the fact like okay I said this was open but now I'm gonna go ahead and tell you that like this definitely doesn't work with this version maybe that's something that can get recommended but yeah it's just so nice when when it does work out.
+Yeah.
+I, I can relate to Frank here who writes with 1.3 thousand or 1,300 dependencies in our project because of this dependencies are at all times.
+Yeah.
+I have on Talk Python Training, the courses website, I think there's 248 packages if you look at what's installed and then the dependencies.
+And then you try to throw in the data science-y stuff.
+And it's just like, there's a 50, 50 chance that I can actually install everything because like half the time, something has got a less than something's got a greater than, and I'm like, Oh my God.
+You add, as you upgrade, right?
+Like at any point in time, it's deterministic, but you know, over at, over the evolution of it.
+Right.
+Yeah, no, it's, it's tough.
+It's tough when you start getting to that number, like there's just so many intertangled things.
+There are.
+And like, the reason I bring this up now is it's, it's a hassle when like, I want to use this library and that library and somehow I've got to like juggle things.
+So they work, but it's concerning when you get a dependable alert that says there's a remote code execution, you're going to need to deal with it and your dependencies won't let you upgrade.
+You know what I mean?
+Like that's, that's why I bring this up.
+It's definitely concerning.
+Yeah.
+Another thing that you can do, and this is, I feel like they don't talk about this as much with Dependabot is that there are ways to mitigate vulnerabilities.
+That doesn't necessarily have to come from upgrading.
+Like I'm always going to say upgrading your dependency is the best way to go forward because then you know that there's no chance of at least that vulnerability in particular being exploited.
+But if it's something like remote code execution, but it's this one component.
+Right.
+As long as you're not using that component, then you're fine.
+Or if it's remote code execution, when you get some sort of input, whatever, right, that's, that's malformed or whatever.
+And you're like, okay, well that component's not exposed to the network.
+It's I only use it internally.
+So there is something to say.
+Not even a server.
+It doesn't open a port.
+Right.
+It's just a thing I run on my computer.
+It's like, it probably doesn't matter.
+Exactly.
+Yeah.
+And that's, that's kind of the one typing into it.
+And it's like, but if it's in your website, then all of a sudden it gets a little trickier.
+Right.
+Then it gets dicier.
+Yeah, definitely.
+Yeah.
+The stakes are higher when you attach the internet to anything, but when it's like a local script, it's just tail your log file and his request, request, hack, hack, request, attempted hack requests.
+It's just WP log in.
+Yes.
+Yeah.
+WP admin, all them things.
+Yeah.
+It's usually, luckily it's WP something or something most of the time.
+If you're safe against 90%, we're all good.
+As long as you don't return a 200 to any of those, like your traffic will remain low.
+- Yeah, absolutely.
+(laughing)
+All right, so that's what you're doing, focusing on these kinds of things.
+That's really, really awesome.
+And thanks for giving us an even more detailed look than I expected into it.
+(laughing)
+Yeah, let's talk about your, let's talk about, you know, the timely thing.
+I mean, security's always timely, but the CPython, let me see if I get this right, 3.12 release coming up here on Monday.
+- Dang, he's got it.
+- Amazing.
+I got it, man.
+I'm ready.
+I'm ready for this new world.
+So there is a pep and let's see who put this together.
+This is Barry Warsaw and Guido and it is pep 101.
+I love it.
+(laughs)
+Pep 101.
+- The one you need, right?
+- Yeah, what a perfect number.
+But it's the title is doing Python releases 101.
+That's kind of a circular, I love it.
+And it just talks about all the steps and it's kind of a manual of now you do this, Now you do that, but it's just a really long doc.
+I love that.
+Stop, stop, stop, stop.
+There's like, there's like a all caps all across.
+Stop, stop, stop, stop, stop.
+Did you do this right?
+Right.
+Yep.
+That you can tell, you can always tell when there were problems in the past in a checklist, right?
+Like if there ever was something that happened incorrectly, it's, it's very obvious.
+And so yeah, the stop, stop, stop.
+I feel that that I, I don't personally know why that's there, but I do laugh every time I see it.
+So, yeah.
+let's see.
+Please note how pep one Oh one replaces pep one or two time traveling was invented there.
+What is it?
+Yeah.
+At the very top.
+It's I wanted to comment on that too.
+It said replaces pep one Oh two.
+And I wonder if it was more like a, Oh, we should just use one Oh one sort of situation.
+Well, I think this is doing micro releases, right?
+So this one, maybe more like full, like the full deal.
+I don't know.
+Yeah.
+I think security releases are, they're slightly different.
+We don't actually build binary installers for security releases.
+We only build source builds, like source tarballs for micro releases.
+And so maybe that was the distinction in 102.
+- Sure.
+Okay, so this has existed since 2001, but you got to really dig into it.
+And you know, there's some interesting stuff there, but picture a thousand words, all these things, you put together a really nice graphic here.
+And somehow you got this in like HTML, I'm impressed.
+Yeah, that's embedded SVG.
+I, I always use draw.io for my, my diagrams.
+I take pride in my diagrams.
+So yeah, it looks good.
+All right.
+So there are 10 steps.
+Some of the steps have ABCs in them.
+So, and you know, just for people who pull up this picture and obviously being a podcast, it's hard to see the picture.
+If you're not watching the live stream, I will put a link to the article, which has the picture in there and by remember, right.
+I'll even put it as the chapter art.
+We'll see about that.
+but there's a legend in here.
+So you've got like different types of things.
+You've got human actors, which are golden release artifact, which is blue, a source of risk, which is where you're paying extra attention and the start and end state.
+And so, the colors mean stuff here and the legends at the bottom, but yeah, let's, you know, start with number one.
+Now what happens here?
+Yeah.
+So starting with number one, and I'm actually going to increase the size of my screen as well, because I'm going to pull it up separately myself.
+Going on here.
+Yeah.
+A lot going on here.
+You need some, you need some mandor control plus on it.
+Yep.
+Okay.
+All right.
+So in the very beginning, what happens is essentially the release manager decides it's time to make a release.
+It'll be right now.
+So we're, we're deciding, okay, we're going to make a release.
+And so something that happens even before this is we kind of talk amongst all of the other.
+It says release managers in there, like windows release manager, macOS release manager.
+They kind of flip between that language and experts.
+So like windows expert, macOS expert.
+Some people understand this weird windows things that can make a MSI installer.
+The people, what do you do on Mac?
+I don't even know how to build that right.
+That person.
+Yeah.
+Yeah.
+Talk to, talk to them, get, get their, get their buy-in that indeed they're going to be around when you decide to do this because this is kind of like a big coordinated thing. Everyone has to be around to do their part. And then if that is the case, then the release branch gets frozen. So in this case, that release branch would be 312. And so that's done by essentially putting a block on all future like pushes to the branch like in GitHub, use like branch protection. And that's basically to make it so that no one can merge pull requests anymore so that you have something that's stable that you can kind of work off of.
+And then after that, you'd move on to step two, which is the actual release manager will update their fork of the repo with whatever is on that branch.
+So like the three 12 branch will get updated and then you'll pull that branch locally now on step three.
+So now you're on the actual release managers machine.
+And so like, I kind of have like gray boxes drawn kind of throughout.
+So those are kind of like security boundaries a little bit.
+The top most one is the GitHub organization of Python.
+And then the middle, the tiny one that has the fork repo, that's the GitHub user for the release manager in particular.
+And then the furthest left, the gigantic one, is the release manager's actual computer.
+It's not documented anywhere.
+It's just how I was thinking about it.
+But yeah, so then there's this thing called release tool.
+And so release tool is basically just a Python script.
+on GitHub, if you go to github.com/python/release-tool, it's basically just a script that runs and then does all of the stuff that's needed to build the source distribution and documentation of a new Python release. And so you run that, and as a result, you kind of get like a huge amount of code that needs to be committed. And so there's a whole bunch of different little tools that kind of get run in addition to that. So things like Blurb, Sphinx gets as a part of that.
+Yeah, you need a whole lot of dependencies installed.
+So you like you need like late tech, you need a whole bunch of stuff installed for this to actually work.
+Do you make sure you've got like the right right compiler?
+Is there a lot of concern about that?
+Like is it clang or LLVM or GCC or, you know, I believe it's GCC.
+I believe it's GCC.
+You know, I didn't dig into that exact point.
+I'm pretty sure it is.
+I feel like that's another part that you like that choice matters, right?
+Like you might get different outputs, you might discover bugs that weren't there.
+If you can.
+So you gotta kind of get that gray box all set up as well.
+Right?
+Yeah, definitely.
+And so the fact that it's on someone's machine, I would say reproducibility is, is quite tough in those sorts of situations, right?
+Like if, if, if someone were to build a release of Python and then a day goes by, like I guarantee you that the, if you tried to do it again with the exact same starting input, it would be potentially different.
+Right.
+And so that that's actually a problem from a security perspective for reproducibility, because it means that someone else can't verify that what you did is correct.
+Right.
+Like the hash might change or something like that.
+Right.
+Hashes might change or if there's like somehow the time is getting embedded into a binary somewhere.
+Like there's just a whole bunch of different ways that reproducibility could be different between two different runs.
+Yeah, and so that after the release tool happens, you basically get handed a couple of source tarballs that just have everything in them.
+And then you also get a bunch of Git changes to the repository.
+So these are things like the change log has been generated from all of the blurb notes.
+And so what you do is then you take all of those changes, and you create a big commit that says this is the release of CPython 3.12.0.
+And then you tag it and you push that to the fork.
+You don't push that to the main repository yet.
+And so the reason you don't push that to the main repository, and this is actually something that this phenomena is an interesting one, especially because a lot of security build tooling doesn't take this work workflow into account, which is you don't push the tag to the origin until the very end.
+A lot of security tooling like Salsa and all of these things will kind of, like, they won't assume because you can do it without tags.
+But, like, they'll have features that are, oh, we'll capture the git tag in the output of, like, this, like, document that says that your build is, came from this repository, this setup tooling, whatever, right?
+But a lot of projects actually wait on the tag until the very end because they want things to be repeatable without causing confusion.
+So if something went wrong throughout this whole release process, you wouldn't want there to be a tag on the main repo that is now confusing people, right?
+Because those tags cause notifications.
+>> I'm going to get the code.
+You're like, actually, no, the Mac build wouldn't build.
+We're going to fix that or whatever, right?
+>> Right, exactly.
+And so this whole thing is like very, it's a common thing.
+So pip actually has this exact same workflow where they do everything in the release until the very end, and then they push the tag to the repo because they know that if they push that tag, and it needs to change, it's going to cause confusion. So, yeah, that kind of is like step five in there. It pushes that tag. So that tag is highlighted red as a source of risk because that is a fork of CPython. And tags, tags are not in themselves verifiable.
+Because anyone can push a tag. If you're just looking at just the name of the tag, anyone can write a tag if you have write access to a Git repository or a GitHub repository.
+And so if you push a tag and say someone has access to your account, someone could move that tag to a different commit, completely different commit.
+And if it were pulled in that time, and no one decided to like check something else, so like the commit hash, for example, you would be circumvented, like it would be able to inject code into the process, right?
+That's as far as we know, that has not happened.
+Yeah, that is bad.
+bad to inject someone else's arbitrary code into Python directly.
+It's actually doubly bad because there's different degrees of bad in supply chain security.
+One degree of bad is if you're able to do bad stuff, but then people notice.
+Or people can see what happened.
+And so this is kind of like degrees of bad of you can inject code and then you can clean up after yourself afterwards.
+Put the tag back.
+Put the tag back.
+you have write access, right? And so that that sort of like put the tag back or being able to circumvent it in that way is is not good. Yeah, don't give people. These are not new ideas. So I feel less bad talking about these. Yeah, another thing in this article is actually like tying every step of the release process back to a known attack that has succeeded against another project. So like SolarWinds was about build, like release artifact poisoning, essentially, right? You're like taking advantage of the fact that these release artifacts are being distributed. And the you know, they're signed, everything looks good, but you've gotten code injected into the actual artifact itself, and it didn't get noticed. Right. And so like that sort of attack could happen against Python if if there's not mitigations against it, right. And so And so yeah, then the next step is six.
+And so at this point, the release manager has source tarballs from the result of just running the release tool.
+And so they're kind of just waiting.
+They're sitting around waiting for the other experts to do their thing now.
+And this is where Windows and Mac OS installers are actually built.
+And so these aren't built for security releases, but for 3.12.0, these will be built.
+They're two completely different sets of build processes.
+One of them happens in Azure Pipelines.
+So if you go to that release tool, there's actually a Windows folder that just has 100 YAML files in it for all of the different Azure Pipeline configurations.
+- Yeah, Azure Pipelines, a little bit like GitHub Actions.
+People who are familiar with that, but not Azure, right?
+Something roughly?
+- Yeah, yeah.
+And I think there was a time where Azure Pipelines and GitHub Actions were basically the same thing.
+Yeah, like in the very beginning.
+yeah, so Azure pipelines, there's a whole bunch of stuff that happens there.
+Because there's Windows embeddable packages is something that gets uploaded to python.org.
+Windows installers also get uploaded to python.org.
+But that also there's like NuGet gets updated, the Windows Store gets updated there.
+So like, there's a lot happening there.
+And there's actually a lot of things that happen that require the actual release manager, or the Windows release manager to approve them.
+So they're gated.
+These are things like signing keys that are as a part of the process, you have to sign off to say, "Yep, we want to give this job access to the signing key." So that's great.
+- Do you know if WinGet is kind of like the newer package manager for Windows?
+Do you know if Python goes there as well these days?
+Let's see.
+- I haven't used Windows in a really long time, so I don't know.
+- I do, but I only use it for playing games and simple Windows tests, so I don't know it.
+All right, but yeah, so NuGet is like one of these kind of package managers for Windows, maybe Winget.
+People in the audience, if anyone knows, they can let us know.
+- Yeah, definitely.
+I've not even heard of Winget, so I feel really out of the loop right now.
+- It's only a couple of years old, I believe.
+- Gotcha, gotcha.
+- And following on with that, this probably won't help you if you don't do a lot of Windows.
+Louis asks, "Does Python maintain Chocolaty?" Which is similar to Winget, but more independent than Winget.
+They tried Winget and it was buggy and wasn't great.
+Chocolatey is maybe a little older.
+I don't know.
+Same story probably, right?
+- Yeah, I also don't know, unfortunately.
+Windows is not my strong suit.
+(laughing)
+- Chocolatey.
+- Yeah.
+- Yeah, it's all good.
+- Definitely a tastier name.
+That's how I choose all my tooling, is how tasty is the name.
+Yeah, and so then the, like the counterpart to that is the macOS binary installers.
+And so those are, There's basically just another set of scripts that get run on the Mac OS release manager, like their machine, and it builds just everything having to do with Mac OS.
+It does notarization.
+It does, you know, making I know not as much about Mac OS either, but I know that notarization happens and actually I've talked to a few folks about this one too, because this one, if you notice is just one square and it's just red and it's like, yeah, there's there's a lot more to dig into there.
+yeah.
+But yeah, the MacOS notarization stuff is a serious pain as well.
+Like it's a little bit like submitting something to the iPhone app store where it, you know, it gets reviewed and yeah.
+Yeah.
+No, I think once you have it already notified, you can publish updates.
+Cause I was thinking as you were talking about that, like how do you design or deal with the latency, you know, of like I've submitted it and how long does someone picks it up and reviews it?
+I don't know.
+But I guess once it's kind of approved for notarization, then it, it just It goes through pretty quickly.
+You just set a really long time out on your CI job.
+Like exactly time out seven weeks.
+Yeah.
+Give it a week at least.
+Yeah, no.
+And so then after all of those things kind of happen, there's this stage in, you know, there's a stop, stop, stop line in the, pep one-on-one that just basically says for the release manager to wait for everyone to be done with their thing.
+And then once everyone's done with their thing and has uploaded everything to to python.org, there's basically this phase of testing everything.
+So you download everything, you make sure everything works on all the operating systems the way that's expected to.
+You don't wanna blow the horn and then realize the very last mile that there's something wrong.
+And so lots of testing happens, and then after the testing happens, at that point, then everything that will get uploaded to python.org, or that has been uploaded to python.org, gets signed by the release manager in particular with SIGSTORE and GPG.
+And then from there, all of those signatures get published.
+And that is the end of python.org.
+All of the artifacts are published.
+And only then does the release manager, this is step 10, do a git push to the actual upstream CPython repo.
+And at that point, then the branch can be unblocked, all of these things, the release is done, everyone's happy, we can celebrate.
+Yeah, that's kind of the very high level view of what happens.
+- Amazing.
+A couple of thoughts here.
+First of all, the Windows Square is like tangibly different than the Mac OS Square.
+The Windows Square says, send off some source code to Azure pipelines, a external repeatable CI build system.
+Whereas the Mac line is like, build it.
+You know what I mean?
+That's actually pretty interesting.
+And I don't know that there's an Azure pipeline for Mac OS, right?
+Like that's just the sort of the story of Mac and servers and.
+But just highlighting those differences, right?
+Like it's, it's a different thing to say I build on my machine with whatever I got versus I pushed to something like Azure pipeline CI CD and get some results.
+Yeah.
+Both the source tarball builds and the Mac OS builds are all local.
+Right.
+And they're not done with a repeatable like CI provider.
+I was actually able to get like the actual source tarballs to work on GitHub actions.
+And, and so that, that's something that I've worked on and have provided that to release managers and we're talking about it right now.
+And macOS is actually, to my knowledge, is actually going to be revamped a little bit because that tooling has been around for so long.
+I think that there's going to be some work done on it.
+And so I haven't dug into it as deeply.
+I've kind of more just provided a bunch of context to the release managers about things that I want to see.
+Like if I were to do this myself, this is the other things I'm interested in.
+Right.
+Provided that you actually had access to a macOS system, I'm sure you could do it all from the CLI because for example, for the talk, Python and courses apps, we use Flutter and you just say, what a run.
+And it compiles that, that iOS or Mac OS version somehow through the command line and then like outcomes a, a thing that is already deployed onto, you know, a simulator or something.
+Right.
+So it could happen.
+I mean, there is, there is some hosting, but it's kind of like, here's your Mac mini in the cloud.
+Go, go.
+I mean, there is a, what is it?
+GitHub action supports Mac OS.
+So does it?
+Okay.
+So yeah, so possibly, possibly.
+Yeah.
+Maybe, maybe it could happen.
+I'm not saying it has to, I'm just, it was a kind of a striking difference that one is like a CI/CD process and one is local and manual.
+Yeah.
+Actually windows is the most repeatable, most like actually isolated from, from any, from the, just the machine itself, right.
+The release manager themselves.
+So yeah.
+Yeah.
+That's pretty interesting.
+And then we have binaries and they get published and everybody is happy.
+We all go and install it and it's been in testing for quite a while, right?
+Like we've had a bunch of betas.
+We had alphas.
+We have had three release candidates and on Monday we'll have a dot zero.
+It's exciting.
+It's really exciting.
+It is exciting.
+The other question I would ask you is like, what is the time from like step one to step 10?
+How much clock time has passed wall time?
+I would say that it is on, it's on the scale of hours.
+It's not like a day.
+which is kind of incredible, right?
+The fact that you get three volunteers together to do a bunch, all of this stuff, and it only takes a couple hours.
+It obviously depends on how many problems you run into on the way, because if you get to the very end and then there's a problem that you find in testing, you have to kind of start over.
+But yeah, if everything goes to plan, which has happened, I've coordinated security, like there was a couple of security fixes that were in 3.11.5 that I coordinated.
+And yeah, I got to kind of witness the, okay, we've decided we're making a security release to the actual, it's out there, we can now talk about the vulnerabilities.
+Yeah, it's on the scale of ours.
+Is that the int parsing thing?
+It was the, what was it?
+There was an int part or was it int parsing?
+No, it wasn't.
+Really long ints, I don't know.
+No, that's a different one.
+No, it was, there was a TLS and this one sounds really scary.
+It's not as scary. It's a TLS bypass on the server side. So like if the client is supposed to be authenticated, for example, if you're using MTLS, you can if you like send a handshake and then immediately close your socket, you can get lucky during like a brief period of time where the socket on the other side, like the server socket will say like, oh, it's closed. So it's it's fine, right? And the data that whatever you sent over the wire won't will still be readable. But then the handshake hasn't actually like completed. And so that sounds like scary, right? But it's it's actually not as bad because so many protocols, well, for one, so many protocols don't even use client authentication at all. So that's one huge point. The other side of it is that all protocols that people do end up using mutual TLS with are protocols that you have to send something back to... So like HTTP, for example. You have to send something back, and at that point, the socket is closed. And so it can't send the data back.
+So there's no data exfiltration. It's a pretty narrow scope of what's actually vulnerable.
+Yes, the fix for that vulnerability is in 3.11.5.
+And there's another one too, but it's a little bit more minor.
+Well, we'll start fresh with 3.12.
+And hopefully you will not have to witness one of these releases.
+Honestly, given how large CPython is and how wide ranging its standard library attempts to be, it does not have many vulnerabilities.
+I mean, you go look at like a web browser upgrade.
+It's like, here's the 27 remote code execution vulnerability.
+Maybe not quite that many.
+But here's the 27 security fixes this month, you know?
+- Yeah, we've maybe, maybe it's a little more front of mind right now, now that like Chrome is on their fifth zero day of the week.
+But yeah, it's, it's pretty tough week for Chrome right now.
+- Yeah.
+- And Firefox and the rest of us.
+- Yeah. Yeah, for sure.
+Let's see another comment from Frank says, "SIGstore and GPG seem a bit at the end of the process, considering these are built locally in some cases.
+How does one guarantee that the sign sources are still right?" Yeah, so this is kind of getting to the, like, I agree with you, how does one track that they're still right?
+So they get uploaded to Python.org.
+And at that point, they're kind of like in a holding pattern for testing.
+And so those binaries are there, they're on Python.org, they've got, you know, the hashes have already been taken.
+Then the testing happens.
+So like, anything that happens between that and the Sixer styling, like, yeah, at that point, it's kind of protected.
+But yeah, there is this really big dwell time where you just have artifacts sitting on someone's machine, and they're going to get signed and sent out the door. And that's kind of like the due diligence of release managers, they need to make sure that those are the right artifacts that they've been tested properly, that the ones that you tested locally are the ones that are going to get ended up being signed. Yeah. And so this is something this is like a, a piece of the whole puzzle that gets mitigated by having those builds happen on external services as opposed to on someone's local machine. Because at that point, you're just giving --
+>> Yeah, you're just giving this, like, set of scripts, like, very, very narrow set of input. Like, I want this exact git commit and this version number to get built. And then out pops, like, a tarball that's already been signed and verified and everything. And then from there, you just put that on Python.org, right?
+>> Awesome.
+>> Like, that is a lot less -- there's a lot less of that risk where it's just on someone's machine and how, how do, how does one know that that is the exact thing that they built?
+It's not provable.
+Yeah.
+What about virtual machines for these gray boxes?
+I mean, obviously the Azure one, that's, that's its own thing, but have you considered like a, a Docker or an official just RLs VM go like here, take this, run that, you know what I mean?
+yeah.
+To, to make it a little less dependent on the person whose role it is that year.
+It definitely would help with the reproducibility side of things, because as we know, Docker is just the whole machine shipped in a box, right?
+So yeah, in theory, if you build the same thing again in that exact same image, you would end up getting a pretty similar result.
+So it helps on that front, which is good.
+I think the tough thing is that you still don't have control of the inputs, and the output you also still don't have.
+It comes out of the Docker container, you get a tarball.
+There's still that time in between when the tarball is out of the container and when it's actually on python.org, where it's on someone's machine that is not in a container.
+And containers also aren't the best in terms of like, you did mention virtual machines as well, but even that, like on a machine that is a high value target, you know, maybe it's worth it.
+Who knows?
+Yeah.
+Yeah.
+Who knows?
+All right.
+It's happening Monday.
+So very exciting.
+And I'm looking forward to all the new work.
+I mean, are there new features in 3.12 that are you particularly excited about?
+You know, since being in this role, I actually haven't been paying attention to Python releases as much, Python features as much.
+I'm mostly excited about it getting faster.
+I mean, the generic, it's just straight up faster.
+Like there's no one on the planet that's not happy about that.
+What are the major features this release?
+So there's like a some more broad F string thing.
+So you should be able to have a subset of the language in the F string.
+And now you can kind of like program in the F string, I believe.
+type statement, better generic types.
+Yeah.
+There's like a, a simpler way to express generics in the type system.
+And then I'm with you, you know, honestly, like F strings being nicer.
+That's awesome.
+Thanks for that.
+But faster, faster, faster is good.
+this per interpreter, Gil's kind of part of that.
+faster CPython thing, right?
+Like it's hard to leverage, but if you could just say in your threads, new interpreter for this bit, right?
+All of a sudden you escape the gill for computational stuff.
+That'd be pretty interesting.
+but you know, also this, this is another interesting thing.
+If you pull up this list, like the size of the scroll bar, I don't know.
+We were talking about scary scroll bars earlier.
+Like this is next level.
+Let me see.
+I'm going to, I'll throw this into Omnivore.
+Are you a fan of Omnivore?
+This app?
+Omnivore.
+Never heard of it.
+What is it?
+Omnivore.app.
+Kind of a Instapaper pocket replacement.
+Oh, I'm already logged into it.
+Look at that.
+Oh, super, super cool.
+So I go here and you say, add a link.
+Actually, it just, I think it just went in there.
+Let's see.
+40 minutes just to read that.
+What's new.
+That's what I was trying to pull.
+It just, yeah.
+It calculates that for you.
+It's like, it's going to take a while.
+So just the, a sense of like, what is new in Python 3.12.
+That's a ton, right?
+Yeah.
+A ton of stuff, like tons of fixes.
+Tons of fixes and improvements.
+Mike Feeler out in the audience says Python dash M, SQLite 3 is nifty.
+Mike, you're going to have to tell me more about this.
+Does that, does that open up a database now?
+That would be lovely.
+Yeah.
+That would be cool.
+Kind of like the HTTP server.
+Yes.
+Yeah.
+Or the JSON tool.
+The JSON tool is the one I use the most.
+What's that one do?
+so you can like pipe JSON into it and it'll just make it pretty.
+It's pretty, it's questionable how useful it is, but it sure does make pretty JSON.
+Yeah.
+which I really appreciate.
+Like two space indented JSON.
+That's perfect.
+- Indeed. All right.
+One more comment from the audience and then we'll maybe wrap it up.
+Karen, hey Karen, says, let me, she's clarifying above, like VM Docker for less changes and better reproducibility.
+"VM Docker for less heterogeneity reproducibility than the current situation, which is affected by a given user's environment." Yeah.
+Like what web browser did you install today or something completely unrelated or, you know, or like you upgrade, if it's your personal machine and you're using tools, like if you upgrade those tools, it could pull some other system dependency, right.
+That ends up being relevant to the build of CPython.
+And yeah, it's just, there's just so much that could be different over the course of even a few days.
+Yeah.
+Yeah.
+Which is why it's interesting that the windows one goes to Azure pipelines.
+Cause it kind of pulls, puts that to the side.
+Right.
+Yeah.
+All right, Seth.
+Well, this has been super, super interesting.
+And thanks for giving us a look into this world.
+So, yeah, very, very excellent.
+And I guess, you know, final two questions.
+Can you write some Python code?
+What editor are you using these days?
+Yeah, I'm using PyCharm.
+I love PyCharm.
+Specifically, you know, I have the--what is it?
+I had the Professional Edition for a good long while, and then I let that subscription lapse, and I need to just renew it.
+So I'm using the community edition right now, but yeah, I love PyCharm so much.
+So really good editor.
+Awesome.
+I'm there with you.
+And then notable PyPI package, something that is interesting to you.
+I already talked about these.
+So pip audit, just use pip audit.
+There's so much work happening somewhere with pip audit that it just makes sense for you to use it because there's just a ton of work happening.
+And if you just add it to your workflow, you'll just know that things are vulnerable or like what's vulnerable and like what versions you should update to.
+>> Yeah, I already have some tooling that, like some aliases that do three or four steps to actually update my dependencies and install them.
+Like I might as well just throw this as like another and and pip audit.
+>> Yeah, and you can actually, so I think there's a way you can tell pip audit to install packages, but then it will say something if there is a vulnerability in whatever you're installing.
+So you can even replace pip install with that, I believe.
+>> Use pip audit.
+I think that that is a feature.
+All right.
+I think so.
+It has a features thing.
+Let me look at it.
+Oh, let's see it.
+Oh, it's not going to work.
+Cause it's not the read me.
+It's true.
+I got to go to the homepage, which will take me here.
+So I gotta go to the source.
+no, where's the GitHub.
+I only go to the stars.
+All right.
+You know what?
+Maybe I don't want to click this thing.
+Features.
+There we go.
+Multi-villain admitting.
+We haven't talked about S bombs, but seamlessly reuse here.
+listening. Yeah. If it reuses the pip caches, maybe, maybe, maybe. All right.
+What is it?
+I'll play with it. We'll see. People can check it out.
+Citation needed. Citation needed.
+Exactly. Citation needed. That's right. All right. Well, yeah. People check out pip audit.
+That looks excellent. And yeah. Final call to action. People are interested in this. I mean, give a thought to it on Monday, theoretically, at least in the past, if you listen too far in the future, but you know, the next release.
+Yeah, no, I think the biggest so in terms of like, what can you personally do? Because like, there's just I just talked about so much stuff that is just kind of happening in the background.
+But there's also stuff that like individual people can do. And the most impactful URL that you can visit for security, if you're an open source consumer or like a maintainer, like it doesn't matter, this is just gonna be impactful if you work in software is best dot open ssf.org. So So that is basically just like a web page and it just has a few URLs and you click into any of those URLs and it just gives you like a checklist of your things to think about here's and then if you click into those checklist items, it gives you it's kind of like this recursive nice, like guiding force of like, here's the things you could be doing, right?
+And if you want to dig in more size guide for developing more secure software, in other words, NPM best practices, and so on.
+Yeah, excellent.
+I'm hoping to put a Python best practices guide there by the end of the year that I'm here.
+So don't you worry. Look forward to that.
+Excellent. I'll be right there. We'll get it above on the list.
+Yeah, it'll somehow not sort alphabetically and it'll be okay.
+Tip the scales a little bit.
+Exactly. Cool. Well, thank you for being here, Seth.
+And thank you for all this hard work that you're doing. It's good to know that you're out there keeping an eye on all these things.
+Thank you so much for having me on the show. This has been lovely.
+Yeah, you bet. Catch you next time.
+Bye.
+>> This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+The folks over at JetBrains encourage you to get work done with PyCharm.
+PyCharm professional understands complex projects across multiple languages and technologies, so you can stay productive while you're writing Python code and other code like HTML or SQL.
+Download your free trial at talkpython.fm/donewithpycharm.
+Want to level up your Python? We have one of the largest catalogs of Python video courses over at Talk Python. Our content ranges from true beginners to deeply advanced topics like memory and async. And best of all, there's not a subscription in sight. Check it out for yourself at training.talkpython.fm. Be sure to subscribe to the show, open your favorite podcast app, and search for Python. We should be right at the top. You can also find the iTunes feed at /iTunes, the Google Play feed at /play, and the Direct RSS feed at /rss on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/youtube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+[MUSIC]
