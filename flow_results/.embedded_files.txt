@@ -1669,3 +1669,13 @@
 431-visualizing-cpython-release.txt703
 431-visualizing-cpython-release.txt767
 431-visualizing-cpython-release.txt831
+432-beanie-pydantic-upgrade.txt127
+432-beanie-pydantic-upgrade.txt191
+432-beanie-pydantic-upgrade.txt255
+432-beanie-pydantic-upgrade.txt319
+432-beanie-pydantic-upgrade.txt383
+432-beanie-pydantic-upgrade.txt447
+432-beanie-pydantic-upgrade.txt511
+432-beanie-pydantic-upgrade.txt575
+432-beanie-pydantic-upgrade.txt603
+432-beanie-pydantic-upgrade.txt63
