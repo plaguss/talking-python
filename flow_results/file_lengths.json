@@ -408,5 +408,6 @@
   "429-flaky-tests.txt": 15337,
   "430-gradio.txt": 16128,
   "431-visualizing-cpython-release.txt": 14297,
-  "432-beanie-pydantic-upgrade.txt": 11557
+  "432-beanie-pydantic-upgrade.txt": 11557,
+  "433-litestar.txt": 13940
 }

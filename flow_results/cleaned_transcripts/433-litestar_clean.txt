@@ -1,0 +1,831 @@
+We all know about Flask and Django.
+And of course, FastAPI made a huge splash when it came on the scene a few years ago.
+But new web frameworks are being created all the time.
+And they have these earlier frameworks to borrow from as well.
+On this episode, we dive into a new framework gaining a lot of traction called Litestar.
+Will it be the foundation of your next project?
+Join me as I get to know Litestar with its maintainers, Jacob Coffee, Janek Nouvertne, and Cody Finchner.
+This is episode 433, recorded August 30th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm @mkennedy and follow the podcast using @Talk Python, both on fosstodon.org.
+Keep up with the show and listen to over seven years of past episodes at Talk Python.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at Talk Python.fm/YouTube to get notified about upcoming shows and be part of that episode.
+This episode is brought to you by Sentry and us over at Talk Python Training.
+Please check out what we're both offering during our segments.
+It really helps support the show.
+Everyone, Janek, Jacob, Cody, welcome to Talk Python to Me.
+Hey, thanks for having us.
+Good to be here.
+Yeah, it's great to have you all here.
+Really excited to talk about one of my favorite topics, web frameworks, APIs, async performance, design patterns, like, let's do this.
+Let's do it.
+Cool.
+So we're going to talk about Litestar, which is somewhat new to me.
+I haven't known about it that long, but looking at the GitHub stars being several thousand GitHub stars and release two, it's definitely been going for a while.
+So it's a really cool framework that I think people will definitely be excited to learn about.
+But before we get to that, let's start with you all.
+Just a quick introduction for each of you.
+Go around the Brady Bunch squares of our video here.
+Janek, you want to go first?
+Yeah.
+Yeah, sure.
+My name is Janek.
+Obviously, I'm a Python developer from Germany, currently living in Cologne.
+So I'm a bit behind the rest of the other guys when it comes to the time zones.
+I would put it a different way, Janek.
+I'd say you're living in the future.
+You're living hours ahead of time.
+You know what's already happened.
+Oh, yeah.
+That sounds much nicer.
+Yeah.
+Well, I currently work as a Python developer.
+Before I got into Python, I worked as a carpenter.
+So I've built furniture and other cool stuff.
+I think that's all we need to know right now.
+So, Cody, why don't you continue?
+Yeah, I'll be happy to.
+So hey, Michael.
+Hey, guys.
+I'm Cody.
+Really, I've kind of had an interesting journey into the Python space.
+And so I'm kind of probably atypical from the rest of the team here.
+And so I've actually been a long time database guy, specifically in Oracle.
+And so lots of big, nasty data warehouses, large transaction systems, and building all the glue that you've got to do to make that stuff run.
+And so I guess really my intro to Python was really around DevOps, doing how do you make the whole environment stay running?
+How do you keep it efficient?
+And it's really focused on the database side of things.
+And so about 10 years ago, moved to Dallas from Alabama, originally where I'm from, and joined a small team of Oracle developers.
+And so we got acquired by one of the big four consulting firms.
+And so at that point, I shifted into development, from development and into cloud migrations.
+So did quite a bit of just Oracle database migrations into the various cloud providers.
+And now, just long, about six years later, I've now wound up at Google as part of the database black belt team there.
+And I still try to figure out exactly what a database black belt is.
+But a year in, really what I can tell you is that what I do is talk to all of our biggest customers and figure out what are the features and things that they need to make their enterprises run on Google Cloud.
+And we work with the engineers to make that happen.
+What an interesting background.
+I would say having a really good background in databases, and especially the DevOps side of databases, is a pretty unique view for building a web framework.
+A lot of people are all about, oh, I got to have something for my front end code, my JavaScript I'm writing, right?
+And that's really not the same.
+Yes, and my career actually originally started using, well, I guess now they're called low code tools, but we used to call them rapid application development.
+And so there's just lots of database builders where there really wasn't any actual Python or any Java or those types of code involved.
+It was all PL SQL.
+So I was actually happy to get involved in the Python world and move out of that space.
+So yeah, excellent. Awesome. Jacob.
+Hey, I'm pretty new to being a developer.
+I spent the last four or five years in the system space, more on like the IT side of things, building systems and helping users.
+The last year though, I've gotten to DevOps on my team at O'Reilly, auto parts, not the book people.
+Been really interesting, but recently I got to join this team and I'm learning a lot.
+So this is really exciting for me to be here.
+Yeah, well, it's awesome to have you here.
+And like I said, a really exciting web project that I think people will appreciate.
+So let's go ahead and jump into it.
+So Litestar at Litestar.dev, effortlessly build performant APIs.
+So who wants to give us the elevator pitch here?
+The 30 second view of Litestar.
+Janik, I think Cody should do that.
+Oh, Janik, I'd like to hear what you think.
+And then I can give you about my perspective of how I kind of joined the team and what it means to me.
+But I think it would be helpful to hear how you think about it.
+All right. So what is Litestar?
+Well, I think our tagline is pretty, puts it pretty well.
+We definitely have a focus on building APIs.
+So not, well, not typical HTML applications monolith.
+It's often compared to fast API, and it has similarities, definitely, which fast API is already in the name.
+It's also focused on building APIs, but for us really important is the effortless part.
+So what we strive to do is to take away all the, well, not all, but as much as we can take away the boilerplate for developers, you usually have to do anyway when you're building any project of size, which includes lots of stuff like authorization, caching, ORM integration, and all these kinds of things that you usually have to do.
+And with micro frameworks like Flask or fast API or Starlet or any of the other ones out there, because there are a lot of them, and they are all really great at what they're doing, but they do require to build a lot of boilerplates, which can be good because it gives you a lot of control over what you're doing, and you can build it exactly how you want to.
+But it's also not, well, it's not completely effortless, which is what we are trying to achieve.
+Yeah, when I think about the web frameworks, I have this sort of bimodal distribution at like two ends.
+On one end, you have Django, where it comes with all of these helpers and all of these things.
+Like you just say, yes, I want a whole back end to manage my database with a UI, for example, right?
+Well, there's a bunch of those kinds of things, form creation and the ORM migrations, all that stuff is kind of just, you get it all.
+And the other end, you have Flask and you have FastAPI and a whole bunch of others, Sanic, you name it.
+And there's a lot, and they're all about, we're going to go and handle the request, and then it's up to you.
+Do you want a database?
+You can have a database.
+If you don't want one, don't have one.
+In that regard, FastAPI itself is kind of almost prescriptive in that it talks about having like model exchange and defining models that create how the website works.
+Whereas Flask doesn't even have that.
+You just kind of nailed it.
+And this is actually how I kind of came into, it was actually Starlight at the time.
+But I guess about four years ago, I built a pretty large scale Django app for some consulting work.
+And it was really around data quality and data migration.
+And it worked really well.
+But I was reading all this stuff about FastAPI and I really liked what I was seeing.
+And the developer experience of that was really incredible.
+And the tools that those guys put together was just kind of second to none.
+It was really refreshing to see that kind of build in over what you see in Django.
+And so I started working with FastAPI and really liked it.
+But I got to where I felt like I had a lot of boilerplate that I added on top of that to get to that working app.
+And so when we joined up with Google, one of the things that I did was say, okay, I've got a lot of like boilerplate for things that I need to run this app.
+And maybe there's somewhere that I can contribute.
+And so at that point, I started looking around at all the web frameworks.
+And that's when I got introduced to starlette at the time.
+And just to give a little bit of a history, it was originally called Starlight because it was based on Starlette, just like all the other ASCII frameworks out there.
+And obviously Starlette is an awesome tool.
+And we were kind of paying respect to that by naming it Starlight.
+But obviously there's very few letters in between that and Starlette.
+And so what we found is that many of the posts that we made, people were confusing, hey, did you mean starlette?
+Because I don't know what a Starlette is.
+And so long story short, we said, okay, it's time for us to rename.
+And I guess we're all not too original because we just flipped the wording around.
+And that's how we came up with Litestar.
+It's a cool name. I like it.
+Yeah. And just for people who don't necessarily know, much of FastAPI's magic is that it's built on Starlette.
+And so in a sense, you're running on the same foundation as FastAPI in that regard, right?
+No, we're actually not anymore.
+So...
+Okay. That was the original. All right.
+I think we have dropped Starlette as a dependency about like six, seven months ago, before version two.
+Yeah.
+So in the beginning, we were...
+Well, starlette is built very, very modular.
+You can use like FastAPI, use the whole thing, and you can just extend the router and don't care about anything.
+But it's also designed in such a way that you can just take certain things of it.
+So you can say, okay, I just like the routing and the rest I'll do myself.
+And what we originally did was we had our own router, our own routing system, and plugged that into Starlet and built our own application on top of that.
+But over time, we have diverged quite a lot from the way Starlette wanted to do things, or well, not wanted to do things, but Starlet became a bit restrictive because we wanted to do things very differently at very deep parts of the starlette stack.
+And so it kind of made sense to us that we just wrote our own basically and filled in the gaps that starlette left behind, which wasn't an easy decision because Starlet is a very great piece of technology and it's very well done.
+And it's got a lot of credibility to it, right?
+You know, there's a lot of people that run it in production, and that means something when you have a tool that is known to work well.
+It was a bit of a challenge to get that going.
+But yeah, at the moment, we are from the ASGI side, our very own thing.
+We don't depend on anything else in that regard anymore.
+Okay. And is that all Python or is that got some other technology making it go in there?
+So that part, the ASGI part is all Python.
+We have some other non-Python parts, but they are not at the web serving side, let's say.
+So we've rustified, I guess that's the term, if you will, at least one place.
+That's the URL parsers, right?
+Yeah, the query parsers.
+Okay. That certainly is a strong trend these days.
+Although I'm surprised for a framework that hasn't been around that long that it's already got rust.
+No, just kidding.
+We experimented about a year ago.
+We experimented actually with more rust and that was to do the routing in rust.
+So we use a Redix-based router.
+That's something Sanic does that as well.
+And we experimented with a rust implementation, but it was decided that the speed up that we got from using rust wasn't really worth the trade-off between it being harder to maintain and being less accessible for other contributors.
+Because most of the people who are using a Python web framework, they will know Python, but they're not necessarily that fluent in rust.
+And well, basically the router wasn't really that big of a bottleneck for Starlette at the time.
+So it didn't make a lot of sense to write that part in rust.
+Yeah. It's a big trade-off, isn't it?
+Even things like shipping wheels and just pushing out a version.
+Once you start to go into a, well, there's a per platform compilation step.
+That has a lot of friction, right?
+And I'm sure you could do a whole podcast just on packaging, but Python packaging in and of itself is not always the easiest or most intuitive process.
+And so, yeah, it definitely gets complicated when you add in another language.
+Yeah, I can imagine.
+And in a lot of cases, there are more low-hanging fruits that you can grab and just optimize things there before you say, okay, now we have optimized everything so well, the only way we can get faster if we now use a language like rust.
+And I don't think we're at that part yet.
+So we have yet still a lot of things to do.
+That's excellent.
+It's a really good philosophy too, I think.
+There's an interesting new way to make your Python code faster that used to be the case when Moore's law was really in effect.
+You went from a 486 to a Pentium to a whatever gigahertz and from megahertz to gigahertz and all those things, you just wait and the hardware got faster.
+So your code went faster.
+But with the faster CPython initiative and Guido and Mark Shannon and team over there, they're making Python quite a bit faster constantly with every release.
+It's really impressive what they've done.
+It was a noticeable for the projects that I'm currently using Lightswirl and it was a noticeable increase in performance when I went to 3.11.
+And yeah, looking forward to seeing what all they do over the next couple of releases.
+– Yeah, we just last week, I think, no, this week perhaps, had the release candidate for 3.12.
+So it's kind of final besides the bugs, which is, you know, people can start testing it and see what's to come out of there as well.
+– Yeah, we haven't actually tested yet with 3.12 because we're still waiting on some of our dependencies to be compatible with that.
+Jacob, do you want to say something?
+– We just have two more.
+I think it's GRPC and Greenlet.
+Greenlet actually, I think, is ready, but they need to do a release to PyPI.
+But the GRPC is, I think, one of our stragglers.
+– Okay.
+– I've been eager to test that and see what kind of performance we can get.
+I guess we could do the RC one now, but we'll wait.
+– We should probably test it out at some point.
+– Okay, interesting.
+Yeah, I mean, that's always the constant struggle, right?
+Is you've got a lot of dependencies here on and on.
+– A huge number of them are optional, but yes, it can get a little crazy.
+– Yeah.
+– That's actually a good point to make.
+You know, one of the things you'll see is that there are quite a lot of dependencies, but you'll see that a lot of them are tied to optional groups.
+And so one of the things that we wanted to do was make it quick for a user to kind of pip install one thing and have all the pieces they need to get started.
+And so you can say pip install Litestar, and you can add the CLI or the standard group, and it'll automatically install the JS beautifier and the command line utilities and rich and a couple of other libraries.
+And so there's a lot of helpers to kind of make that a little bit more easy to just jump right in.
+– Right.
+This portion of Talk Python to Me is brought to you by Sentry.
+Is your Python application fast or does it sometimes suffer from slowdowns and unexpected latency?
+Does this usually only happen in production?
+It's really tough to track down the problems at that point, isn't it?
+If you've looked at APM, Application Performance Monitoring products before, they may have felt out of place for software teams.
+Many of them are more focused on legacy problems made for ops and infrastructure teams to keep their infrastructure and services up and running.
+Sentry has just launched their new APM service.
+And Sentry's approach to application monitoring is focused on being actionable, affordable, and actually built for developers.
+Whether it's a slow running query or latent payment endpoint that's at risk of timing out and causing sales to tank, Sentry removes the complexity and does the analysis for you, surfacing the most critical performance issues so you can address them immediately.
+Most legacy APM tools focus on an ingest-everything approach, resulting in high storage costs, noisy environments, and an enormous amount of telemetry data most developers will never need to analyze.
+Sentry has taken a different approach, building the most affordable APM solution in the market.
+They remove the noise and extract the maximum value out of your performance data while passing the savings directly onto you, especially for Talk Python listeners who use the code Talk Python.
+So get started at talkpython.fm/sentry and be sure to use their code talkpython, all lowercase, so you let them know that you heard about them from us.
+My thanks to Sentry for keeping this podcast going strong.
+And it looks like you've got, say, like Oracle or DuckDB or other things that maybe not everyone, or, you know, AsyncPG, all those types of things that you probably only need one of those, right?
+You're probably not doing MySQL, Postgres, and Oracle.
+Maybe, but probably not.
+We actually do all of them.
+And so with the same, and this is one of the things that I think is probably good to point out, is that with the repository contrib module that we've created, you actually can use the same repository, the same models, the same JSON type, and it will automatically select the best data type for whatever engine you're running.
+So for instance, if you're on, let's just say that today you're running on AsyncPG with Postgres, and you've got a JSONB data type using the built-in custom Litestar JSON type, and tomorrow you convert to Oracle, all you need to do is change your connect string, and it'll automatically deploy that to Oracle with the correct JSON type.
+And so you really don't have to do anything additional to make your code work between that.
+So honestly, a lot of that came from my time with Django, where you got the, you know, one set of utilities worked with quite a few databases.
+And so I spent quite a bit of time kind of making sure that that worked.
+And so you'll see that, including with the Alembic migrations that are coming out in 2.1 in a couple of weeks.
+And so through the CLI, you'll be able to actually manage your entire database, call and configurations and generate them, as well as, you know, launch and use your app through the same, you know, single CLI.
+I don't think I'd ever want to migrate to Oracle.
+Well, when you need Oracle, you do need Oracle.
+I'm aware of the stigma, but yeah, there's some times and places for all of them.
+I think for those who are unaware what you're talking about, you're talking about the SQLAlchemy repository patterns that we offer.
+So the things you mentioned, they are built on top of SQLAlchemy, which in itself is already really flexible and makes it easy to change databases.
+But there are still a few gaps that you need to bridge yourself, like the ones you've mentioned.
+And this is an example of the things that we try to take care of.
+One last note on that.
+So a lot of the repositories that you might see for cookie cutter apps or the other existing templates out there usually stop at the basic CRUD operations.
+But what we've done here is actually implemented all the basic CRUD operations and efficient bulk operations based on whatever database you're using.
+And we choose the most optimal method for that.
+So that includes bulk add, bulk update, a merge statement, bulk delete, as well as all of the standard CRUD operations.
+And so one of the things that we really have focused on is making sure that this is an incredibly feature-complete repository that has all of the functionality that you might want to use just right out of the box.
+That's really excellent that you all are handling that for people.
+And it gives me a sense of what you mean by the helping people do this stuff effortlessly, bringing a little bit of those batteries included feel of Django without...
+Putting in the batteries.
+Without the very prescriptive way that say Django does.
+I guess keeping the micro framework feel, but bringing along a lot of the stuff that people would otherwise have to choose and configure like, oh, okay, we're going to use...
+I guess we'll use SQLAlchemy.
+Oh, did you call an async function?
+Well, then you're going to also need the async SQLite library installed.
+How do I find that?
+Those series of steps you've kind of got to go through.
+And it sounds like you've taken care of some of that for people.
+We try to.
+Obviously, we'll continue to evolve it over time.
+But I've now used it a year at work at Google.
+And it's really kind of satisfied.
+I'd say 95% of the use cases I need.
+And so I typically don't have to drop back into raw SQL anymore, which I think is a huge thing.
+And that's what I would like to propose and get everybody else to.
+And so that's where the focus there.
+And the one thing I'll add about it is that we still kind of maintain that micro framework philosophy, because all this work is actually packaged up in something called a plugin.
+And so you can configure this one class and it automatically registers the route handlers, the own startup, own shutdown handlers that need to happen.
+It'll register the ASCII lifespan things that you need.
+And so basically you get this one piece where you can just set up your entire app and you don't have to do or add the piece in several parts of your application.
+Yeah, excellent.
+So before we dive into the features, which we have been doing a little bit already, at least some of the philosophy, I want to talk about benchmarks.
+And I know benchmarks are a little controversial in the sense that, well, the way I'm using the framework is different than the way you use it.
+The way you use it is really fast.
+The way I, you know, whatever, right?
+Like putting that out there and just giving a sense that this is a really fast framework.
+You know, how does it compare to things like FastAPI or Court, which is the async version of Flask-ish, right?
+They're working on unifying those more, but basically the async version of Flask for now.
+Sanic and then Starlette, who wants to give us a quick summary of this graph you got here in the benchmarks page?
+Before we get into the benchmarks, you said it already, but I want to add another disclaimer here.
+Like, as you said, benchmarks are really, really controversial topic and they're insanely hard to get right.
+And it's even harder to get actually benchmarks that are useful for your use case.
+And they show you what you actually want to measure because most of the time they don't.
+They measure something, but they often don't translate one-to-one or even somewhere close to that to real-world performance.
+And I have spent a lot of time on these benchmarks.
+And I want to say that the benchmarks didn't came about as us trying to compare to other frameworks, but we were experiencing some performance regression internally after a major change somewhere.
+And we were trying to track that down.
+And for that, I developed a quite comprehensive benchmark suit that tried to get us close to a real-world usage of how we expected the framework to be used.
+And then that grew to compare other frameworks as well.
+And when I added the other frameworks, I tried to follow a very, very simple philosophy, which is not necessarily, well, some might say it's unfair.
+I think it's one way to get a comparable result.
+What I tried to do is to not optimize anything.
+I just used every, I built the same app on every framework with the framework as it comes out of the box, just took the straight up approach that's shown in the documentation.
+And I did that because from almost all of the frameworks, there is for every case, some way to make it a little bit more performant in this special case and in that special case.
+And I'm not an expert in all of these frameworks.
+And I'm sure if you start optimizing, there's no point where you can say, okay, now it's completely optimized.
+So I just took the completely opposite approach and didn't optimize anything at all.
+And that includes Litestar.
+We also do things that could be made more performant in Litestar, but we don't do them in the benchmarks.
+Well, that's just our bench line of what we are comparing to.
+And I just think it's an important context to have.
+Yeah, that seems fair.
+So we know what we are comparing.
+Right. Okay.
+So if we look at the benchmarks, one thing we can see there, so we have the synchronous and asynchronous performance.
+And one thing that we can see there is that for Litestar, it's almost identical compared to, for example, Starlette, where it's not.
+The reason for that is our model of execution for synchronous operations.
+What Starlette does and what you could argue is the safe way is to run these in a thread pool by default, which is good because if you have a synchronous function and asynchronous framework, and it's blocking, you might potentially block your main thread and all other requests that are coming in at the same time.
+You don't want that.
+So definitely the safest option is to just put that in a thread pool, let it run, and you're good.
+The thing is threads are slower than async IO.
+And so what we do is we force our users to make a deliberate choice when they have a synchronous function.
+So we say, do you want to run that synchronous function in a thread pool or not?
+And if not, we just don't do that.
+– Is that done by a parameter to the, you know, like at get or something, and then you say thread pool, yes or no, or something like that?
+– You can set that as a parameter.
+And if you don't, and you use a synchronous function, you get a very nasty warning about that.
+You can shut that off globally because some, yeah, that.
+– Sync to thread equals false. Okay, cool.
+– Yeah, you can shut that off globally if you don't want to be warned about it.
+But so we made the decision that it should be a deliberate choice if you want that behavior or not, because in many cases, you don't actually need that behavior because you're not doing any blocking IO operations or any other blocking or CPU bound operations or whatever.
+So the, in fact, the synchronous functions are as blocking as the other async functions.
+So there's no benefit to be had from running it in a thread.
+– Yeah, and also a lot of times in production, the production server like G-Unicorn or whatever is already using multiple threads or things to deal with that.
+And when, or at least multiple processes.
+And then when you're talking to things like a database or something, you're doing a network call, which deep down is probably releasing the GIL while it's waiting anyway, right?
+There's a lot of subtleties that are happening down there that maybe you don't want to juggle, right?
+– One point to add to that is that the sync to thread option applies to the dependency injection as well.
+And so it's not just the routes that you can add that flag to.
+And so to your point about databases, all those pieces can have that same kind of behavior.
+– There's a benchmark for that as well, somewhere that shows the same difference for the dependency stuff, I think.
+Yeah, so that's one difference and another difference.
+And so just to add, this is one choice that Starlette makes for you and by extension FastAPI as well makes for you that you can't easily turn off.
+But if you look, for example, at the Sonic example, you see that it doesn't suffer from the same problem.
+So you can attribute that to this decision.
+The other big difference is because what we're looking at here is serializing a dictionary into a list of dictionaries into JSON.
+And one of the reasons why Litestar is so much faster in this than FastAPI, for example, is because we use MessageSpec, which is a JSON validation and parsing library.
+Well, not just JSON, it's also for MessagePack, which is an insane thing.
+It's an insanely great piece of technology, which we have been using, I think, for almost a year now.
+When we started to introduce it, yeah, that one.
+And it's super fast.
+It's written in C.
+The code can be a bit hard to get into because it's like one massive 12,000 line C file.
+So if you're not very familiar with C and the Python C API, it's not going to be an easy read.
+Yeah, but it's insanely fast.
+And it supports a lot of things out of the box.
+So for example, well, JSON, so all built in Python data types, but it also supports data classes and type dicts, which helps us a lot.
+And FastAPI, on the other hand, by default, well, it uses, for one, uses a standard library JSON module, which isn't as fast as any of the other external, not external, third party JSON libraries that you can have.
+And it also uses Pydantic to validate the data, which I have to point out is something that we do not by default.
+So that's the reason why there's such a big difference.
+And even after Pydantic 2 has been released, which has been rewritten in Rust and has had a significant gain in performance.
+Yes, Samuel Colvin says something like 22 times faster, which is remarkable.
+Yeah, but still, if you just don't do that step at all, it's obviously going to be faster.
+So yeah, that's true.
+Can you, do you remember this graph here, whether this is FastAPI based on Pydantic 1 or 2?
+This is Pydantic 2.
+Okay.
+You could see that it's noticeably faster now with Pydantic 2.
+So there has been a huge gain.
+And to be fair to Pydantic and FastAPI, mostly FastAPI, you could also use FastAPI's OR JSON response, which uses OR JSON to serialize that.
+And it would be a lot faster.
+But as I said earlier, that would, to me, fall into the category of optimization.
+You could do similar things for Litestar.
+And what we wanted to compare is performance out of the box.
+And this is what you get.
+Talk Python to me is partially supported by our training courses.
+Python's async and parallel programming support is highly underrated.
+Have you shied away from the amazing new async and await keywords because you've heard it's way too complicated or that it's just not worth the effort?
+With the right workloads, a hundred times speed up is totally possible with minor changes to your code.
+But you do need to understand the internals.
+And that's why our course, Async Techniques and Examples in Python, show you how to write async code successfully as well as how it works.
+Get started with async and await today with our course at talkpython.fm/async.
+That's some of the stuff you were talking about, right?
+You could include new JSON parsers.
+You could include UV loop, for example, and lots of optimizations, right?
+The benchmarks are on UV loop.
+I think that's one optimization we did across the board for everybody.
+Everyone uses a single UV corn worker.
+Yes. So the environment is the same for all frameworks that we test.
+It's UV corn with UV loop, the Cython dependencies and one worker pinned to one CPU core that's shielded.
+So it just sort of get like something comparable.
+And that's awesome, actually.
+That's really cool. I like it.
+And I guess I'd just like to point out though, that often there's other things that are in your bottleneck in your application, right?
+And so obviously benchmarks, take them with a grain of salt.
+And the other thing is that message pack, or message spec, excuse me, is awesome, but it's not as feature complete as something like pydantic, which is really great.
+So I think there's some differences there.
+And so we wanted to make sure that you have the ability to use both.
+But in the context of benchmarks, sometimes I guess it's worth noting that pydantic is probably doing more or can do more than message spec.
+But I don't think it's necessarily always going to be what you see here at the serialization piece that's going to be your slowest part.
+I agree. As a database guy, you might have database indexes and the lack thereof coming to mind or something, right?
+Well, that's one of the things, right?
+You know, it's, and you kind of touched on it.
+It's the network latency and those kinds of things between that's really going to consume quite a bit of the time.
+Yeah.
+And I think we do have a benchmark, which is serialization of complex objects, like pydantic models or data classes of something like that, which actually I think is very interesting because it shows that if you're using pydantic with Litestar, it's actually not faster than fast API, because then what you're measuring is the speed of pydantic, which in both cases is the same.
+And you can, it sounds like, which is interesting.
+Okay. So quick takeaway, Litestar is quite fast.
+One of the reasons you might choose it is the speed.
+And it sounds like there's a lot of good options there.
+All right.
+But not the only one.
+I want to point out, on that note, if you allow me to point out one more thing.
+Of course.
+We are quite fast.
+And I think for the feature set that we have, we are probably among the fastest, but we are not by far the fastest ASGI framework out there.
+That would be, to my knowledge, Black Sheep, which is insanely fast.
+And we actually don't include that in the benchmarks because it makes the benchmarks absolutely useless because then you just have one gigantic bar, that's Black Sheep.
+And then you have two very, very teeny, tiny bars, which is everything else, which is another micro framework that's written in Cython.
+I have not heard of Black Sheep.
+That's something I have to look into.
+Okay, cool.
+But obviously, speed is interesting.
+Speed is important.
+It's certainly something that if it was really poor, people might choose like, well, it's interesting, but it's not that fast.
+But given the speed, it's certainly an advantage, not a drawback.
+But I think a lot of the advantages come from a bunch of the features.
+So maybe we could talk through some of these and whoever wants to just jump in on them as we go, feel free to.
+So I think it probably came through already from the conversation, but the programming API is very micro framework, Flask, fast API like, right?
+You create a function, you do an at get, give it a URL, decorator on the front, and you've got an endpoint on the web that you can do things with.
+So that's pretty straightforward.
+At its core, exactly.
+And we take it one step further.
+So all of the patterns you know and love from Django.
+So some of the things that you see from Django REST framework.
+So we have controllers that are very similar to that, where you can define a class and have multiple methods in it.
+And so, you know, that's really kind of where things start to differentiate.
+But at its core, we definitely wanted to make sure you had that exact micro framework experience that you see everywhere.
+So the first one, let's just touch on some of the main features here.
+The first one is data validation and parsing.
+So leveraging the power of type ints, which is very, very nice.
+Who wants to highlight that feature?
+Take your own mute.
+Good that you pointed that out.
+So that's definitely one of the areas that was directly inspired by a fast API.
+Because fast API, a few years ago, came up with this brilliant idea of the combination of just leveraging the type hints and the emerging Pydantic stuff and whatever, and build your APIs on that, based around that as your core.
+And it's been very increasingly popular to build your APIs like that.
+So it's definitely directly inspired and influenced by this.
+We are approaching things a bit differently though.
+So for example, you are not tied to Pydantic.
+You can use any data modeling, not any, but a lot of data modeling libraries that you might want to choose are supported out of the box.
+Pydantic is supported.
+You can also use the method spec, which supports some data modeling like Pydantic, not as featureful, but very, very fast.
+You can use adders, you can use plain data class or type dicts to validate your data and to transform your data, which is what you are currently looking at, which are our DTOs, which have been written by the brilliant Peter Schutt, who isn't here with us today, which are, well, data transfer objects.
+So they are a way for you to define how your data should be transformed on the way in or on the way out.
+So you have incoming data that's unstructured, JSON data, and you have a target model, and you might want to apply certain transformations to that, say rename fields from snake case to camel case, very common thing to do while you are validating it on the fly that it confirms to a certain schema, for example, a Pydantic model or a data class.
+And so DTOs are basically an abstraction layer between that where you can say, okay, this is my source model, this is my Pydantic model, and it has a user ID that's an integer and it has a name that's a string.
+And by default, Litestar, if you give it that, will validate that the incoming data confirms to that schema, will have Pydantic run all the validation and parsing on it like you would normally, which is quite similar to how FastAPI does it, or how you might also want, would do it by hand.
+The DTOs come in where you have one data model that has different representations.
+So for example, you might have a database model that's a SQLAlchemy model, but on the way out, you don't want to include the password field because of reasons.
+But you want it on the way in when you create the user to sign up.
+So one way to do that manually would be if you're using Pydantic to create two models, one for the way in, one for the way out, or to create one base model with all the properties that are the same and then two additional models, whatever.
+DTOs basically do that, but they do it for you.
+So you don't have to actually write out those two models.
+They can take in one of the models, one of the supported model types.
+I think at the moment, we support Pydantic, SQLAlchemy, MessageSpec, Adders, and DataClasses.
+Correct me if I'm wrong.
+No, I think you got all of them.
+So if you have a class of that type, you can create DTO from it.
+And then you have a DTO config where you can say, exclude these fields or only include these fields and rename these fields.
+And all you have to do is create a type annotation with that DTO.
+And Litestar will take it, use it to transform your data, and then give you back your original model in the form you specified.
+I see.
+And you say in the decorator, you set the DTO model that does that conversion for you.
+Got it.
+Yeah, that's a good point.
+You set it in the decorator and not at the point where you receive or return the data.
+So the data you receive and return will always be the actual model that you're dealing with, which has the great benefit that your type annotations are always correct.
+And you don't have to worry about that, about, you know, casting something to something else or doing the serialization in your route handler directly, because otherwise the type annotations for the return type won't match because you have excluded the field or whatever.
+So you just set it completely separately from that, just as information for Litestar to say, okay, use this to do the transformations.
+But the end result is my original model, whatever you want it to be.
+Okay, so this is kind of the model equivalent of FastAPI.
+The DTO, that's really neat.
+There's a lot of, maybe a little bit of overlap in something like SQL model, right?
+Where you can declare your SQLAlchemy model as a pydantic model.
+And in this case, and you're welcome to use SQL model with Litestar, but in this case, you can now just use the normal SQLAlchemy model and declare a DTO and it'll automatically convert that to, you know, a message spec struct on the way out and serialize it that way.
+Very cool.
+That's a good point.
+You bring up the message spec struct.
+So that's one other area where we use message spec for to create these models because message spec is extremely fast and has this struct type, which is sort of like an Adders class or a pedantic model, but it has the benefit of being, as far as I know, the fastest library for that type of stuff for Python that exists at the moment.
+So what we are building there, the transformation layer is as performant as it can be.
+Excellent.
+In fact, I think, and I had to go look up the actual quote, but I think the struct is actually faster than the data class in a lot of scenarios.
+And so they've done an incredible job with that library.
+That is incredible, actually.
+And you're beating the building stuff, right?
+That's cool.
+All right.
+We talked a little bit about the open ecosystem, right?
+The ability to use pydantic versus other custom DTOs, other libraries, open API, swagger, the whole generate your documentation for you.
+That sounds pretty excellent.
+I'm guessing it's based a little bit on the DTOs as well to describe the schema.
+Every class has the ability to export what that output looks like.
+And so the DTO knows how to output its signature so that it can generate the correct open API schema.
+And I guess really the main thing to point out, and we obviously do the typical swagger schemas, but one other thing that we add in is redot and stoplight elements as well.
+And so you've got a couple of options for your documentation host.
+Middleware.
+So middleware is things that can see the request before your view function runs or make changes after it runs for cores or logging or other things.
+Want to talk about that?
+Cody, do you want to talk about another ChromePreston stuff, for example?
+I'll happily do that.
+So, you know, you kind of nailed what the core of the middleware is, but really it's all those pieces that you need to add in to maybe add in security or add in some type of additional functionality, compression, for instance.
+And so a lot of, you know, outside of the plugin system, a lot of that functionality is included in the middleware.
+And so you'll see built in stuff for most of the things that you're going to want to do out of a normal application.
+There's probably a few things that you may need to roll on your own, but we've got all the core things.
+And so you've got compression, both broadly and GZIP.
+You've got open telemetry and Prometheus integration.
+You've got several different types of authentication backends that would get integrated here, including a session-based backend that one, there's a cookie-based backend and a session-based backend where it stores, you know, on the actual server itself.
+And we also have a JWT auth configuration that you can use here.
+And so I encourage all the listeners to just check out what we have as part of the default middleware.
+But, you know, most of the things that they're going to want to do from a web app are going to be built right in.
+We also have the logging, the cores, all the basic stuff.
+See it like cross-site, reference, rate limiting.
+Cross-site, yeah, requests forgery for forms.
+Yeah.
+And then you can add your own and they're all just little ASCII apps that you can plug in as you need them.
+On before and on after requests, something like that, right?
+This is really cool here where you could say in a particular view decorator, you can say, for example, exclude from CSRF for just this form, for example.
+And actually, this is something that you'll see as a feature.
+You're going to see this all throughout the code and it's layered permissions.
+And so this exclude from CRS, CRSRF and several other things.
+You may see that.
+It is a mouthful.
+You're going to see that in several different places, right?
+And so you can apply that at the controller or you can apply that at the route level that you see here.
+And so that's one of the helpful features that you'll see where you can put it in one spot.
+It'll cascade down.
+Yeah, I saw that for the DTOs.
+Yeah, we have a lot of that like layered dependency stuff, like the dependency, but dependency injection, like you could also do at the app level or just at the controller level.
+There's so much other applications, controllers, routers and the route handles.
+These are our basic layers.
+And most of these types of configurations, so middleware's dependencies, header configurations, middleware configurations, they're all layered.
+So you can apply them on every layer you want and they will affect the layers below that.
+So it's quite flexible how you want to or where you want to configure your stuff.
+Well, the ORM integration, we talked a little bit about SQLAlchemy as well.
+So that's pretty cool.
+And I'll be happy to elaborate on that.
+But, you know, we've covered quite a bit of what you'll see here.
+I think the only thing that I haven't mentioned that we've integrated in and that will be coming in 2.1 is the use of lambda statement.
+And I'm not sure if you're even have seen that or if your listeners have, but it's a relatively new function that's in SQLAlchemy to help with statement caching.
+And so the repository has been converted over that.
+Actually, I see some great things in the chat.
+There's HTMX integration.
+Obviously, we want to make sure we touch on that.
+And I really want to let somebody talk about the WebSockets and the channels integration too.
+So there's some really cool stuff I'd love for your listeners to hear.
+Before we move on to the WebSockets, which I also want to talk about, I do want to give, since we're on the ORM integration, I can see some comments out there from, for example, Roman behind Beanie, which is a MongoDB ORM or ODM.
+Says, I like the DTO concept.
+Having such tools separately would be great.
+I mean, things such as SQLAlchemy, excuse me, SQLAlchemy objects when needed, pandas, data frames, by data model, depending on the context is really cool.
+We actually have talked about that.
+Well, not we, the people present here, but Peter Schutt, the person who created the DTO implementation at me, we have actually talked about that, making the DTOs a separate library because it's a very useful concept.
+So it's not something we have planned.
+It's something that has crossed our minds as well.
+– That's very cool.
+The question was, what about the MongoDB people or the other NoSQL folks for whom SQLAlchemy doesn't necessarily want to talk to because it's relational?
+What's the story there?
+Like, is it still pretty easy to use Lightstar?
+– It is.
+And I think that there's actually a native integration that's maybe not totally finished, but there is an open PR for a Mongo-based repository.
+So there's going to be that much tighter coupling coming soon for those that want to use it.
+But if they, there's nothing that would limit compatibility now.
+So if they want to go ahead and configure that with their application, there, you're certainly free to do so.
+But there will be a first party kind of clean integration for those things coming soon.
+– Oh, that's excellent.
+So for right now, you know, B&E is based on Pydantic.
+You all work with Pydantic.
+It sounds like, can I just use that as the go-between maybe?
+– Absolutely.
+And you're free to use Pydantic with Litestar just as you can with FastAPI, and it'll just work.
+And so there's no reason to change everything to message spec if you want to.
+You can mix and match and leave everything in Pydantic if that's what you prefer as well.
+– That's a good point.
+So the thing we do, all these integrations with Pydantic and others and whatever, so they are not baked in somewhere deep into the application.
+They are all plugins, plugins that you could write yourself if you wanted to and write for every library that you desire.
+That's one of the larger things that we tackled with the 2.0 release, where we tried to decouple us from Pydantic because we were based on Pydantic before and we wanted to be more open.
+So we basically ripped out everything Pydantic in Litestar's core and put it into a plugin and at the same time made sure that the plugin API was so versatile that it could support all the features that we had supported before.
+And now we're at the point where it's very trivial actually to add support for a library like Pydantic with everything from DTOs to OpenAPI to serialization, validation, parsing fully supported by a fairly trivial plugin that you have to add.
+So even if it's not provided out of the box, it's fairly easy to just do it yourself.
+It's really cool.
+All right, WebSockets.
+Let's talk about WebSockets here a little bit.
+Janik was the mastermind behind this.
+All right, Janik, first tell people what WebSockets are and why they care about them.
+Why is this not just another HTTP request?
+WebSockets, explaining WebSockets in a few sentences.
+Probably not that easy.
+Yeah, you have three sentences, go.
+So for people who have been around longer in the web development space, they might remember long polling.
+So where you had, where you faked, well, back and forth communication between the server and the client by having a request that never terminates.
+And then you can always send more data from the server because the request wasn't actually done yet.
+And I would say WebSockets is kind of like that concept but evolved.
+So you can easily send bidirectional data from the server to the client with a very, very minimal overhead.
+And WebSockets are a core functionality of ASGI.
+You could, there were several ways you could do WebSockets with WSGI, but they were all not very easy and straightforward because they are asynchronous by nature.
+This is what they are.
+They are an asynchronous communication channel.
+So baking that into a synchronous protocol is always a bit tricky.
+And I think there's no ASGI framework that I know of that does not support WebSockets in some way.
+So it is a core functionality of that type of Python framework, I would say.
+And so our WebSocket implementation has kind of like two layers.
+You have the low layer where it's basically you receive the socket object, which is just the connection.
+And then you can act on that connection and you have to accept it and you can terminate it and you can send data or whatever.
+And then you have what we call WebSocket listeners, which are an abstraction over WebSockets.
+And they basically work like you would normally define a route handle in Flask or FastAPI or Litestar, where you receive some data and then you return some data and that is your function.
+And the rest will be handled by the listeners.
+So you define a handler function for an event that might occur.
+One of the cool aspects of this is that these support all the features that Lightstar supports in other layers of the application.
+So you can use DTOs with them.
+You can use validation with them.
+So if you define a DTO and you say, okay, so this is my model and this is what I want to receive, the incoming data from the WebSocket will be parsed as this model.
+It will be validated and then it will be presented to your function.
+So functionally, these WebSocket listeners, they look and work exactly the same as a regular HTTP route.
+Yeah, that's really cool.
+Enables another thing that a lot of ACI frameworks don't have, which is handling of WebSockets synchronously, because we do the async stuff in the background.
+And so you can use an asynchronous function, but you can also just synchronous function because all the dealing with the actual WebSocket itself is handled somewhere else.
+It's deeper, yeah.
+So my thought was probably this is what I want to write in a standard, like I want to receive a message from the client back to the server or and process that there.
+But if you want to do like all the weird multicast stuff, different listeners or groups of listeners, you can do with WebSockets.
+That's probably the lower level version you're talking about, right?
+Did I get that right?
+Yeah, perhaps not.
+It depends how weird you want to get.
+So a fairly standard use case would be for something like, let's say, a chat room where you have some sort of predefined channels and then you have multiple clients that want to send data over the same channel and then fan it out to all the other clients.
+And for stuff like that, we actually have a full integration, which we call channels, which themselves aren't necessarily tied to WebSockets.
+They are basically distributed message bus sort of thing.
+I have yet to come up with a good, short description of what channels actually are.
+It changes a bit from depending what I'm talking about.
+I think message bus is the way to think about it, right?
+And it keeps the history of the events.
+And so a message bus is perfectly fine.
+They are backed by, at the moment, by Redis via different methods.
+So you can use PubSub or other methods that are quite a bit more involved.
+And they can also handle WebSockets for you.
+So you can say, OK, so I want to create a channel named Chat.
+And every time someone signs up to that, please accept the WebSocket request and then add the client to this subscriber list.
+And then every time a message comes in, I want to do this.
+And then I also want to distribute the message they send to all these other clients in those channels.
+And I know if they send a special message, then I want to unsubscribe them.
+And so for this kind of standard use case, we have that built in.
+You can, of course, build your own logic on top of that.
+And as you said, if you want to go into really weird stuff, you will have to use the low-level interface, which is also there, which you can also access from the WebSocket listener.
+So you can, via dependency injection, just receive the raw socket object if you want to deal with that for some reason.
+So it's available if you need it, but you can do the easy thing by default.
+Oh, awesome.
+That sounds really cool.
+And the channels sound great.
+Also, Chris out in the audience said, does that also mean server-side events are?
+Yes.
+Server-sent events, rather, excuse me, are available.
+And I saw that you have a dependency on HTTPxSSE, which is like a lightweight, lightweight WebSocket type of thing.
+It's very cool.
+That's a development dependency for testing.
+Ah, for testing.
+OK.
+So we do have server-sent events support built in.
+You can do that.
+And you can, for example, use that in combination with channels.
+So instead of fanning out the messages via WebSockets, you could do that with a server-sent event as well.
+Excellent.
+All right.
+We're getting quite short on time.
+I want to close this out with maybe what would be the last thing in the process of building out an app in Litestar?
+That would be deployment.
+And I didn't see a lot of conversation about how I should be deploying this stuff on the website.
+But I saw on the benchmarks that you said, we use GUnicorn with the UVicorn worker and so on.
+And it sounds like maybe using GUnicorn is a good option.
+What's the deployment story?
+What do you tell people that want to put this in some real scaled-out production story?
+That's still a good option.
+But personally, I think Cody's well.
+We've just been using UVicorn, not as a worker, just by itself.
+That has worked really well.
+It really just depends on how you're going to run it.
+So if you're using Docker or Kubernetes or something else that's managing that process, then it's possible that GUnicorn may not be something that really is needed in your environment.
+And in fact, it might actually just add overhead.
+And so if you've got something like Cloud Run or Docker or Kubernetes or anything like that, what we've realized is that sometimes it's quite a bit faster to just run it with UVicorn.
+And if the process dies, then your container management, whatever you're using to manage those things, will automatically start and scale those processes out.
+It notices that the container exited anyway, and so it's going to create a new one, right?
+OK, got it.
+Correct, yeah.
+But if I'm going to a Linux machine directly?
+Then I think there's more of a decision to make on whether or not you want to host it through something like GUnicorn.
+And I guess the other thing I'd like to add is that really there's any of the ASCII servers can run Lightstar.
+So you've got Daphne, Hypercorn.
+There's work that we're doing right now with Socketify.
+It's a mouthful as well.
+But they've got some cool stuff going on there.
+And so hopefully we'll have compatibility with that soon.
+And so yeah, the idea is that the same way that you would host any other ASCII app would apply to how you would manage a Litestar app.
+Excellent.
+And maybe Nginx or something like that in front for SSL and Let's Encrypt and all those things.
+Absolutely.
+I think that's probably about it for time.
+Final thing here.
+So you all said you just released a week ago or so.
+Last week, released version two.
+I want to give a quick shout out to the changes for people maybe already using it.
+I don't know if that's even possible.
+This has been in development for over seven months now.
+Okay.
+And there have been substantial changes to basically every part of the application that you could think of.
+A lot of the features that we have talked about today, they are new in version 2.0.
+The DTOs, they are new in 2.0.
+The SQLAlchemy integration is new.
+Channels are new.
+The WebSocket listeners are new.
+Message spec integration is new.
+Pydantic billing being optional is new.
+So I think it doesn't make a lot of sense to compare it to version 1.0.
+So just in this context.
+Strongly encourage people to use 2.0.
+Yeah, definitely.
+Please use version two.
+We also have the new stores interface.
+As well.
+And so many other features that I forgot about or don't have time to list.
+HTMX request.
+All sorts of good stuff.
+Okay.
+Yeah, there have been so many people, amazing contributors over the last several months spending time on this and delivering awesome features for us, for the community.
+There's been so much work going into this.
+And well, I was relieved when I finally was able to hit the publish button on GitHub and we could finally get it out.
+It's a big, big project.
+That's right.
+A lot of people have already been using version 2.0 in production.
+Cody, you have.
+Jacob, you have as well.
+Basically, since we started development, I actually haven't.
+I've stuck on 1.5 for a long time.
+Now it's out.
+One of the things I'll add is that the velocity of the project is, it seems to be really high.
+And it's encouraging to see all the contributions and all the edits that everybody's making.
+And so I, for one, I'm really excited about what it's going to look like in a year.
+I think we've got a lot of opportunity ahead of us and looking forward to seeing everybody jump in and try things out.
+And if something doesn't work the way that you want it to, feel free to open up an issue or hop on Discord.
+We're all very responsive and would love to kind of hear what our users are thinking about as they build their applications.
+It seems like a great framework.
+I really like the balance you're striking between the micro frameworks and some of the batteries included.
+So congrats to all of you.
+Now, before we get out of here, just I'll ask one quick question, you know, for I usually ask at the end, and that is a quick shout out to some package or library out there that you like and want to spread the word about.
+I guess I'll start.
+DuckDB for me.
+So I have used a massive amount of DuckDB and you can kind of think about it as like an analytical SQLite.
+And so it's in process.
+And so you can start it up and just run SQL directly from your Python process.
+And so the project that I'm working on at Google actually has quite a bit of DuckDB as kind of this like middle ETL piece where data gets ingested.
+We do things in DuckDB and then that actually gets exported to BigQuery or other database engines.
+And so this really has kind of opened up the flexibility of us to be able to do quite a bit of transformations, just in RAM without having to write to disk.
+That's cool.
+An in-process SQL lab database management system.
+Cool.
+He's been recruiting us to use DuckDB for quite a while now.
+And he succeeded.
+That's cool.
+I love what the standard library has, but Qlik is like one of my favorite CLI building tools.
+Rich is the thing that makes you make your terminal beautiful.
+But there's this really cool package.
+I mean, you can use them both separately, but rich-qlik.
+And it's what we use for our CLI.
+You have the great Qlik CLI building stuff, but then rich on top of it automatically makes everything pretty.
+That's cool.
+So it's like all the magic and niceness of rich, but available for Qlik, like colors and your help documents.
+I haven't gotten to check out Sebastian's typer yet, but I've seen some screenshots and it's sort of similar.
+I don't know a whole lot about that, but I think it also uses rich, right?
+I think so.
+Nice.
+All right, Yannick.
+Well, for me, it's got to be message spec because it's just...
+So if you do any kind of JSON parsing or serialization or message spec parsing or serialization or data modeling that you might usually want to do with a data class and want to add a bit of validation on top, or just if you're curious, you should absolutely check this library out because it's super amazing.
+The author is really, really great.
+I can just give him just a huge shout out because he's done such a great job at supporting our integration with it.
+It has been quite a tight collaboration at some points because when we started integrating it, there were a lot of things where we felt like, okay, so, well, we kind of can't use it right now because of this reason or that reason.
+And he's been so responsive and helpful in finding ways for us to work around that or just straight up implementing features that were missing for us.
+And it's really...
+That's pretty awesome.
+I can't thank him enough.
+It's really great.
+It's a pleasure to work with him.
+And it's an awesome library that everyone should check out, I think.
+Cool. That's news to me.
+So I will definitely check it out.
+All right. Well, thank you all for being here.
+Final call to action.
+People want to get started with Litestar.
+What do you tell them?
+Go to litestar.dev.
+You can read the docs.
+Use it 15 minutes, 30 minutes.
+You'll know if you like it or not.
+Join us on Discord if you have questions.
+We're happy to help answer anything that may come up.
+I don't think I can add anything valuable to that anymore.
+All right.
+Well, yeah.
+Sounds good, guys.
+Thank you for being here.
+Congrats on the project.
+Thank you, Michael.
+Bye-bye.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm/Sentry and get started for free.
+And be sure to use the promo code talkpython, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show.
+Open your favorite podcast app and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at /iTunes, the Google Play feed at /Play, and the direct RSS feed at /RSS on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm/YouTube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+Bye.
+Bye.
+this is a test.
