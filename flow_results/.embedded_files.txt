@@ -1679,3 +1679,16 @@
 432-beanie-pydantic-upgrade.txt575
 432-beanie-pydantic-upgrade.txt603
 432-beanie-pydantic-upgrade.txt63
+433-litestar.txt127
+433-litestar.txt191
+433-litestar.txt255
+433-litestar.txt319
+433-litestar.txt383
+433-litestar.txt447
+433-litestar.txt511
+433-litestar.txt575
+433-litestar.txt63
+433-litestar.txt639
+433-litestar.txt703
+433-litestar.txt767
+433-litestar.txt830
