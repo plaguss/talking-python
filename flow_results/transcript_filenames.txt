@@ -431,3 +431,5 @@
 431-visualizing-cpython-release.txt
 432-beanie-pydantic-upgrade.txt
 433-litestar.txt
+434-mobile-apps.txt
+435-pypi-security.txt

@@ -409,5 +409,7 @@
   "430-gradio.txt": 16128,
   "431-visualizing-cpython-release.txt": 14297,
   "432-beanie-pydantic-upgrade.txt": 11557,
-  "433-litestar.txt": 13940
+  "433-litestar.txt": 13940,
+  "434-mobile-apps.txt": 13837,
+  "435-pypi-security.txt": 13378
 }

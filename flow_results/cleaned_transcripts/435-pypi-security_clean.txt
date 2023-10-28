@@ -1,0 +1,838 @@
+Do you worry about your developer data science supply chain safety?
+All the packages for the Python ecosystem are much of what makes Python awesome.
+But they are also a bit of an open door to your code and machine.
+Luckily, the PSF is taking this seriously and hired Mike Fiedler as the full-time PyPI safety and security engineer, not to be confused with a security developer in residence tapped by Seth Michael Larsen.
+Mike Fiedler is here to give us the state of PyPI security and their plans for the future.
+This is Talk Python to Me, episode 435, recorded September 18th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm at mkennedy, and follow the podcast using at Talk Python, both on fosstodon.org.
+Keep up with the show and listen to over seven years of past episodes at talkpython.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at talkpython.fm slash YouTube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Sentry.
+Don't let those errors go unnoticed.
+Use Sentry.
+Get started at talkpython.fm slash Sentry.
+And it's also brought to you by us over at Talk Python Training.
+Did you know that we have over 250 hours of Python courses?
+Yeah, that's right.
+Check them out at talkpython.fm slash courses.
+Hey, Mike.
+Hey, Michael.
+It's awesome to have you here.
+Thanks for having me.
+I'm really excited to be here.
+Yeah, I'm excited to have you.
+It's interesting to talk about security.
+I got to tell you, talking about security just makes me nervous.
+Why is that?
+Well, two reasons.
+I feel like when you talk about security, you're kind of sticking your head up and people are like, let me see if I could whack that.
+You know, not everybody, but a few people in the world, right?
+But it is the internet.
+So if you take a very, very small percentage and multiply it by billions, it becomes non-zero.
+And then, you know, it's just one of those things.
+It's like trying to prove the absence of something.
+It's very hard to prove that you're not missing stuff, some step.
+It's very hard to prove that you haven't, that there's not a, you know, you've got all the controls and there's not one control you forgot.
+Right.
+In that regard, probably more so.
+It's pretty tricky.
+The way I've often thought about security is it's a spectrum, right?
+I used this quote a million years ago.
+I don't know who said it first, but the most secure computer is powered off and buried in six feet of under concrete, right?
+But it's useless, right?
+It's very secure, but nothing in there is useful.
+So if we take that as like a crazy extreme of secure and say the most insecure computer is, you know, powered on, has zero password control, connected to the internet and auto publishing IP data, so that way anyone can come and do whatever they want.
+All right.
+So that's the other end of the spectrum.
+That's a really bad situation.
+There's a fine balance that every software application system company has to kind of navigate to figure out where along those two crazy extremes, where do they fall and where are their kind of risk thresholds of tolerance are?
+Like what would it cost me to add more security?
+Well, I could, you know, lock down all of my users and not allow them in unless they come to the front door and show a picture ID, right?
+Like, okay, if that's how we want to secure our building, that's one way to do it, but that'll slow down the ingress to our building.
+So we issue our employees badge cards and we assume that they act in good faith and they don't kind of lose them and report if they lose them.
+Oh, great.
+So that's kind of a middle ground where you kind of delegate some of the security to the individuals and just kind of, you have to figure out where your security is and what you're willing to do and sacrifice in order to get it.
+Yeah, I totally agree.
+Wild sidebar.
+I can't believe the internet in its early days was like you described, like no NAT firewalls that stop direct access, no passwords.
+We might want to know who you are just so we can assign the files more conveniently to you, you know?
+Yeah.
+I hearken back to like the bulletin board days where you would dial up into somebody's random computer and you would do stuff in there.
+And I hosted a BBS and I interacted with others and it was like, we were all generally operating in good faith because we wanted to kind of play together.
+And not until much later did bad actors saying, you know what, I see how I could take advantage of this in a way that suits me and not you.
+To which we started to say, all right, well then how do we control for these things?
+Today that conversation comes into modern systems development of secure by design, right?
+Or a lot of folks will say shift left, right?
+Take security into account much earlier into the life cycle as opposed to, oh, we have to tack this on at the end.
+So I think the evolution of the internet was necessary for us to get to here.
+But as we're seeing newer protocols develop, those are taking this more secure by design approach.
+Yeah.
+In depth and with layers.
+Were you a trade wars fan?
+Oh man, that's a name I have not heard in a very long time.
+That was a good one though.
+Yeah.
+I was very much a news and mail kind of relay kind of kid.
+Just wanted to see what was going on.
+Got very much involved in like understanding how the pretty good privacy would allow you to sign your messages so that way other folks could believe that those were you.
+Kind of like a test to truth and that kind of fell apart because again, these are all imperfect systems.
+They were, but it was such a world full of possibilities back in those days.
+I remember even just sending a mail and getting it back through that whole systems of relays was mind boggling.
+At the time I was living on top of a mountain in the middle of Israel and having that ability to connect with other people who there's no way I was ever going to see this variety of people back then.
+Like Oh, this opened the world.
+Right.
+Yeah.
+And that kind of fueled my desire to like, okay, what else can I do with these computers with these systems?
+And Oh wait, there's this internet thing.
+All right.
+Well, my mom's going to be ticked off because I'm tying up the phone line for hours and like, all right, well, let's just have some fun.
+Yeah.
+That's when call waiting was the nemesis.
+So I bring, I kind of focus on that a little bit because while we're going to talk about things that are not necessarily positive or people trying to do negative things to something that we all love and has been a very positive thing for the Python ecosystem.
+I do want to point out mostly technology is doing really awesome things for people like opening these doors and educating and connecting.
+It's just some of the bad people, they like to connect and bad ways.
+So before we get too far down that let's, let's just have you give people a quick introduction about yourself.
+So, so they all know you.
+Hey everyone.
+I'm Mike Fiedler.
+I'm in New York city and that's where I've been living for the last 15 years, I say, I think.
+And I've been working in software development systems engineering for over 30 years across a couple of continents, variety of different companies.
+And for the past two years, I think, or three, I've been an active contributor to pypi.org.
+Prior to that, I was contributing to a lot of Ruby projects, the chef ecosystem.
+And I've worked at a variety of different companies, both startups and enterprises.
+You may have heard of some like Datadog, Warby Parker, MongoDB, Capital One, just kind of like working through different scenarios and learning different industries along the way.
+For the past year, I've been, well, since January, I've been focusing pretty much purely on pypi.org.
+You work for the PSF officially or what's the story?
+Yeah.
+As of August, I was hired to come on full-time.
+We thank you to our grants from Amazon web services, AWS, and some other folks that are chipping in to fund this pypi safety and security role.
+But the PSF got some funding and I am the first full-time engineer to focus on pypi.org as a full-time.
+In the past, you've spoken to some other folks who were contracted out to build out different aspects or features, but now I'm a full-time maintainer.
+Yeah, that's really cool.
+You know, the developer in residence at Lukashlanga is playing, working in that role now.
+I feel like that was the first one of these types of roles, but now there's a couple, right?
+Yeah.
+I mean, the PSF is a nonprofit organization, very small staff.
+I think we number a total of 12 and of those 12, I think only about five of us are engineers and everything else is volunteer based.
+The first developer in residence program, which is Lukash, has been successful enough that we got another organization and grants to fund the security developer in residence, which Seth Larson is doing.
+And he is kind of focusing on the wider Python ecosystem as a whole.
+Whereas my role is very much more narrowly focused on PyPI.org and the ecosystem surrounding that.
+So that way, you know, we can focus on specific targets around security for the packaging world as opposed to the Python core.
+Okay.
+Well, I do believe if you talk to people about why they like Python and especially why they stick with Python, the language is good.
+You can do cool stuff with it, but it's pip install, say your name, say the name of your useful library that just brings so much and makes it so sticky and useful and productive.
+And so making sure that we have trust and pip install is really important.
+Last year, I think Dustin Ingram came on and talked about some of the stats that he had pulled together that speak about like how much PyPI.org is used.
+That doesn't even count for the countless folk out there who are mirroring PyPI packages.
+So that way they can have a local cache, you know, deal with corporate firewalls or whatever need, right.
+But it's true.
+There's the very popular request library or the Django project.
+pip install Django, and you have all the things that you need to start a Django project.
+Right.
+And the speed at which the folks who are kind of working on the tooling like pip or some of the other alternatives out there to enable users to get those packages is such a wonderful tool in anyone's toolbox.
+But then very often folks figure out, forget that there is an entire kind of package universe behind what they just did as a consumer.
+Right.
+So pip install Django is, yeah, I got this thing.
+It installed it.
+Where did it install it from?
+How did it get there?
+Who put it up there?
+Why is it there?
+All of those questions, most people go their entire career with not even having to worry about or think about.
+They're just like on the consumer side.
+But then on the producer side or the package maintainer or project maintainer, that's, there's a whole other slew of things that one has to worry about.
+Yeah.
+There's some stuff we'll talk about in there, which will be really fun.
+I think also there's the third level of just the people who run IPI and the infrastructure and the stats behind it.
+I mean, maybe give us a quick, I kind of started us off down this path.
+Maybe give us a quick statement for those who don't necessarily know what PyPI is, but I think more interestingly, maybe try to give us some of the stats about the scale of things behind the.
+Sure.
+I mean, I haven't, I haven't computed the, the runtime stats in a little bit, but pypi.org stands for the Python package index.
+And it's distinct from other things that have pypy in their name, which is a different runtime.
+But pypi.org is a package index, very much kind of a, a grocery or a, a store where you would pick up ingredients for the thing that you want to bake, right?
+If you wanted to bake a cake, you need your ingredients.
+What kind of flour are you going to use?
+What kind of sugar?
+Sure.
+There's different kinds of flour and sugar.
+Which one do you want?
+How do you know you go and find one and where the package index helps is we store kind of publish all the different kinds of flour and sugar that you might want that other people have spent time developing.
+That doesn't mean that there's only one type of flour, but there's a variety and we just make it easy for people to publish their projects.
+And as you've highlighted, there's over 480,000 projects live on PyPI right now and over 4.8 or almost 4.9 million releases.
+And a release is not a one-to-one to a project.
+A project may have many releases.
+So for instance, if there's the requests library and they publish a new version that comes as a release.
+And then beyond that we have files and files map to releases as you could have a source distribution.
+So there's like literally the source code of a given release, or you could have compiled wheels for different platforms.
+So there's a lot more files than there are releases and there's a lot more releases than there are projects.
+And then on the, like the last stat that we show on the front page is the users.
+We do have over 740,000 users on pypi.org.
+That doesn't mean that these are active users, but they have at some point signed up for an account on pypi.org.
+That's a huge number.
+And these are not people who might pip install a thing.
+These are people who for some reason or other are interested in potentially creating content for others to use.
+Exactly.
+Today, the only way you can publish a project on PyPI is by having a user or, you know, it starts with a user.
+There's other ways to publish, but you have to have a user to kind of start the process.
+And a lot of folks have started to kind of get the idea that if this project needs long-term maintainership, right, it's not just me.
+Maybe I should ask somebody else to help co-maintain this.
+So it's also not a one-to-one mapping of users to projects or releases or something like that.
+For sure.
+This portion of Talk Python to Me is brought to you by Sentry.
+You know Sentry for their error tracking service.
+But did you know you can take that all the way through your multi-tiered and distributed app with their distributed tracing feature?
+Distributed tracing is a debugging technique that involves tracking requests of your system starting from the very beginning, like a user action, all the way to the back end, database, and third-party services.
+This can help you identify if the cause of an error in one project is due to the error in another.
+Every system can benefit from distributed tracing, but they're especially useful for microservices.
+In this architecture, logs won't give you the full picture, so you can't debug every request in full just by reading the logs.
+Distributed tracing with a platform like Sentry gives you a visual overview about which services were called during the execution of certain requests.
+Aside from debugging and visualizing your architecture, distributed tracing also helps you identify performance bottlenecks.
+Through a visual like a Gantt chart, you can see if a particular span in your stack took longer than expected and how it could be causing slowdowns in other parts of your app.
+Learn more and see some examples in the tracing section at docs.sentry.io to take advantage of all the features of the Sentry platform.
+Just create your free account.
+And for all of you Talk Python listeners, use the code TALKPYTHON, all one word, and you'll activate a free month of their premium paid features.
+Get started today at talkpython.fm slash sentry dash trace.
+That link is in your podcast player show notes and the episode page.
+Thank you to Sentry for supporting Talk Python to me.
+Some of the changes coming, I think, allow for like, almost like a GitHub organization within PyPI, right?
+Rather than, well, we're going to create an account and that one account is for all of AWS, for example, which is not really the right granularity, probably.
+It definitely isn't, but it historically has been, right?
+Like that is just a feature we had never built.
+It was never a focus, but over the past year or so, I think we got funded to build out some of the organizations aspect.
+We have launched the community organizations.
+So that way, if you're running a, an open source project or an ecosystem there, you can sign up today and get an organization name.
+We are still working through a long backlog of organizations in order to approve them.
+It still requires a, an admin to do so, but we are still working through some of the complexities around corporate organizations when it comes to just as a nonprofit, how can we kind of figure out how to support corporations properly?
+Yeah.
+I've always thought that that was something of an opportunity to work with corporations more closely on PyPI and indirectly through the PSF.
+Your role exists because of these grants, because connections with certain high profile and high consumers of Python tech companies, right?
+Like AWS and others.
+But there's tons of companies that have things that support their product and they're at least their developers work with and having a way to make them feel more at home on PyPI I think is a good idea.
+Beyond what lots of organizations may do is, you know, have some of their in-house engineers contribute to PyPI.org to the warehouse code base.
+It's open source.
+Everything you're looking at is open source.
+That's where I started.
+And it's, that's the easiest way of like, Oh, you want this thing?
+Open an issue, talk about it with us.
+You know, if you want to go ahead and put some effort behind it, we'll welcome that too.
+But there is a, a wiki page out there of like packaging fundable improvement projects of like, all right, if you're considering throwing some money at the problem, here are some things we've thought about and would love your assistance with.
+And that like there's other ways of just like straight up funding a role that can focus on a particular thing.
+Excellent.
+All right.
+Let's talk about supply chain issues.
+We were talking before we went live here that probably the biggest side of security or the biggest, at least from my perspective, what seems like a very huge opportunity for people to do bad things is to just upload malware basically of different ways.
+Right?
+And I don't want to talk about hacking PyPI org itself or other stuff, but I think that that's probably quite well covered.
+And it's more about, can I get trick somebody and through various ways of installing something that they, they didn't.
+And that generally falls under the supply chain security side of things.
+So I wanted to just point out three examples that just show this is a industry wide problem, not necessarily a PyPI problem, but there is a PyPI manifestation of it.
+Right?
+Yeah.
+So just to lay the groundwork for folks who aren't familiar with supply chain attacks, the notion is that instead of an attacker trying to get onto your computer, they're going to go after something that they have a high probability of knowing is going to be on your computer through for the solar winds as kind of an administrative action.
+Well, you know, many, many solar winds were installed on servers, on computers.
+That's part of the supply chain that it's not, I'm not going directly after you.
+I'm going after something you consume.
+Right.
+And it can be very, very meta, right?
+So one of the examples that I would say that that falls under is this thing called Xcode ghost.
+And so I believe this was primarily a Chinese problem, basically because in China, there were a lot of app store developers who weren't either weren't registered as Apple developers or for whatever reason, didn't go, maybe it's just a latency thing.
+Didn't go through the app store to get their Xcode or go through the developer portal.
+They just found like a local mirror.
+What are those local mirrors?
+What could go wrong?
+I just, I'll just get it from, you know, this IP address instead of apple.com.
+Right.
+Yeah.
+So what it did was it was a backdoored version of Xcode.
+So not, they weren't attacking even the things that people were using.
+They said, let's take over the developers tool chain.
+So whatever they happen to be building, we don't know what that is, but we'll install a virus into their app.
+That Apple go in the app store, then whoever installs that app, we'll have it right.
+These things get very indirect.
+This is kind of the, the challenge is like nobody until somebody surfaced this as an attack, right?
+Nobody thought this was a problem.
+This is kind of earlier to your comment of like, how do you disprove the evidence, the existence of, of a, of a problem.
+And a lot of it is just like, all right, we gotta, we gotta think about every aspect that goes into producing a given piece of software.
+But like the strongest answer here is don't download random stuff from people on the internet.
+Right.
+Like I'm sure that this one in particular had a good reason for having a local mirror, but if you're going to local mirror it, then who is the local mirror and what is there?
+What are they doing?
+Right.
+How, what kind of attestation or assurances do you have that they haven't modified anything in the process?
+It's very tricky because I might absolutely trust some company out there that's building a very popular, they have 10 million downloads like that.
+Surely that's fine.
+But one of their developers or one of their consultants to one of their developers may have, you know, misappropriately gotten their tools.
+And it's very hard from the outside to even know that that could be a problem.
+So these things are tricky.
+Yeah.
+I mean, the good news is that there's a large volume of security companies out there who, you know, make their bread and butter by scanning and looking for patterns that looks, you know, sneaky, tricky, and they spend a lot of investigative time digging into these.
+We get lots of reports from the, from those types of folk of like, here, this is a new package.
+It looks fishy and here's why.
+And then we, we take action on those.
+I hear you.
+Hypo squatting was a big issue for a while.
+That's a form of supply chain attack.
+Like here, this Xcode ghost is we're going to get people to use a fake Xcode or a broken bad Xcode with that they think is fine.
+Right.
+Instead of trying to say, take over Django, the package and do some militia to it, try to take over Django or, you know, whatever, right.
+Some common misspelling of that and upload that package.
+And you could even embed Django.
+Right.
+And so it still functions.
+I don't remember it being spelled this way, but it's working.
+So it gotta be fine.
+Yeah.
+Typo squatting is, is, is very much a prevalent problem.
+Right.
+And because like, I can't prevent you from making a typo.
+Like I literally can't, if you type in Django, that's it game over.
+Right.
+What I can do is look or receive reports that Django exists.
+It looks malware and let's just take that down.
+Let's not do that.
+Right.
+Yeah.
+And I was going to say when it comes to type of, oh, you talked about typo scouting and, and I was reminded of a, of, of an article I remember reading around DNS record bit flipping where some computers, some browsers would not properly process a given bit in a memory register for a DNS record.
+So this author figured out what those bit flips would be for popular DNS names, registered those DNS names and started just harvesting traffic and said, you know what, this is not anything you can do.
+This is just how browsers and memory work.
+And that was, I don't know, about six, seven years ago.
+And I believe it's been fixed since, but it was like, yeah, there's sometimes there's just not anything that you did wrong.
+It's the ecosystem you're in is doing things in a way that you don't expect for something as nefarious as, as like DNS bit flipping.
+Like this is where like having outbound firewalls can help a whole lot to say, don't allow traffic that I didn't initiate in some manner.
+And if I did have, I have, I initiated the traffic to this address before.
+Do you remember zone alarm from the early two thousands?
+Yes.
+So this is before this is, this harkens back to a slightly less naive version of, I can't believe there was no passwords on the accounts, just on the open internet.
+But windows 95, 98, there were no firewalls.
+And I, I was at a company that was based inside of a university where we all got ethernet and every computer that plugged in, got its own IP address and all sorts of crazy stuff, but there were no firewalls.
+And I remember when that thing came out, I thought, you know what, maybe I'm just gonna go around and put this on all the dev machines.
+Like it's kind of insane that we have this incredibly insecure software just on the open internet.
+And so I did in all the, when I started, it used to say, do you want to let such and such thing act as a server?
+Do you want to let IIS or, you know, NGINX or this type of thing.
+Sure, that can be a server.
+Then the next pop-up was, do you want to let notepad.exe be a server?
+I'm like, huh, that's not probably what it should be doing.
+Yeah.
+That doesn't sound right.
+I said, no.
+And then the next one, and the next one, the whole companies and notepad.exe were being servers and I'm like, this can't be good.
+And it turned out they had, something had infected it.
+And until I put on one of those outbound firewalls, how do you know?
+Right.
+No one knew there was no indication we had, you know, super fast internet.
+It wasn't like it was dragging it down.
+I don't even remember what it was doing, but it was bad.
+The number one thing that I think we can learn from all of those things is that awareness is the biggest part of security, because if folks aren't aware that downloading something from the internet could be a danger, then they're just going to download it and run it.
+If somebody who had a previously version of, you know, software working on their machine suddenly pop up and say, this has been modified.
+Are you sure you want to open it?
+So many of us just click okay, without reading the dialogue.
+It's like, well, wait, think about that for just a second, because you are the biggest kind of enabler and disabler of security, the human behind the keyboard, because you probably have some administrative rights on your computer that allows you to do some stuff.
+And in the example with Notepad EXE, I think today, if we were to try to do that on some popular developer environment like VS Code, VS Code does act as a server in a lot of cases.
+So it's like, I don't know, should this work as an inbound server or not?
+I don't know.
+Maybe it's just part of the local language server that I need for autocomplete.
+Or maybe it's not.
+It's getting more subtle every day.
+It is absolutely getting more subtle.
+Even Zoom had like a local loopback web server thing, I think for a while.
+So before we move off of this typo squatting part of the conversation, out in the audience, we've got a pretty decent question here.
+What's the possibility of something like a verified badge for popular packages?
+I mean, if Twitter can charge $8 a month.
+No, I'm just kidding.
+I don't think they're called Twitter anymore.
+But the artist formerly known as Twitter.
+The challenge there is what does verified mean?
+This is something that we kind of introduced some features later on that we'll talk about.
+But this notion of verified is like, well, verified by whom?
+Where does the level of trust?
+Because if a supply chain attack happens for Django, so if you were to like search Django here in PyPI.org and we get Django, all right, we've got Django, the second line Django 425.
+And if we were to enter there, like, how do we know?
+This is a thing, right?
+So I could add a badge here, but that doesn't give me any confidence that any of the Django folk, which are great people, that one of them didn't get compromised and suddenly a new version was pushed.
+So verified, I guess it's what does that mean to whom and why?
+Because the last thing I want to do is tell people, give them a false sense of security when honestly you're downloading software from the internet.
+If you don't have a process to vet what it is you're doing is doing the thing, then you should probably look at that aspect of a, we vetted this version of Django.
+We got these hashes, we got these releases, we pin this dependency.
+We're happy with this.
+And then when you upgrade, you kind of do a similar evaluation.
+There's a bunch of projects out there like PyUp and safety and others that will publish, you know, and scan for advisories.
+There's also the PyPA advisory database for packages that we know have some problems with them.
+So that way you can use other tools to audit what you have installed to see if you have something smelly.
+But we are thinking about what it would look like to add a, this release and these files of a given project have been published under, you know, stringent, you know, more secure methods.
+Yeah.
+I certainly see that a verified wouldn't prove that the Django devs hadn't, you know, somebody could have taken over their computer and swapped out like twine or poetry or whatever they're using to upload the package and do exactly what they did with Xcode Ghost basically.
+Right.
+Something equivalent to that.
+So the last part we want to do is like, we don't want to give people a false sense of security and say, well, PyPI told me this was okay.
+And then they find out it wasn't because then that looks really bad for us.
+But on the flip side, we are looking at how do we provide mechanisms and measures to publishers to reduce the potential for the situations that you described to happen.
+This portion of talk Python to me is brought to you by us over at Talk Python Training.
+Let me tell you about one of our really popular courses.
+HTMX plus flask modern Python web apps hold the JavaScript.
+HTMX is one of the hottest properties in web development today.
+And for good reason, you might even remember all the stuff we talked about with Carson Gross back on episode 321.
+HTMX along with the libraries and techniques we introduced in our new course, will have you writing the best Python web apps you've ever written clean, fast and interactive all without that front end overhead.
+If you're a Python web developer that has wanted to build more dynamic interactive apps, but don't want to or can't write a significant portion of your app in rich front end JavaScript frameworks, you'll absolutely love HTMX.
+Check it out over at talk Python dot FM slash HTMX or just click the link in your podcast player show notes.
+All right, let me throw some ideas out to you and tell me what I think.
+So as I think about this, especially when the very first news a couple years ago, I can't remember exactly the timeframe, but not very long ago, the first malicious PyPI package, you know, NPM had been getting whacked on for a while because JavaScript yellow.
+But you know, when it came to PyPI, I was like, okay, this seems to be a little more serious and more pervasive.
+And they were often typo squatting type of issues, or people would introduce some package and say, here's a cool thing.
+You should check it out.
+And it's really a virus or one of those types of things.
+And so one of my thoughts, one of the metrics I would have liked, or maybe in the future will like to apply to my local Python environment is don't let me install packages that are too new, or don't let me install install packages that have too few downloads.
+And like, give me a mechanism to say that, like, I don't want to ever say pip install something and that something has not existed on PyPI for less than a week.
+I don't ever want to be able to say pip install something.
+And that thing has less than a thousand or 10,000, whatever downloads unless, and they could say, Nope, you can't install that.
+It breaks your rules.
+You could say, okay, no, I actually uploaded this.
+I really need to, you know, you could do like a pip install of force dash dash force, or you know, some kind of override.
+But by default, if I could just say, you know, it has to have at least 5,000 downloads, or I just don't want it.
+I feel like at that point, somebody would have discovered, Oh, you know what is actually using a hundred percent CPU usage and crypto mining or whatever it happens to be doing.
+I don't want to be the first Guinea pig in the world to discover this.
+What do you think about this idea?
+The download count one is always an interesting one, right?
+It's a topic that comes up a lot.
+And like, I can tell you personally from experience that writing a little loop to increase download counts is super easy.
+Interesting.
+Okay.
+Like write a wild true pip install something and like you'll drive up download counts that will be meaningless in the grand scheme of things.
+So you could say, well, maybe make it like, it's got to have, you know, a thousand distinct IP addresses, but then, you know, if you own a botnet, then you're good to go.
+Okay.
+Fair.
+This becomes the, like the cat and mouse game of like, all right, well, what is something that is good?
+Today we have a mechanism where we don't advertise new packages that have been there for, I think under a week to any kind of crawlers.
+So any search engine crawlers.
+So if you were going to like Google for Python, Django, and it was a brand new package, you wouldn't find it via Google because we wouldn't advertise that for indexing yet.
+Right.
+But after a week, like we do.
+So that's one method that we have for preventing some of these like newer packages from getting widespread visibility because they, you know, everything is a webpage.
+They are all subject to search engine optimization.
+Somebody could craft their readme to, you know, be the best hit on Google and therefore they'll show up first.
+And with all this crazy AI stuff, it's only getting easier.
+Hey ChatGPT, I would like to create a page that is like the Django PyPI page, but I want it to rank highly for this.
+Something that we are talking about internally of like, how do we put packages that are brand new, either from some heuristic of a brand new user or a brand new version, or differs enough from the previous versions and kind of put those in kind of a holding or a time out zone to let our security research partners who are really excellent at like just listening to the package feeds and going after and just running all their analysis on them to give them first crack.
+Right.
+And then when they see, okay, out of these hundred thousand packages that were published in the last 24 hours, 1% need to be addressed or reviewed by a human.
+They can raise those red flags and then we can kind of apply the administrative action that is necessary in order to keep the users from getting too much of the bad stuff on their computers.
+What about some kind of whitelist or a check back to like sneak or one of these other companies that you kind of referenced there just a moment ago?
+Having like published allow lists, right?
+These are very prevalent in large corporations that have very strong security policies and they have teams of folks that will maintain internal mirrors of a package index.
+So they will disallow any pip install of anything unless you're using their package index.
+And I think that is another tool in the security toolbox to have people who are that like security focused to say, we will only allow in the things that we have already tested to be true.
+We vetted them and those kind of match our heuristics.
+If you scroll down a little bit on the Django page, almost every sidebar to every one of these has these statistics.
+This particular one shows GitHub statistics because this package has a GitHub URL, but there's also libraries.io, which is not affiliated with pypi.org.
+They're just a really great service and you can search for packages of any shape, kind of any ecosystem, but they have a really good kind of ranking system.
+Again, if it works for you, the crux of it, don't install garbage off the internet, right?
+Check out what you're doing.
+But by using something like libraries, which I don't know why that didn't load.
+Probably was just getting a virus.
+I probably misspelled it.
+Oh yeah.
+Just kidding.
+But they offer a nice set of stats around a given package.
+So you can try and be a little bit more informed on your own.
+The challenge there remains that nothing is going to tell you on libraries.io or PyPI if somebody has uploaded malicious software and this is a bad one.
+The best we can do is once we know about it, we handle it.
+Yeah.
+I feel like PyPI has been pretty on top of it.
+We try.
+I published a blog earlier today where I pulled together a lot of analytics and stats from our inbound malware reporters and it's looking pretty good.
+We handle over 80% of inbound reports in under 60 minutes.
+I go into the article about the whys and wherefores, the timeliness matters and the response time because the longer something is out there, the worse it can contagion to other folks.
+So we try and do as quick as possible, often under like five to 10 minutes, but we also have to do some investigation and kind of like confirm that the report is accurate.
+We don't want false positives.
+Most of our researchers don't give us false positives.
+So shout out to all those folk, but it's hard and time consuming.
+I remember one of the more recent IPI supply chain issues where somebody uploaded something bad was attributed to all these different ATP and hacking groups have cutesy names like the solar winds was by something bear.
+Hold on.
+Which bear?
+Cozy bear.
+That's the kind of bear it was, which is really Russia state actor hacking.
+Right.
+And one of the PyPI ones was North Korea.
+I think they were doing crypto mining on computers, which seems like a real big waste of I have access to the server in a bank.
+But anyway, it works for them.
+It works for them, you know, like, but the reason I bring this up is like, it's you all have a serious challenge in that if you're up against state actors from a security perspective, like that's not just script kiddies or some weird automation or, you know, like those are you guys got to be on top of the top of your game.
+Right.
+This is again, where I think relying on our ecosystem of security partners is so important because they will corroborate intelligence that they've garnered from other ecosystems that are beyond PyPI and be able to identify these kinds of actors.
+Me, I see kind of just a slice of what the universe has.
+They're going to see a different slice, but broader in spectrum and not necessarily as focused on one particular ecosystem.
+So working together, we can kind of do the best that we can for all the users out there.
+Excellent.
+So let's talk about hypo squatting, which is serious, but also kind of the silliest, kind of not that big of a deal because recommendations could be like, you know, actually use a requirements management system rather than just every time you create a new environment, just type pip install X, Y, and Z.
+Like the chances you might fat finger that versus pip install dash R requirements, TXT or, you know, poet something with poetry or whatever.
+Right.
+So that helps a lot, although it's not perfect.
+The other one is more the Xcode go style.
+Like what if somebody were to take over one of the other systems and you all had over here, you have a new two factor requirement or high PI.
+You want to talk about that?
+Yeah, absolutely.
+This also was covered on an earlier podcast of talk Python where I think in 2022, we had announced that we were starting to ratchet down the amount of potential.
+I think you got the wrong link there.
+I do have the wrong link.
+Keep going.
+It's Dustin, Dustin Ingrams.
+Yes, exactly.
+I thought I pulled it up.
+I put the other one twice.
+There we go.
+The 2FA story is largely, again, we talked about there's about 740,000 users, right?
+These are the publishers of packages, right?
+So if in our use case, we talked about Django devs, right?
+And I'm sorry to pick on Django.
+They're just the one that's up there.
+But if one of the Django devs was using a classic problem, which is an email expiry or a domain expiry attack.
+So let's say I'm a Django admin maintainer and I use MikeDemand.com as my email address, right?
+And that's great.
+Because we don't want to ever, we don't use Gmail.
+We don't want to use or, you know, the dot me or Outlook.
+I'm a good citizen of the internet.
+So I got my own domain.
+Yeah.
+I just haven't been paying attention.
+Right.
+I haven't been paying attention this year.
+Right.
+And then let's say I let it expire.
+Whoops.
+You know, like that happens.
+People forget to pay their bills.
+Or your credit card gets stolen and canceled.
+You forget to renew it there.
+And then the other thing goes to spam.
+Like it could actually be super easy that that happens.
+And it happens all the time, right?
+Like people, there are numerous domains that I've registered over the year that I was like, yeah, I don't need that anymore.
+Obviously I have never used anything from that domain to sign up for anything securely that's there.
+But then someone else can come along and register mikedemand.com, set up an email server, request a password reset, get that email.
+And now they can do anything I could have done before.
+With 2FA, that entire set of problems goes away.
+And we're not even talking about like phishing.
+If somebody fishes my password or if they use the same, if I made the mistake and use the same password on two websites and one website stored it in securely, and they pop that in a breach and you know, now they have my username and password.
+2FA just solves.
+Do you discourage that using the same username and password?
+I absolutely discourage that.
+I find it very inconvenient to have a separate password.
+I just use the letter A. Yeah, that's a choice, right?
+It's a bad choice.
+No, like the amount of tooling out there today, both free and paid for password management is just so pervasive.
+It's almost like irresponsible to not use one.
+I 100% agree.
+Yeah, I was one password.
+I think I don't know if it'll tell me how many I have in here, but I think it's coming up on like 1500 and not quite just just under 1000 different distinct passwords and accounts.
+But you know, a lot of people don't want to pay for it.
+Bitwarden.
+Bitwarden is fantastic.
+It's open source.
+I don't know if you got a recommendation, but you're right.
+It's irresponsible.
+I mean, I'm a one password fan.
+It's just a great tool.
+I used it back when when it was like a single thing and I used it as a as a organization account, right?
+Like I was an admin for our org and like managing that lifecycle was pretty sweet.
+And then it's like, OK, we have this as an organization.
+We have over 400 employees.
+Why doesn't everyone have this right now?
+So you know, it became a good rollout.
+But having a second factor, a two FBA or multifactor MFA, I think, is this notion of something you have versus something, you know.
+So let's say that even by using a password manager, you don't know that password anymore, right?
+You don't remember it, but let's say you do.
+Right.
+Like let's say somebody gets your entire vault of passwords.
+They still don't have this second factor, which is often a time based one time password or web authentication device, which could be a hardware device or a browser fingerprint.
+Like they don't have that.
+Right.
+It's a defense in depth kind of problem that is solving where it's like you need you need to have two things in order to get through this door.
+And if you only have one, that's not good enough.
+And using that capability and having that ability on PyPI user management has enabled us to roll out a higher grade of security for the packages and maintainers of those packages by attesting that, well, we know that this maintainer or this publisher of this package has already secured themselves.
+So against these kinds of attacks.
+Yeah, I can just hear the voices.
+In fact, they don't come through an audio form.
+They come in email like, you know, on that last episode.
+Sometimes they come through on the artist formerly known as Twitter.
+Sometimes they come through an email.
+But like, you know, Michael, you said that two factor will help you realize you don't seem to realize I'm saying I realize so I don't get this email.
+Please don't email me that this doesn't stop phishing.
+Like people could still fish you.
+You go and they could ask you your name and password and they'll ask for your time based authentication and then they're in.
+Yes, that's true.
+But it stops some things and stopping some things rather than going, well, it's not good enough.
+That is certainly not not a responsible way.
+Way to go.
+I think it's kind of like making the argument that if nothing is perfect, don't do anything else.
+Exactly right.
+That's a fallacy.
+If you're going to die, don't get out of bed.
+Right.
+Like, no, like we get out of bed, we go to work, we do our things right.
+We ultimately as sad as it is right.
+We have an end date.
+We hopefully don't know what that is.
+But like, do the best you can while you can.
+That's where I come to from like, this is the best we know.
+Yes.
+Will there be something new and exciting tomorrow that is even better?
+Maybe.
+But until then, let's do the thing that we know to be the best that we can do right now.
+Right.
+Maybe PASCYs will be awesome.
+I don't know about that.
+Yeah.
+But for example, you know, from a phishing perspective, things like 1Password and Bitwarden have plugins for your browsers and they will suggest to autofill on the right domains.
+But if you're on pypi.io, is it a pi.org or, you know, whatever, right.
+If they're on some kind of phishing domain, they will not suggest to autofill.
+Right.
+If you find yourself going to your password manager and going, God, why does this not work?
+Like, let me just copy this over.
+Stop, figure out why it's not working really, really, really well before you somehow subvert this broken extension that won't autofill.
+Right.
+There are ways to limit phishing through these mechanisms, even if they're not perfect.
+Exactly.
+I think I said this before, but like, I'll reiterate it.
+You the human are the best defender.
+Use your logic, use your sense.
+Like don't just click at things mindlessly.
+Take a moment, take a look, see that error message.
+That looks weird.
+Why does that look weird?
+The domain I'm on looks a little odd.
+The little browser lock symbol isn't locked.
+Why is that?
+Hmm.
+Take a moment.
+Notepad.exe once stacked at the server.
+Yes, I want to load it.
+Come on.
+Yes, let it.
+I got it.
+Yeah.
+The reason that I think the news around the 2FA for PyPI.org is not that it exists, but that it's required now.
+I think that's what's different since I spoke with Dustin.
+We've been on a path and as you've got this blog post open, we've been on a path of like starting with the carrot.
+We want to provide as many people in the packaging ecosystem, all the incentive, all the time, all the kind of expectation that they could have in order to set this up voluntarily.
+There was even a wonderful giveaway of hardware security keys that Google sponsored, which is excellent.
+That doesn't mean you need a physical security key.
+You can use them.
+You can use software security keys, Google Authenticator or any other tool.
+Duo Labs has a nice one, but anything in order to kind of move the bar on this 2FA engagement.
+We've seen some decent adoption and it's like, okay, well now let's set a timeline.
+This post by Donald kind of starts the clock on that.
+We are basically drawing a line in the sand that's saying at the end of 2023, if you want to publish a new package, like that's it, you need to have 2FA.
+We've started on that process by requiring 2FA for new users.
+So if you registered today, you need to set up 2FA.
+Like if you've been around for a while and you don't have it yet, we'll still allow you to upload, but we'll send you a notice that's saying, here's what's going to happen at the end of this year.
+And we've slowly been kind of ratcheting down the areas at which 2FA is not required with the intent on basically January, December 31st, January 1st, 2024, enabling the requirement on all accounts.
+So that way we can kind of walk away from the problem of, well, I guess one of the Django maintainers got phished and that's why we had a big issue in the ecosystem.
+Like I don't want that to be the problem.
+But again, apologies to Django, y'all are awesome.
+It's because they're so popular and loved that you pick on them, I can tell.
+Yes.
+Again, this doesn't completely solve all phishing attempts, but it certainly is another layer of defense.
+So I think it's certainly worth doing.
+Now there was a bit of a pushback.
+I think somebody even like rage quit their package temporarily and then said, oh no, I want it back on PyPI when this came out as if it was a big deal.
+And this is, you know, this blog post was from May.
+The deadline is end of 2023.
+In between those two times, GitHub just comes out and goes, everyone gets 2FA right now.
+I don't care.
+Right.
+And it's such a broader, more impactful thing in terms of the many people use Python who are not creating packages, but almost everyone who uses Python is also in some way using GitHub.
+And so it just touches so much more of the ecosystem and people are like, oh, okay.
+I don't know why there was so much blowback in one and not the other.
+But it's an odd thing, right?
+Because on the one hand, PyPI or the index itself, right, has been around for about 20 years.
+This is a long lived concept in the Python ecosystem of having a place where people can publish software freely, no charge, and others can install that software.
+This requirement is a shift, right?
+And a lot of folks are like, well, what else is going to happen?
+It's like, well, probably nothing, right?
+I don't see us talking about other requirements or enforcements unless they're necessary.
+Again, I can't predict the future.
+And if somebody says that like pass keys are the best way and TOTP is broken and proves it, and the industry wide decides, oh, wow, this is not a good idea.
+Let's do this other thing.
+Then maybe we'll do that.
+But until then, this is the best we've got.
+The requirement for 2FA is even on the OWASP top 10 list of why you should be doing this.
+And it's like, this is what governments use, companies use, and auditors use to say, we are adhering to the best practices.
+Because if you had a security vulnerability reported to your company because you weren't using 2FA, auditors will say, well, why not?
+It's in the top 10 list.
+It's like the SQL injection of yesteryear.
+Yeah.
+Just like, just do this, right?
+Just solve this class of problem.
+You will have other problems.
+We all have problems, but solve the ones that we know are relatively easy to solve.
+Good advice.
+I feel like, you know, when the two factor software problem, like that's not good enough, you know, these YubiKeys and stuff are too tricky.
+We're just going to go back to SMS.
+Like that's, that's where it's.
+I cannot believe that my bank will let me use 2FA.
+They forced me to use SMS.
+You might want to check out for different banks.
+Well, it's like one of the top four banks in the U.S.
+It's nuts.
+They also have limits on the length, not lower bounds, upper bounds on the length of the password.
+My, that, that, that I understand why, right?
+Upper bounds.
+I understand why, but it usually boils down to like database design and like the cost of doing a database migration.
+I hear like, I think it's like 12 or something.
+It's very short.
+Oh, that's short.
+That's way too short.
+But here's the thing.
+Do you know, it doesn't matter if you have one letter or a hundred letters, the hash is still the same length.
+Depending on how you're hashing it.
+Yeah.
+But they will not be stored.
+Like if they're not storing the hash, it makes me extra nervous.
+Anyway, onward.
+I'm glad they got the SMS 2FA backing it up.
+Yeah.
+Another thing that I, that I, that I do want to kind of plug on the, the, like the security spectrum and kind of to address the question around like verifiable releases is something that we launched earlier this year, which is called trusted publishers.
+That's right.
+That's alluded to or linked to in the there we go on our docs.pypi.org of what it is.
+Links in the show notes, people can check it out.
+Where we leverage an open standard called OpenID Connect.
+And today we only implement this with one publishing tool called you know, GitHub actions where the service GitHub actions is now delegated to be a trusted publisher for your project.
+When you set this up, you have to opt into this completely.
+We didn't do this for you, but you can now opt in to say GitHub actions is allowed to publish my project.
+And then you can say, you know what?
+None of my humans are allowed to publish the project.
+The computer that is getting a short lived token for like five minutes or 10 minutes, whatever it is, is allowed to publish this package and no one else's.
+And that's how we can start to build the levels of attestation and kind of the software supply chain security to say, I know where the source code is.
+I know the source code that built it.
+I know the builder who built it.
+I know the builder who published it and no one else tampered with it in the interim.
+We're not there to like prove that nobody else tampered, but we are there to say, I can now delegate authority to GitHub, GitHub actions to perform this release for me as opposed to me creating a token in PyPI and giving that token to GitHub actions.
+That's how we did it before.
+Right.
+A long lived permanent token that you put in plain text somewhere, right?
+What could go wrong?
+I mean, usually like an environment variable or a secrets and GitHub actions, they have pretty good ways of securing data, but again, it's long lived.
+So if anything ever happened over there, if anybody dumped a debug log that they shouldn't have, that token could be there.
+So by using a trusted publisher flow, you can now have your GitHub actions deployed directly to pypi.org once the artifact is complete and not have to do that token management.
+So we're getting short on time, Mike.
+What else do you want people to know about what you all in particular, what you're doing at PyPI and some of the initiatives and maybe how they can help?
+The top of mind for me right now is the malware reporting project that we're engaged in.
+And that's kind of linked to at the very bottom of my blog from today, the inbound malware reporting blog, where we are looking to establish what a kind of machine readable protocol would be to interact with security researchers.
+A few of them have chimed in already on what they think of, and we're just kind of building the conversation around what it would look like to report.
+How do you like to report?
+And then we'll proceed with whatever guidance we get there and kind of build out the payloads and stuff like that all the way at the bottom, very bottom, all the way at the bottom.
+And once we have this format in place, we're going to be building out like the infrastructure and ecosystem in order to submit those payloads and then figure out how to kind of put packages in timeout while these payloads are being investigated.
+So that way we can continue to provide a secure ecosystem for all users of pypi.org.
+I think that's great.
+I certainly, you know, these companies that are checking out and just monitoring the flow of packages and scanning them, that's a huge service.
+Is there, there probably is, never will be like a bug bounty equivalent.
+Is there?
+I mean, never say never, but.
+Never say never.
+From that perspective, it becomes a bit of a challenge because then you could start funneling money through a bug bounty program because we are offering an ability for people to create packages and then saying, we're giving you a monetary incentive to report them to us.
+So it's like, well, now we've given you a pipeline for money.
+There's a whole shadow industry of like, you first create it, then you get it popular, then you report it.
+Yeah, yeah, yeah.
+No, I hear you.
+Yeah.
+But you know, no, no ideas too farfetched.
+We like talking about ideas and figuring out what, what makes sense and kind of, again, with a lot of security work is like, okay, well, how can this go wrong?
+How can this fail?
+Right.
+How can it be gamed?
+Yeah, absolutely.
+Well, I, for one, feel better that you're putting all your time and energy into focusing on these problems and seeing how we can make PyPI better for everyone.
+Almost everyone, not for everyone, but for 99.9% of us, for most people, just want to use it in a solid way to build Python software.
+That's kind of why I was drawn to it, right?
+Like to contributing to it is such a foundational piece of modern day infrastructure that it's important that it be safe, secure, convenient, useful to anybody who wants to use it because Python itself is such a ubiquitous language across the planet and beyond that, you know, we want to make it the right thing.
+Yeah.
+Surprisingly, every time you say that statement, it's more true.
+Like that just, that graph continues to go up and in surprising ways.
+All right.
+Before you get out of here, I'll ask you one of the final questions, a notable PyPI package, not malware ridden, but a good, useful one.
+What do you recommend?
+Anything you come across that's awesome lately?
+I'm a huge fan of pytest and I know that, you know, your big pals with Brian Okken, hey Brian, who talks a lot about testing and pytest plugins are a wonderful extension to pytest.
+Yes.
+And there's so many of them out there and there's even like an awesome pytest aggregator of these.
+And I think I have one on here, which is called pytest Socket.
+Nice.
+Which I maintain till today.
+But the one that I want to point out is one that I recently learned about, which is called ICDiff.
+I, the letter C, diff.
+I don't even know if it's on this.
+It's the letter C.
+I gotcha.
+Yeah, there it is.
+So that's not the pytest package, but there's an extension pytest ICDiff.
+We'll get there.
+So this uses that other one.
+But the notion here is a lot of times you get big pytest output if you're comparing, you know, dictionaries, lists or stuff that has lots of data.
+Sometimes detecting the difference is very hard in the terminal and the pytest ICDiff extension will help highlight a lot of these with colors, with spacing, which makes finding the problem much easier.
+Yeah.
+That seems super helpful right there.
+And it does a partial character by character diff and line by line diff with different colors.
+Yeah.
+And the here's what we expected.
+Here's what you got.
+Yeah.
+So I'm learning that there's even more madness to the pretty print.
+So it could say from pprint import pprint, but there's also apparently a pprint pp with ppi.
+Okay.
+Yeah.
+I don't know.
+That's more things to explore.
+It's always, it's going to be in one of those 400,000 packages on PyPI.
+Right.
+It's got to be there.
+And it might be a little different.
+It might be just enough different to meet this use case that is, you know, perfect.
+Yeah.
+So pprint plus plus that's what the PP is like CPP up there.
+Okay.
+Got it.
+Notepad plus plus dot exe.
+It wants to act as a server.
+All right.
+Let's leave it with that.
+I guess a final thing, people are excited to hear about this.
+They want to get engaged.
+You know, they have ideas.
+They want to reach out to you.
+What do you say?
+Open an issue for us on, you know, the warehouse repository, if it's relevant to the warehouse code base.
+If you need to reach me directly, I'm on GitHub as Mike the man.
+I'm on a mastodon as Mike the man at hackyderm.io.
+Or if all of that fails, go ahead and email me at Mike at python.org.
+Awesome.
+Thank you so much.
+Thanks for being on the show and giving us a status report here.
+Absolutely.
+Thanks for having me, Michael.
+This has been another episode of talk Python to me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm slash Sentry and get started for free.
+Be sure to use the promo code talk Python, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show.
+Open your favorite podcast app and search for Python.
+We should be right at the top.
+You can also find the iTunes feed at slash iTunes, the Google Play feed at slash play and the direct RSS feed at slash RSS on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm slash YouTube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+Bye.
+Thank you for watching.
+Please subscribe to my channel.
+you

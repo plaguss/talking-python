@@ -1,0 +1,896 @@
+Are you building a mobile app and wondering where Python fits in in the mix?
+Are you supporting others building these apps with back-end APIs written in Python?
+Can you write your entire app end-to-end in Python?
+Well, I have a great panel put together to discuss exactly this, and they all have a different and unique take on the options.
+Welcome to Lauren Augie, Harut Bozakizan, Andreas Kuhn, Jeffrin, and Joshua.
+This is Talk Python to Me, episode 434, recorded September 9th, 2023.
+This is your host, Michael Kennedy.
+Follow me on Mastodon, where I'm at MKennedy, and follow the podcast using at Talk Python.
+Both on mastodon.org.
+Keep up with the show and listen to over seven years of past episodes at Talk Python.fm.
+We've started streaming most of our episodes live on YouTube.
+Subscribe to our YouTube channel over at Talk Python.fm slash YouTube to get notified about upcoming shows and be part of that episode.
+This episode is sponsored by Sentry.
+Don't let those errors go unnoticed.
+Use Sentry.
+Get started at Talk Python.fm slash Sentry.
+And it's also brought to you by us over at Talk Python Training.
+Did you know that we have over 250 hours of Python courses?
+Yeah, that's right.
+Check them out at Talk Python.fm slash courses.
+Hey everyone, Andreas, Harut, Lauren, Jeffrin, and Joshua, all of you, welcome to the show.
+So exciting to have you here.
+Thank you so much.
+I'm really happy to be here.
+Yeah, great to be here.
+Sam, yeah, it's great to be here.
+This is going to be a really fun topic.
+And I think it's one that puts Python into an interesting space.
+Python's really popular, as everyone listening knows.
+Its growth has been super, super high since 2012.
+And yet it really doesn't play a huge part in mobile apps.
+Although we do have some folks representing Kivi here via their app, which is pretty awesome.
+So I'm very excited about that.
+But it's not the first language you might pick for writing mobile apps.
+If you just say, all I care about is mobile apps, I just want to get started.
+But I think there's a lot of things that Python plays a part in, right?
+Backend services.
+And I'm really excited to hear about the Kivi experience as well.
+So there's a ton of Python people out there who either are building or want to build some kind of mobile app.
+It's obviously one of the most important computing platforms.
+So I think everyone's going to learn from everyone's experience here.
+So I think let's just, I guess I'll go around by app.
+That's the best way I can kind of know to do this.
+And have you all introduce yourself.
+And then actually, let's just have you introduce yourself, then we'll talk about the app.
+So Andreas, we'll go around the Brady Bunch circle of pictures we got on the screen here.
+Andreas, go first.
+Yeah, my name is Andreas.
+I live and work in Stockholm, Sweden.
+And I've been working with Python for about 10 years now.
+And have been working with, I used to work for an online tailor-made suit company, where we developed the platform ourselves.
+And now I'm working with a membership management company, which is a Django app that we are running in the background.
+Nice.
+Very exciting.
+Looking forward to hearing about it.
+Harut.
+Hey, guys, my name is Harut.
+I have been working in Python for like, let's say a decade on and off.
+My background is in applied and computational math.
+So I did a lot of MATLAB in college, and then found my way kind of over into Python, did some data analytics, some data science.
+And then for the past few years, found that building tools for people is actually what I really enjoy.
+So I do a lot of work with data visualization, a lot of JavaScript.
+But if there's one thing that's been consistent in the past 10 years, it's been my Python usage overall.
+Awesome.
+That's kind of how I started as well, building scientific tools and stuff.
+Lauren.
+Hi, everyone.
+Yeah, my name is Lauren.
+I've been programming since 2020.
+Prior to that, it was basically a direct result of COVID.
+Prior to that, I was a live sound engineer.
+So setting up for concerts and corporate events, all that.
+All that went away pretty much overnight in March 2020.
+So yeah, I started learning programming, landed on Flutter.
+That's my main thing.
+Fast forward a couple years, I had finished up a contract with a company called T-Vision Insights.
+Luckily for me, most of their services are written in Python.
+One of the lead engineers there is a fan of both your podcasts, Michael, and gave me a tip that you're looking for a Flutter developer, which brings me here.
+So I was involved in building the Tuck Python mobile app.
+Yeah, now I'm on the Flutter team for an insurance company.
+I did not write any Python until I had finished the mobile app.
+I had sat through a lot of those courses throughout the development process, kind of landed on FastAPI for my backend services.
+Really like it, was really impressed with how easy it was to get started and all that.
+So yeah, that's where I'm at.
+Yeah, awesome.
+I'm really looking forward to talking to you, sort of the interplay of how we work together to build that mobile app.
+And it's just so well-received.
+It's such a solid app.
+The only people who don't seem to receive it well is the app store people.
+We'll save that for later.
+If anyone wants to see me cry, there's a good chance at the end of this episode, I will just be in tears.
+But we'll save that for later.
+But I do want to ask, I mean, I think that's a really interesting background and people, a lot of people listen to this show and they feel like, they hear from guests who are like, yeah, I got my computer science degree.
+I was like an accelerated student.
+So I got it when I was 16.
+And then, you know, like, they're like, well, I admire this person and they're doing awesome stuff.
+But I didn't get my computer science degree at 16.
+Like I was still in high school and I didn't start programming until I was 30 or, you know, and is there still a place for me?
+And I think you've super excelled at that in honestly, with Flutter and Dart, which is not one of the simpler beginner, more beginner friendly language.
+Like it's a pretty seriously structured language.
+So maybe just, you know, give people your thoughts of your three year journey, I guess at this point.
+First of all, thank you for saying that.
+And yeah, I listened to your podcast.
+You have some very impressive people on your show.
+My first line of code till 36, right?
+It was weird, a weird time 2020, obviously.
+But to be fair, I did have a lot of time on my hands, like many of us did, you know, very abruptly.
+So I kind of went all in, you know, that's just I got hooked fast.
+And I had a lot of fun.
+You know, it's kind of thing not everybody gravitates towards programming, they try it, they don't like it.
+It's not for everybody, to be fair.
+But all it is, is consistency and putting in the time.
+If you don't have a degree, it's fine.
+I even chose Flutter is not like if you're looking for a job, there are better technologies to choose if you're just trying to, you know, land a job, right?
+I'm obviously way more ubiquitous in terms of finding a job, even on the front end, learning something like React, way more jobs.
+But all that to say, it's still possible.
+I didn't go to college for audio or programming.
+But again, putting the time consistency, the job hunting process was not particularly fun.
+It's pretty grueling.
+But sooner or later, you just keep at it and you can get there.
+So it's never too late to get started.
+Awesome.
+Yeah, I know you're doing good stuff these days.
+That's great.
+Thanks, Jeffrey and Joshua.
+First of all, my name is Joshua.
+His name is Jeffrey and Jeffrey and Julian.
+We are from Colombia and he is a Spanish speaker.
+So he doesn't know to speak English.
+So I'm here to help.
+Sure, sure.
+Yes.
+Oh, wonderful.
+Well, welcome to both of you.
+Okay, thank you.
+Tell us a bit about yourselves.
+Okay.
+Julian, who is the main programmer or designer of his app, started like 15 years ago when he was playing some video games and he wanted to know how did they work.
+So he started to look for it and started programming, you know, like self-taught people.
+And that's it.
+He started a career, a university career, and he's a very talented designer.
+And also, you know, as a friend.
+So he is a very close friend of mine.
+And I can say you, I can say, I can tell you that I think maybe the right place to start our conversation.
+Now everybody knows all of you is just a quick introduction to your apps.
+And then we'll dive into maybe the first thing is everyone here has chosen a different framework, a different language.
+I think that is in and of itself is pretty interesting that we're all here as fans of Python or with some kind of Python roots or interests.
+And yet that is not, you know, it's not necessarily what we chose to write the apps in.
+So I think that's going to be a real interesting conversation, but let's jump over and maybe start with this one.
+So PinPlanet, I forgot which app goes with which person or group.
+So we'll have to just jump in.
+Who's PinPlanet?
+I'm the creator of PinPlanet.
+The idea started from, actually started from my girlfriend in December 2020 or October 2021.
+I'm sorry.
+She's a big traveler.
+She's always wanted a way to kind of curate all of her travels, kind of keep them in one place.
+And the thing that she told me at the time that really sold me was, I want to be able to show all my friends, like my place I've traveled to with pins on a 3D globe that spins, which is actually the second screenshot on the screen for, I guess, for people who are watching the live stream.
+And then from there I was just, I was sold.
+So I started, I started building this.
+I will say that the original version of this was actually a web app, a progressive web app, and I was a huge proponent of it at the time.
+But for anybody who's used PWAs, they know the experience on both Apple and Google.
+Somehow both of them are just not that great.
+You just cannot seem to win.
+And we've trained users for what, like a decade to look for apps in the app store.
+So that's also kind of a pain.
+Yeah.
+And you can't really list your progressive web app in the app store.
+Right.
+I think actually progressive web apps might be passable because there's a lot of bad frameworks out there that it would, they would compete with, but the discoverability is, is the killer, right?
+It's quite tough.
+So I ended up building, building this app about three or four months into it.
+I brought my friend Andrew as well.
+I'm actually sitting in his office right now.
+He does quite a lot of Python as well.
+More Python than I do.
+He's the person that I kind of look up to when it comes to, to writing.
+I can't forget the, I forgot the word for it now.
+Not Pythonista, but it'll, it'll come to me.
+Oh, writing more Pythonic code.
+Yes.
+And then from there, some, I think somewhere around the summer I decided, okay, you know what, this is the app is gaining a lot of traction, but people want a native experience.
+So I kind of took the plunge, learned Swift and SwiftUI, which is a really awesome framework released by Apple.
+And then we, we released the, the native version, which focuses on like, you can pin all your places.
+You can add your spots, your reviews, your photos.
+You can add travel buddies.
+You guys can collaborate on trips together.
+There's a really cool explore page where you can see kind of the best pins that other people have put up.
+And we're just, you know, adding more features over time.
+It's gaining traction.
+It's a lot of fun.
+It's really exciting.
+Awesome.
+Congratulations.
+Thank you.
+I see that it's a, well, first of all, it has five star, a five star review out of a bunch of ratings, which is pretty ridiculous.
+That's awesome.
+Also that it's free though.
+Is it just free free?
+Is there in-app purchases or what's the story?
+It's completely free.
+Just looking for growth and traction and you'll figure it out.
+Yeah.
+Oh, actually, since you're on the screenshots, Michael, I do want to say thank you for the tip, the screenshots pro website or web app.
+Oh yeah.
+That helped out quite a bit.
+Yeah.
+Really appreciate it.
+Well, it's a pay it forward because Lauren suggested that to me from his app.
+So it goes.
+And on, on it goes.
+Yeah.
+So I think it was screenshot, I believe was screenshots pro.
+Let me screenshots.pro is the app that I use.
+Yeah.
+You can come up with really fantastic looking screenshots.
+I'm super happy with how that came out.
+All right.
+My club.
+That's mine.
+Yeah.
+And my club is, like I said, previously, this is a membership management program.
+We've previously been working with progressive web apps as well, but we had a Ruby on Rails developer who did those, and we are a Django backend in where most of the information was.
+So we had a lot of different servers connecting to our backend and doing all of these strange things instead of just having one.
+And exactly like Harut talked about, you need to have your app on the app store because there's a lot of people asking, where is your app?
+Even though we did have like progressive web apps and you were able to see everything.
+But what we have now is we've developed so that all of our users can handle the members with their invoices, their memberships in various groups and so on to handle if they're going to certain trainings or going to certain meetups and just answer to that in the app.
+And we also have like push notifications and all of that as well.
+Yeah.
+I think one of the main reasons people might want to create an app as a business is for the notifications because that's an interesting way to reach out for sure.
+It really has helped a lot as well.
+I mean, just being on the app store, regardless if you're on Android or on iOS, just being there actually means that things start to happen with the usage and so on.
+We have about, I think in total about 8,000 installs on these apps, which from going from nothing about half a year ago is rather good for us.
+We're a rather small company, so it's...
+Yeah, that's really good.
+We are, everything's in Swedish.
+We are a Swedish company and we don't have anything translated into English yet.
+The screenshots are awesome.
+And I think it's, it makes perfect sense, right?
+Like not everything needs to be in English, even though it does seem like it some of the times I suppose.
+All right.
+V3D.
+Let's talk about that guys.
+Jeffrey is going to talk in Spanish and I'm going to translate.
+Yeah.
+Thanks.
+V3D es una aplicación que inicié en el año 2020.
+V3D es una aplicación que comenzó a diseñar en la pandemia de 2020.
+Inicialmente era para mostrar gráficos 3D, ya que como hobby soy modelador 3D en el software de Blender.
+It was initially just to show graphics on 3D because he is a developer for this.
+Poco a poco vinieron más ideas y quise seguir la programación, llevándolas al punto en el que está hoy, donde soporta texturizado, creación de materiales, también soporta mando de control Xbox y tiene un módulo de realidad virtual.
+And by step I came up with some ideas to implement to the app, like featuring and modeling.
+We can use an Xbox controller.
+Yes, it has a lot of features.
+That's pretty cool to use the Xbox controller with the mobile devices.
+Yeah.
+Actualmente estoy trabajando en una actualización que involucra texturizado con imágenes en movimiento.
+Sigo trabajando en ella y próximamente será lanzada.
+I'm currently working on animated textures, features.
+Yes, I'm working on it and very soon it's going to be ready.
+Yeah, this looks like an amazing app.
+This is built in Kivy, yeah?
+Exactly.
+Awesome.
+This portion of Talk Python to Me is brought to you by Sentry.
+Is your Python application fast or does it sometimes suffer from slowdowns and unexpected latency?
+Does this usually only happen in production?
+It's really tough to track down the problems at that point, isn't it?
+If you've looked at APM, application performance monitoring products before, they may have felt out of place for software teams.
+Many of them are more focused on legacy problems made for ops and infrastructure teams to keep their infrastructure and services up and running.
+Sentry has just launched their new APM service.
+In Sentry's approach to application monitoring is focused on being actionable, affordable and actually built for developers, whether it's a slow running query or latent payment endpoint that's at risk of timing out and causing sales to tank.
+Sentry removes the complexity and does the analysis for you, surfacing the most critical performance issues so you can address them immediately.
+Most legacy APM tools focus on an ingest everything approach, resulting in high storage costs, noisy environments and an enormous amount of telemetry data most developers will never need to analyze.
+Sentry has taken a different approach, building the most affordable APM solution in the market.
+They remove the noise and extract the maximum value out of your performance data while passing the savings directly on to you, especially for Talk Python listeners who use the code Talk Python.
+So get started at Talk Python.fm slash Sentry and be sure to use their code Talk Python, all lowercase, so you let them know that you heard about them from us.
+My thanks to Sentry for keeping this podcast going strong.
+Now, Lauren, I was going to pull up, I will pull up the Talk Python app that we built together, the mobile app that you built and the backend stuff that I built.
+You also have an app that you recently built just straight in Flutter.
+Maybe just pull that up real quick as well.
+I have it installed and I like it, but I don't remember exactly what to search for.
+Oh, thanks.
+Yeah.
+It's called Epic Skies.
+It's just a weather app.
+Epic Skies.
+That's right.
+Yeah.
+That's a beautiful app as well.
+So you've got a couple apps out in the app store now, right?
+Well, yeah, this and as far as apps that I built myself.
+Yeah, this one, which was released maybe a month ago and your app, Talk Python app.
+So this one is straight Flutter, not too many backends, right?
+Probably consumes like some public weather API data somewhere.
+Yeah.
+But that being said, having taken your async Mongo Python course, FastAPI, as I go to implement push notifications, the backend logic will be in Python and determining who gets what local weather alerts, all that will be, the app is already deployed.
+I just don't have the features.
+I don't have all that functionality built yet.
+But yeah, backend for this handling the notifications will be Python.
+That's really cool.
+Yeah.
+You had a couple of releases this year so far.
+And so then also I'll let you talk about it since you built most of the front end stuff.
+Yeah.
+The Talk Python app.
+Sure.
+Yeah.
+I imagine most of the listeners are also students.
+So, you know, maybe a lot of people listening, I've used it, but basically it's a mobile app that allows students of Talk Python Training to consume their video courses, right.
+Similar to Udemy or something like that.
+Yeah.
+So we have our very fast backend written in Python, pulls in the user info, what courses they have access to.
+We track what courses, what lectures the users have watched so that it's in sync.
+If they go to the web app, all that is, you know, stays nicely in sync.
+Yeah.
+Written completely in Flutter.
+There were no, you know, it relies very heavily on video player, obviously, but all these libraries that we rely very heavily on are just available as Dart libraries.
+So I didn't have to write, you know, not a single line of native code as far as that goes.
+Even, you know, when Apple made us do in-app purchases or, for example, showing the progress in the notification bar, there's libraries for all of that.
+I'm grateful you chose Flutter as this, cause I got to be involved, but I also think it was an excellent choice that you could have made.
+I think it was an excellent choice as well.
+And let's go and talk about that.
+Cause I can see some good questions out in the audience and I know this, and I also opened the show like this, right?
+Like there are many ways in which you can build these apps and Lauren was just touching on it.
+How close do you need to be to native and use the exact API delivered by Apple or Google?
+Or how much do you care about cross platform?
+Because on this one, for example, you can get it on Google play, you can get it on the app store.
+The only real changes is there's different rules.
+And so for example, you can't talk about prices or you've got to do in-app purchases on Apple or, you know, there's, there's little variations that they force from their policies onto you, but otherwise it's just the same code, same code for iPad and tablet as it is for mobile, as opposed to Haru, who has the Swift project, which is awesome, but you're really tied to Apple, but you also get to take advantage of the closest changes.
+The build published stuff doesn't keep running into weird issues when there's some mismatch.
+I mean, you want to strike fear into your heart, just mentioned new release of Xcode and then that literally just happened this week.
+I was building something on Xcode 15 beta eight, and it was a huge pain to install.
+Didn't build for no reason.
+It's completely unclear, no documentation whatsoever.
+It's not great.
+So let's talk about choosing the framework and I'll just go through the, I got a bunch of tabs pulled up so we can talk about them.
+Andreas, you chose Ionic.
+Tell people what Ionic is and then why you chose it.
+Ionic is a way to create applications that can be delivered both to like normal website, to Android and to iOS.
+So we get all of the functionality and only need to write the code once.
+What it really is in our case, we chose to write everything in Angular.
+It's a web view running on the mobile phones.
+So you actually get just a simple server running on the mobile phone and also on iPads, of course.
+You can get connectors to the phone for doing things like push notifications.
+You can connect to the photo and photo library and also to the web camera and so on.
+So you can get all of that functionality into your app as well.
+The only difference being is that you only have to implement it once and it works on all of these three platforms.
+You can even get web functionality or sorry, camera functionality on the web application as well.
+That is running in an Angular, in a normal Angular platform.
+So yeah, that's and the reason we chose Ionic was that we're a very small team, only three developers.
+I and one of the me and the other one of the other developers had some experience of Angular.
+I've released other applications in Angular and we decided that that would be the way to go.
+So yeah, that's really why we chose Ionic.
+And what it does have it has like style sheets for each type of application.
+So you have one style sheet for the web, you have one style sheet for iOS and you have one style sheet for Android.
+So each button gets styled.
+So it looks like an Android button or an iOS button and so on in the system as well.
+Are you all using the Ionic framework for your web app as well?
+Yes.
+Okay.
+Now that's interesting.
+That's a different level of integration there that or a reuse.
+That's pretty interesting.
+The thing is for us, just this specific application, because what we did have previously, we had a progressive web app that was written on Ruby on Rails and the Ruby on Rails developer decided to go elsewhere, which meant that me and another Python guy, Ruby on Rails application that we had to take care of.
+I have read some Ruby on Rails.
+I've also written some Ruby on Rails previously, but it's like, is that 15 years ago, I think?
+So that's not something that we wanted to keep up with.
+And what we do need to do, we need the deep linking, which means that if you get an URL in an email, because we send out notifications for invoices, for example, you get an URL in your email, you click on that, you either go to the web application, if you don't have the app installed on your mobile phone, but you can get into the application directly if you have it installed on your phone.
+So that type of integration is very important for us as well.
+It's worth pointing out Ionic is cross platform, not just web to mobile as I'm learning, but also so you can publish in the Google Play Store, you can publish in the Apple App Store.
+We publish in all app stores and then we also have it on the web on its own URL as well.
+It needs certain documents in the web application to actually make sure that deep linking works in the mobile space as well, so that we can get to the right mobile phone and application and so on as well.
+Did you look at other frameworks?
+Were you thinking of maybe going true native and writing in Swift or other things?
+The main thing is, like I said, we're a small team and we needed to do something that was rather simple, things that we knew something about.
+The other main developer, he is Python Django developer.
+I worked with him also on that online tailored suit company that we had previously.
+And we've been working with Django for a very long time.
+And just changing to like writing something in Swift or writing, then needing to also do it in Java for an Android application would be too much hassle for us.
+And therefore we chose something that we sort of thought that we would be more or less comfortable with.
+It's still just HTML, that's CSS and it's some TypeScript, which is like a better version of JavaScript.
+What is your framework?
+I mean, you kind of mentioned this a little bit, but why did you choose this?
+And like, you know, did you look at others?
+And yeah, I think this is actually the biggest choice people have to make when they're building an app.
+It's like, what do I even, which direction do I even go?
+Even if I'm sure I'm doing Python in the backend, then still that doesn't solve this problem necessarily.
+I think the story will make a little bit more sense.
+I mentioned earlier that the initial version was a PWA.
+That's mostly because my background is web development.
+I write a lot of Vue as well.
+However, the PWA was difficult for discoverability.
+And then I had to make the really tough choice of, okay, what's kind of the next thing to do?
+I really did look kind of all around the landscape.
+But the one thing that always kind of scared me was that if, or I guess the thing that really pushed me into going native was like, if I wanted really native functionality, which, you know, having like been billing apps for quite a few years now, sometimes the things that you want to do or the things that people ask for veers off into like the, all right, this is actually pretty custom.
+There's no library for this.
+Like we got to, we got to just like roll up our sleeves and do it.
+Yeah.
+I knew that if I had gone cross platform that all my experience, let's say for example, would have been in Flutter or React Native, which are like the two really, really popular options.
+And if I now needed to write something custom, the one year of Swift experience that I have now I wouldn't have had.
+So it's like, not only am I using a really difficult and probably not well-documented API, it's like, on top of that, I also don't even understand the language.
+So I think for me, that was kind of the big, the big thing.
+And one of the reasons was I always thought maybe like, we haven't done this yet, but maybe we could like amp up the camera or do something with video players, or maybe like be a little bit more custom with, with the way that we pull, pull our images in and take more advantage of caching and stuff.
+So that was where kind of, that was the reason why I ended up, I ended up going with Swift.
+I think it was, it was a pretty cool choice.
+Yeah.
+And it sounds like SwiftUI makes it a little bit easier than, you know, a bunch of storyboards and all that.
+Let me say a little bit about, about SwiftUI.
+It has been quite helpful.
+I don't know if it's because I've come from the web.
+I've heard online that the people at Apple or the, the people who develop SwiftUI were influenced by React.
+I could see that a little bit having, having used a little bit of React, but it is, it is quite a bit more, it's a lot more expressive.
+It's a lot easier to write.
+But let me also say that you're not going to get away with only writing SwiftUI.
+Like you could do maybe 80 to 90%, but there's that additional 10% you have to dip down to UIKit and, and kind of put some extra stuff together.
+Still a little rough around the edges.
+That's kind of the case.
+I'm always thinking of new apps and new ideas and that I have no time to work on them.
+But the one that I have no time to work on right now that I'm thinking of is something to do with the Apple watch.
+And there's no Flutter for Apple watch right now.
+So I'm like, well, maybe I'm going to have to learn Swift after all.
+We'll see.
+We'll see if I, first I got to find time and then we'll come to that.
+We'll solve that problem later.
+Awesome.
+All right, Geoffrey, Kivi, why'd you choose Kivi?
+Mi framework favorito en ese caso es Kivi.
+Kivi lo conocí en el año 2011.
+Okay.
+My favorite framework is Kivi.
+I knew it in 2011 and I use it because it's very stable and steady.
+And because it has a very active community and it allows and develop applications for many platforms and with one use, just one code.
+So that's why he chose Kivi.
+It seems like Kivi is a good fit for the type of application that Geoffrey built.
+So it was a good match.
+Yes.
+Si, totalmente encaja con lo que he buscado.
+De hecho para mi es gratificante que lo conjundan con un juego porque siempre he querido que tenga ese nivel de realismo que ofrecen los videojuegos como los frameworks de Unity 3D.
+Okay, it's grateful for me that Kivi really match with I look for because I found it nice that people can feel it like a game because games are realistic in some ways to control what do you want, how do you want to and custom your car, for example.
+And this application gives you lots of features to implement to what you want.
+Okay, Lauren.
+I don't remember if I mentioned it.
+I actually started briefly with Kotlin and native Android programming in 2020.
+But once I tried Flutter, I just found the developer experience to be exponentially better, right?
+And with the added benefit of being cross platform.
+So Kotlin as a language, I think is great.
+It's not that's not the issue, but just the overall process of building an app and native Android versus Flutter.
+I imagine I would probably like Swift better.
+If I tried that I haven't really had a need to dive too deep into it so far.
+But I think Haru made some interesting points in terms of you need something really custom.
+Yeah, he would have had he chose a cross platform framework, he then would have had to learn Swift and then do all that.
+But I do want to make the point that you do still have access to any native API's that you need, right?
+Even if there's not a library for it.
+And Flutter, it's something called a method channel.
+And then you can just just a message you send back to the native platform, whatever you got to do on the native side, you can do that being said, in terms of what really struck me in Flutter was building UI was so much nicer than than doing it Android with a hot reload, you know, you make a change, hit save immediately updates the widget.
+So in Flutter, all your UI components are called widgets.
+If you ever look at some Flutter UI code, it's I didn't really like it at first, like it looks a little bit weird if you're not used to it.
+But as soon as you wrap your head around the widget tree and how it all works, and get used to using snippets and your preferred IDE, you just say wrap this widget and another widget that saves a bunch of time.
+It's really not fun if you're doing that stuff manually without without snippets.
+But yeah, all that being said, I was just so much more productive building UIs and again, having the added benefit of being cross platform.
+So for me, that's I mean, it's unlikely I'll ever have a need to go native or choose a different framework for that matter, because Flutter suits all my needs.
+So there's some code that somebody has never seen that that might look might look a little bit weird, right?
+It looks normal to me.
+What's interesting about it is like, it's really you build these, these like hierarchies of code, but they exactly match the UI hierarchy, like this panel contains these three things, and they're kind of indented in code.
+But boy, do you need a smart plugin in your IDE or your editor to like manage the back end of those curly closing things?
+Yeah, it was especially starting out, you're missing one, one parentheses or one curly bracket and your page is full of red squiggly lines.
+And if you don't know how to sort that out, it's not once you get used to it, it's fine.
+But especially in the early days, sorting out those closing brackets are pretty annoying.
+But yeah, all that being said, I found myself way more productive with Flutter, really easy to build nice UIs, the performance is always getting better animations, all that stuff is really nice.
+And you still have access to the full native API's if you if you need to use it.
+Doc Python to me is partially supported by our training courses.
+Python's async and parallel programming support is highly underrated.
+Have you shied away from the amazing new async and await keywords because you've heard it's way too complicated or that it's just not worth the effort?
+With the right workloads, 100 times speed up is totally possible with minor changes to your code.
+But you do need to understand the internals.
+And that's why our course async techniques and examples in Python show you how to write async code successfully, as well as how it works.
+Get started with async and await today with our course at talkpython.fm slash async.
+One of my concerns with all of these frameworks, these these non, non Kotlin, non Swift frameworks is like, well, how supported are they?
+Like, am I excited about something that 10 people are using?
+You know what I mean?
+Right so I can pull up Ionic and Ionic's got 50,000 stars.
+And then, you know, one of the other ones I definitely considered and chose is Flutter and it's got 157,000 stars.
+By way of comparison, Flask has around, I think, 50,000, 60,000.
+CPython itself has 50,000.
+Right?
+So like, oh, okay, well that seems like a good enough number that people are using it.
+These are all really interesting choices.
+And I think just making this choice, it's where you got to start, but it's a challenge.
+You got to think about what you're building and whatnot.
+Right?
+I'd like to also add to that.
+I mean, one of the main things that like you said, one of the things that we had a bit of a worry about was, will like, for example, iOS, the app store, will they accept something that's coming from Ionic framework?
+Because you are literally just running a web application in a web view in your app is really a small component.
+And we even had in the previous versions, we had the ability to update the underlying HTML code and the application code from a server that is on the internet.
+So it was really a really strange thing, but Apple has never had any issues with our application.
+Yeah, that's fantastic.
+Congratulations also.
+I know, I don't think it's the Ionic framework.
+I think there's always a weird issue.
+There's just a weird review processes there.
+But I think Ionic seems to be pretty solid and that people have apps out in the app store.
+Flutter, absolutely.
+Like you can see a bunch of things like the BMW app and stuff.
+Kivy also, I think that's really good.
+I think there's, I think one of the rules of thumbs that people should really have is if you're going to use a framework, just look to see that there are apps in the app store based on that framework.
+Right?
+Not proof of concept, not theoretical things, but like here are apps in the app store based on this, this app.
+And not necessarily because it's only a good thing if the app is in the app store, but there's all these little edges, right?
+Like I said, in-app purchasing, for example, right?
+That's something you could, you could build a cool mobile framework and never add that because you haven't gotten around to it.
+But if, even if you don't want it, if the people at the app store require you to have it, your app doesn't go in the app store until you put it in, regardless of whether you even want to.
+Right?
+So I remember Lauren and I spent, how long did we spend?
+Like a week and a half full-time adding in-app purchasing and we didn't even want it.
+Right?
+And they're like, Nope, Nope.
+You have to have it rejected, rejected, rejected.
+Nope.
+Here's the way you can, what is it?
+You can like protest this rejection to a higher authority, protest it, reject it.
+You know, it's like, it wasn't good.
+It wasn't good.
+So you got to think about those kinds of things, like when you choose a framework, right?
+And good job on that in the end, Lauren.
+We're not done as, as we'll see.
+But yeah, nonetheless, we're, we're pretty much there.
+Again, I had a blast working on this.
+It's really, really nice working with you directly.
+Really grateful to have been a part of that.
+There's a question in the audience.
+I kind of want to get, I guess this is for you, Lauren.
+This is Alan asks, looking into Flutter, I want to know the best way to integrate with AWS, for example, is Cognito an option for a signup flow?
+So I don't know what Cognito is.
+I guess it's an authentication platform from AWS, I'm guessing.
+But yeah, I mean, just maybe talk about that real quick.
+If, if you've got any experience, I don't personally have a lot of AWS experience and I know they have like a million separate services.
+So I do know that there is an AWS library for Flutter.
+Again, I don't know what exactly that entails in terms of which one of their services it provides a Dart wrapper for, but either way, it's certainly possible to integrate with any, any other services.
+Even if you have to, you know, do it from scratch, it's obviously possible.
+It's all just APIs at the end of the day.
+So I would say that like every one of these frameworks we just talked about, to my knowledge has something like pip and PyPI, right?
+PyPI, we're all used to pip install our projects.
+Like that's just the lifeblood of how Python works.
+But for example, Flutter has pub.dev and you can, you know, pub, pub get stuff and it's in the equivalent type thing, right?
+Compared to like React Native, which is a little bit older, you know, you, you see a lot about how they're, they have a more robust package system, but in my experience, I've yet to run across a scenario where I did not find the library that I needed.
+Like weather app uses location.
+It's plenty of location libraries, you know?
+Yeah.
+And Ionic has NPM, obviously, right?
+Yeah.
+And they also have their own package.
+They have the Cordova packages or Cordova.
+Okay.
+Yeah.
+Which are, are what they use for connecting to the telephone itself.
+So everything that you need to do with that, you, you go through the Cordova store.
+There are a lot of various packages on the Ionic website themselves.
+So, yep.
+And to varying degrees of success, we have CocoaPods for you Haru, right?
+Now it's actually Swift package manager.
+So it's, it's a little bit better.
+I think it goes by SPM or I don't know.
+Yeah.
+A little bit easier to install less configuration hassle overall.
+Because like I said, the CocoaPods are kind of a little bit janky, right?
+They're based on like Ruby gems and then they compile it.
+A lot of Rube Goldberg and stuff happening there.
+And then for packages in Kivy, you just use pip.
+Yes.
+Utilize la libreria Pginus.
+I use the Pginus library.
+Y tambien utilice para monetizar la aplicacion en la play store.
+Con publicidad utilice Kipmo.
+And for play store, I use for purchasing Kipmo.
+Cool.
+So there's third party packages that you can do in-app purchases with.
+That's great.
+Utilizar graficos 3D, calculos rapidos NumPy.
+And for 3D calculation, I use NumPy.
+That's really cool.
+That's one of the most popular ones for general science, but I guess it's, it's neat that it applies right there on mobile apps.
+There definitely are some advantages to having Kivy.
+This is a question for you, Andreas, I guess, but we can maybe all talk about this real quick.
+What are the limitations of Ionic regarding to being connected to the internet versus I being offline?
+I'm guessing that that question has comes from the fact that it sounds like a web app framework.
+It is a web app framework, but it is self-contained.
+So when you install the app, you get all of the JavaScript, all of the HTML, all of the CSS that's required to make your app look like it should look on the mobile phone.
+It's more of how you design your application yourself.
+If you want, for example, our application doesn't work without internet access because we have all of the information on the backend and there's really nothing that we can do without internet access.
+But you could of course design it that you download stuff and you use it with, there's a lot of plugins to get like in, what is it that Apple likes?
+They like to use the default database that we get on all of our Python.
+SQLite maybe?
+Yeah.
+SQLite.
+Thank you.
+They use a lot of SQLite on the apps and you can get SQLite connectors and use that locally on the mobile phone itself.
+So you can store everything if you want to and do a complete offline experience as well.
+And you use block, but did you use block for offline capabilities?
+For anyone not familiar, block is one of the many available state management libraries for Flutter.
+That's the one I prefer generally.
+It's what I use at work as well.
+They also have a library called hydrated block, which makes it really, really easy.
+It just persists any state change within your application without having to write manually write your code.
+So basically it's a to JSON and from JSON situation.
+You have like a state class and as long as your state can be serialized in the JSON, it just does all that in the background, which is really nice.
+So there's like that kind of state persistence between app sessions, but then there's also actually downloading the files like for when the, you know, offline was very important to you, right?
+As far as the functionality.
+So yeah, yeah.
+That's one of the reasons the app existed.
+One of the two or three, right?
+Sure.
+Yeah.
+So the thing is that wasn't really hydrated block was not actually it saved the file path, but the actual bytes, you know, streaming of the bytes and saving the file itself.
+That was just basically just the HTTP library, writing that directly to the, to the device.
+And then hydrated block saves the file path.
+The next time the user needs to watch that offline.
+What's your offline story?
+We don't really have an offline story.
+I think it's kind of similar to like other platforms.
+So something like Instagram, if you don't have an internet connection, you don't really see photos and it's kind of similar for us right now.
+Keep it simple.
+Right.
+And Jeffrin, does your app use online features or is it just offline?
+With the Lisa and the third thing is offline.
+In v3d we use offline images.
+Okay.
+Yeah.
+So no real internet.
+Excellent.
+All right.
+Let's do talk a little bit about some Python, about what's going on here.
+Since you know, we're just a little ways into the show, I guess we could talk some Python at this point.
+Yeah.
+It's been a great conversation.
+So let's go kind of top to bottom.
+And Andreas, it sounds like yours is very much an online application and has backend services.
+You already talked about the Ruby on Rails app and getting away from that.
+Tell us your story.
+Give us a little sense of like, what is your backend architecture and just, you know, what do you got going on with Python?
+Where some of the technologies and things there.
+Our backend architecture is actually just changed.
+We're really proud of it now because we've moved from our own installed servers that have been installed with via very long scripts that you've written down exactly what you need to do and everything and running our own MySQL servers and so on.
+And we've moved everything into AWS and we're currently running in a Kubernetes setup.
+So we are really proud of how that's running currently.
+But we are a Django shop.
+We've been running Django.
+The first version was written in 2013 and we've just iterated since then.
+And we're now currently on the latest versions of all of the dependencies that we have in PyPI as of last week, because we did a major upgrade.
+We need to update our Redis connections for certain reasons.
+But yeah, we've been running with Django and just doing a regular Django application really.
+And that's the main part of the admin for our customers.
+They use the Django app to do their administration for the memberships, sending out invoices, selecting activities that they need their members to join and so on.
+All of that is done more or less currently in the Django app.
+And then we have the mobile application is for the members to go in and check which activities are we going to go to, which invoices do we need to pay, connect to other members in the teams or in the clubs that they're members of.
+Primarily, you've got this Django app.
+And I would imagine that people can log into the Django app as well.
+Yeah, and previously, we had like a lot of Ruby on Rails servers that did certain parts of the application.
+For example, we have a lot of different payment solutions for the invoices you can pay via Swish, which is a comparison with I think it's called Venmo or Cash App in the States.
+What you do is you send money via your mobile phone number in Sweden.
+And so we have a backend for handling that that used to be written in Ruby.
+We've moved that into Django as well.
+We also have credit card payments, which was in Ruby on Rails moved into Django.
+And so we're trying to consolidate a lot in the backend and try to move everything back into the Django application and just have the mobile apps out for the members to use to talk to the backend.
+That's excellent.
+Yeah, there's a bit of a trend away from all that stuff, right?
+There's a great article, give me back my monolith.
+Yeah, exactly.
+Instead of all the microservices and different technologies, just give me one thing, just let me put it into the app.
+But it sounds like kind of like you embrace that with Django.
+We've got a lot of experience with Django.
+Me and the other main developer, we've been working with Django for, I've been working with about 10 years now.
+He has been working about 15.
+And it's our preferred go to solution for everything in the backend.
+You must have APIs and stuff, right?
+Do you use like, what do you use for the API side of things?
+Is it still just straight Django?
+Or do you have some REST frameworks?
+We use Django with Django REST framework.
+So it's really a simple solution for that as well.
+And we really enjoy working with that.
+We have another guy who's come in now who is a developer I've worked with a lot from the Ukraine.
+And he's been working with us now from Poland instead, just doing development with Django REST framework.
+And he's really good at those things.
+Yeah, it seems like a nice one.
+Have you considered Django Ninja?
+I've just read about it.
+I haven't actually done anything with it.
+I read about it the other week.
+If you like fast API, but you also like Django, then maybe Django Ninja is what you're looking for.
+Yeah, exactly.
+But that being said, I mean, the new releases with Django with version five with all of the now async views, everything that we're getting with that, I think Django is one of these things that you know that your code will always work.
+But you also get that you're starting to get all of these new features as well to get the systems working as well, which is really amazing.
+I think they're doing a great job with the Django community now.
+Excellent.
+So similar to Andres, we also use Django.
+So I'm just going to be basically talking building on top of a lot of the stuff that he said, big fan of the framework.
+I've been using it for years.
+I'm trying to think we mostly use Django REST framework.
+A lot of the stuff, a lot of the views are kind of custom built.
+The ORM is very helpful.
+Migrations are really helpful.
+We do write some raw SQL for some of the more trickier parts of the app, like the explore page where the queries need to be more performant.
+We use HTTPX to send notifications to APNS, which is Apple's push notification server.
+We are big fans of type hints.
+I have some of the stuff written down here, just to kind of point out.
+Post GIS for some of our geospatial calculations.
+And most of it runs on, I don't know why I'm saying most of it, all of it runs on AWS on pretty bare bones EC2 servers.
+I kind of like the simpler monolith approach where you kind of just like you have a bare bone server, you set up everything, and then you can use something like Ansible to help you bring it up and bring it back down.
+But it's just a lot easier to keep in mind.
+And deploy and version and all those things.
+Hey, while you're on, I did got a question on the audience I'll go ahead and ask.
+In your pin app, is it difficult to write code so that changes are saved?
+Lauren talked about the block thing, you kind of just make the changes to the state and they just stay.
+But what's the story for yours?
+I don't know if I fully understand the question.
+But I think there are two ways, two things that I could say to answer it.
+One is we use user defaults and Swift to take advantage of like saving stuff directly on the device.
+But actually, the main thing that we do is we push a lot of logic to the server.
+And this is like my favorite way to kind of get around the App Store nonsense.
+Just I guess is the nice way to say it.
+But the more and more logic that you push to the server means that whenever you need you find a bug or you have a feature or fix that you want to push out, you know, you can just change it on your server, redeploy and then boom, like it's available.
+So sometimes like when people on the app complain about issues with like, oh, this is not displaying correctly and then I'm like, oh, just refresh the app.
+And they're like, oh, that's crazy.
+I can't believe that just worked.
+And then other times certain things that I have to do on the device, I'm like, oh, well, here's a now I got to submit this to the App Store or wait a day for it to get approved, wait two weeks for everybody's phone to update.
+Yeah, absolutely.
+You can do it on the server.
+It's just have so much more control.
+And I mean, Lauren, that's how you and I worked a lot, right?
+A lot of the things were like, well, if we want something to be visible in this collection or not visible in that collection, or, you know, like for example, if you want, say the free courses to appear in a different section, but not in the main one, you could just not return them in the API rather than changing the app potentially.
+Right, exactly.
+Yeah, I was actually, I recall being impressed by how easy it was for you to make these changes, you know, as these requirements kind of popped up throughout the process, you'd be back in 10 minutes, okay, it's ready, you know, and it was, I guess, Mongo is maybe partially a factor in that and how flexible it is.
+I made zero database schema changes explicitly on this.
+I just wrote code and it just started doing what it needed the whole thing through the app.
+Yeah, the whole app dev process.
+Yeah, it was fast.
+I remember telling you when I started my job, it was noticeably not as fast as your backend.
+And that's a big company with lots of money, that should be super fast.
+Well, yeah, to be fair, I think it's reasonable to assume an insurance company has a larger and more complex backend.
+I think the complexity is also crazy, right?
+Like probably you've got to, we got to apply a bunch of rules to this question, not just return the data.
+Yeah, sure.
+Nonetheless, I'll say it again, your backend is crazy fast.
+And you kind of got me hooked on the fast API Mongo situation.
+Yeah, really impressed with all that.
+I know you're not using fast API for your backend for that.
+I would if I got a choice actually, but I mean, no, no, no, no, I'll go ahead and say a little bit about what we're doing on our backend, just to kind of be fair to round it out.
+So the talk Python web app is written in pyramid.
+I love the pyramid framework.
+It has a lot of cool features.
+It's really, really fast.
+It was one of the very first ones to support Python three, like intentionally, not like it might run, but we embraced Python three.
+That was a huge reason that I chose it.
+I also love the chameleon framework for writing templates.
+It's, it's really nice.
+It's been great.
+I like the projects with ambitions, start small, but finish big and stay finished.
+Stay finished.
+So that's really good.
+And then it talks to MongoDB using Beanie and that combination is just great.
+And like Haru, it runs on digital ocean, not on, not on AWS, but it's just a couple of servers, right?
+One for the front end web server, one for the database and it's golden.
+It goes great.
+So yeah, that's, that's pretty much what we got going on there as well.
+Yeah, I probably would choose fast API if I were to start over, but rewriting the web app, it's like 20 or 30,000 lines of Python.
+And you know, it's, it would be cool if it was fast API, but I'm not sure that the benefits of making all those changes are really there.
+It's, it's like, I already liked the framework as it is.
+I also came across light star recently.
+I just interviewed those guys here on the show, but not yet published.
+So in the past, but also in the future, in a sense, and this is a really interesting thing also built on starlet that I'm really, really interested in and checking out more as well.
+So there's a lot of, there's so many good backend frameworks to choose from, but you know, you got to pick one and go with it.
+And then Jeffrin, I guess maybe it's worth pointing out that Kivy is while you don't have online capabilities for your app, Kivy itself is Python.
+So yours is the only mobile app that is all Python.
+Whereas everybody else's mobile app is something else.
+Yeah.
+So Kivy is a construal code Python and Kivy is building Python.
+Con servicios en la nube construidos en flask.
+With services on the cloud and flask.
+Okay.
+Flask.
+Y también utilizo Dropbox en Python para el almacenamiento de archivos en la nube.
+And I also use Dropbox to save data in the cloud with the same Python.
+What does your app use the flask online service for?
+Son utilizados para realizar la publicación de modelos 3D en la nube y que se puedan descargar desde cualquier otro lado del mundo.
+We use flask to upload everything in the cloud and in order to be downloaded in any part of the world.
+I said we would talk about the app store, but I also want to finish this on a positive note.
+So I think I'm going to not try to make it the focus of app store horror stories.
+Although I just don't get why they make it so hard to build apps for these frameworks, especially Google.
+I mean, especially Apple, but also Google in their own special way.
+So instead, let's just round this out with maybe like a piece of advice or your thoughts on going from having your app to get it in the app store.
+Andreas, you want to go first?
+From our point of view, the main thing that has been a bit of a hassle was if you want to publish an iOS app, you need to have a Macintosh.
+So we need to go out and buy a Mac.
+That was one of the things.
+But that being said, what we have done a lot now is we try to automate these things.
+We try to automate pushing the app into the various app stores from GitHub, which we use as a repository for it.
+I've successfully done that now for the Google Play, but I can't get the iOS app to build, unfortunately.
+Yeah, that does not sound practical.
+But that's one of the things I think you should invest some time in, because if you do get it working, you can get a lot of these hassle things out of the way.
+And building it on a Mac, it's four or five clicks that I need to do to build it.
+But I need to make sure that I have the right versions everywhere, and I make sure that I have set the new version of the application in all places I need to update that in, both on Android and on iOS, various config files I need to update.
+So really looking into automating all of that, I think would be a good thing to try and do as much as possible.
+Yeah, that sounds fantastic, actually.
+Even having one of the app stores automated is really nice.
+Yeah.
+Haru, you mentioned builds, Xcode, good times.
+We're going to try to end on a positive note.
+I don't want to rag on Xcode too much.
+Let's not talk about it.
+But you do need Xcode to build your app to get it in the app store.
+That's for sure.
+And if you're like right now, we're what, like four days?
+September 12th is the launch of iPhone 15, and iOS 17 will come out a few days after that.
+If you want to try to build something for iOS 17, you do need Xcode 15, which is still in beta, beta 8.
+And that can sometimes be tricky to build for, not everything.
+Because like the videos that Apple puts out in June for WWDC, the API has actually changed since then.
+And it's again, not clear sometimes.
+Yeah, we're a little spoiled in the Python world about how it, if something once worked, it generally continues to work.
+This next question here from Alan, maybe perfectly lines up your part, Lauren.
+I've not yet published a Flutter app.
+So really want to learn how this works, any automation available?
+Yeah, maybe just app store advice and chime in on that potentially.
+Short answer is yes, there are a few different CI CD platforms available for that.
+Like for example, GitHub actions, you can get that set up where you push a command from a terminal and it does all this stuff in the backend and pushes to the store.
+I personally have not, that's on my to do list.
+I have not actually done that yet.
+There's also CircleCI, there's CodeMagic, there's a few different services available.
+All that is probably a little time consuming to set up.
+Let's say you don't want to get into that, which you should, it's definitely worth it in the long run.
+But let's just say like, we're not for talk Python, we're doing it quote unquote manually, it's still not that bad.
+Like basically in Xcode, you create the archive, upload it within Xcode, go on the web app, submit, right?
+And it's more or less, you know, on the Android side, you're basically, as far as Flutter is concerned, it's when it comes to publish, you're publishing a native app, right?
+So you just got to go through both those processes.
+Android Studio, you build the APK and then upload, you know, and submit, right?
+The other respective web app.
+So even if you don't go there.
+Yeah, it's worth pointing out, like, there's, I think, zero difference from the way you publish a native app and the way you publish these.
+From what I do, like, I'll open up Android Studio and go through the steps or I'll go through Xcode and do this.
+It just happens to be what's running or compiling behind the scenes had some Flutter component at some point, but it's, they're identical.
+People should probably keep that in mind, right?
+Yeah, it does compile to native code.
+So as far as like the app stores are concerned, and as far, you know, it is a native app just with the UI being painted over top, right?
+But so, but yeah, lots of options out there if you want to go that route.
+Yeah.
+And cross your fingers when, yeah.
+Yeah.
+Jeffrin is, is your app in the app store?
+I know it's in the Google Play Store, right?
+Google Play Store.
+Yes.
+Yeah.
+We have online ship in app store, just only in Play Store.
+And do you have advice for people getting their apps into Google Play?
+Follow the guidelines of privacy.
+Overall archives exploration.
+Yes, that have given headaches for me since the updating of SDK.
+Excellent.
+Well, everyone, this has been really fun.
+And I said, we're not going to share app store, horror stories, horror stories.
+So we're going to finish this on a positive note.
+I think in general, there's just so much possibility in mobile app development these days.
+I don't know about you all, but when I first got first on iPhone or smartphone, like just my head was full of ideas of like, oh my gosh, you could do this, you could do that.
+This is just such an open world for interesting things.
+And it's really cool to hear how you're all building your different apps and putting them together.
+So thank you for being here and it's been great.
+Thanks for sharing your experiences.
+Thanks a lot.
+This was great.
+Thanks, Michael.
+This was a lot of fun.
+Thank you.
+This has been another episode of Talk Python to Me.
+Thank you to our sponsors.
+Be sure to check out what they're offering.
+It really helps support the show.
+Take some stress out of your life.
+Get notified immediately about errors and performance issues in your web or mobile applications with Sentry.
+Just visit talkpython.fm slash Sentry and get started for free.
+And be sure to use the promo code Talk Python, all one word.
+Want to level up your Python?
+We have one of the largest catalogs of Python video courses over at Talk Python.
+Our content ranges from true beginners to deeply advanced topics like memory and async.
+And best of all, there's not a subscription in sight.
+Check it out for yourself at training.talkpython.fm.
+Be sure to subscribe to the show.
+Open your favorite podcast app and search for Python.
+You should be right at the top.
+You can also find the iTunes feed at slash iTunes, the Google Play feed at slash Play, and the direct RSS feed at slash RSS on talkpython.fm.
+We're live streaming most of our recordings these days.
+If you want to be part of the show and have your comments featured on the air, be sure to subscribe to our YouTube channel at talkpython.fm slash YouTube.
+This is your host, Michael Kennedy.
+Thanks so much for listening.
+I really appreciate it.
+Now get out there and write some Python code.
+you .
