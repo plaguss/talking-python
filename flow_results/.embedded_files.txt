@@ -1720,3 +1720,10 @@
 435-pypi-security.txt767
 435-pypi-security.txt831
 435-pypi-security.txt837
+436-packaging-survey.txt127
+436-packaging-survey.txt191
+436-packaging-survey.txt255
+436-packaging-survey.txt319
+436-packaging-survey.txt383
+436-packaging-survey.txt407
+436-packaging-survey.txt63
