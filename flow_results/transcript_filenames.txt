@@ -435,3 +435,4 @@
 435-pypi-security.txt
 436-packaging-survey.txt
 437-htmx-for-django-developers-and-all-of-us.txt
+438-jupyterlab-4-and-jupyter-7.txt
