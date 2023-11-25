@@ -308,8 +308,8 @@
 309-life-lessons.txt
 310-ama.txt
 311-get-inside-the-git-folder.txt
-312-scaling.txt
 312.-Python Apps that Scale to Billions of Users.txt
+312-scaling.txt
 313-pydantic.txt
 314-modern-python-projects-ama .txt
 315-awesome-fastapi-list.txt
@@ -436,3 +436,4 @@
 436-packaging-survey.txt
 437-htmx-for-django-developers-and-all-of-us.txt
 438-jupyterlab-4-and-jupyter-7.txt
+439-pixi-package-manager.txt
