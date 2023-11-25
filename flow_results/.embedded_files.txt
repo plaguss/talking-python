@@ -1743,3 +1743,6 @@
 438-jupyterlab-4-and-jupyter-7.txt703
 438-jupyterlab-4-and-jupyter-7.txt767
 438-jupyterlab-4-and-jupyter-7.txt809
+439-pixi-package-manager.txt127
+439-pixi-package-manager.txt174
+439-pixi-package-manager.txt63
