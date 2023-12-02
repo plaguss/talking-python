@@ -1746,3 +1746,17 @@
 439-pixi-package-manager.txt127
 439-pixi-package-manager.txt174
 439-pixi-package-manager.txt63
+440-jupyter-ai.txt127
+440-jupyter-ai.txt191
+440-jupyter-ai.txt255
+440-jupyter-ai.txt319
+440-jupyter-ai.txt383
+440-jupyter-ai.txt447
+440-jupyter-ai.txt511
+440-jupyter-ai.txt575
+440-jupyter-ai.txt63
+440-jupyter-ai.txt639
+440-jupyter-ai.txt703
+440-jupyter-ai.txt767
+440-jupyter-ai.txt831
+440-jupyter-ai.txt868
