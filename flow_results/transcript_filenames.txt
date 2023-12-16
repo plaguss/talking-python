@@ -439,3 +439,4 @@
 439-pixi-package-manager.txt
 440-jupyter-ai.txt
 441-syntatic-sugar.txt
+442-ultra-high-speed-message-parsing-with-msgspec.txt

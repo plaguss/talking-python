@@ -417,5 +417,6 @@
   "438-jupyterlab-4-and-jupyter-7.txt": 13292,
   "439-pixi-package-manager.txt": 13581,
   "440-jupyter-ai.txt": 12969,
-  "441-syntatic-sugar.txt": 16709
+  "441-syntatic-sugar.txt": 16709,
+  "442-ultra-high-speed-message-parsing-with-msgspec.txt": 15136
 }
