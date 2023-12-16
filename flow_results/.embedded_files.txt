@@ -1778,3 +1778,7 @@
 441-syntatic-sugar.txt831
 441-syntatic-sugar.txt895
 441-syntatic-sugar.txt959
+442-ultra-high-speed-message-parsing-with-msgspec.txt127
+442-ultra-high-speed-message-parsing-with-msgspec.txt191
+442-ultra-high-speed-message-parsing-with-msgspec.txt252
+442-ultra-high-speed-message-parsing-with-msgspec.txt63
